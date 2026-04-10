@@ -1,0 +1,6 @@
+.DS_Store
+*.asv
+*.mat
+*.png
+beam_path_checks/
+beam_path_checks_fix2/

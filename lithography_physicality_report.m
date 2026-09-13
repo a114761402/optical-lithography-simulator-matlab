@@ -1,139 +1,39 @@
-function report = lithography_physicality_report(displayReport)
-if nargin < 1
-    displayReport = true;
-end
-
-benchmarkReport = lithography_validation_report(false);
-convergence = convergenceChecks();
-intermediateXY = lithography_intermediate_xy_physicality_test(false);
-fullPath = lithography_full_path_wave_test(false);
-
-report = struct();
-report.benchmarks = benchmarkReport;
-report.convergence = convergence;
-report.intermediateXY = intermediateXY;
-report.fullPath = fullPath;
-report.pass = benchmarkReport.pass && all([convergence.pass]) && intermediateXY.pass && fullPath.pass;
-
-if displayReport
-    fprintf('Physicality report\n');
-    fprintf('  Benchmarks: %d/%d passed\n', benchmarkReport.passCount, benchmarkReport.totalCount);
-    fprintf('  Convergence: %d/%d passed\n', nnz([convergence.pass]), numel(convergence));
-    fprintf('  Pre-lens XY symmetry: %s\n', ternary(intermediateXY.pass, 'passed', 'failed'));
-    fprintf('  Full projection path continuity: %s\n', ternary(fullPath.pass, 'passed', 'failed'));
-    for k = 1:numel(convergence)
-        status = 'PASS';
-        if ~convergence(k).pass
-            status = 'FAIL';
+function report=lithography_physicality_report(displayReport)
+% Independent grid / window / source refinements on MATCHING metre axes.
+if nargin<1,displayReport=true;end
+cases={'Point','Circular','Annular'};
+rows=struct('name',{},'imageError',{},'pupilError',{},'imageAbsoluteError',{},'pupilAbsoluteError',{},'pass',{});
+for c=1:numel(cases)
+    % Preserve the historical 256-pixel refinement fixtures. The current
+    % practical startup has its own convergence suite and source limits.
+    p=lithography_reference_params();p.sourceType=cases{c};p.sourceOuter=.7;
+    if c==3,p.maskType='Circular Aperture';p.maskSizeUm=6;end
+    p=lithography_check_settings(p);a=lithography_run_physics(p);
+    for variation=1:3
+        q=p;q.enforceLimits=false; % Deliberate numerical refinement of an admitted case.
+        switch variation
+            case 1,q.gridSize=384;label='pixel grid';
+            case 2,q.propagationPadding=2*p.propagationPadding;label='window';
+            case 3,q.maxSourceSamples=4*p.maxSourceSamples;label='source quadrature';
         end
-        fprintf('    [%s] %s | image %.4f | pupil %.4f | %s\n', ...
-            status, convergence(k).name, convergence(k).imageError, ...
-            convergence(k).pupilError, convergence(k).summary);
+        b=lithography_run_physics(q);
+        [ei,ai]=physicalDifference(a.imageRaw,a.imageAxisM,b.imageRaw,b.imageAxisM,p.fieldSizeUm*1e-6/(2*p.reduction));
+        [ep,ap]=physicalDifference(a.pupilRaw,a.pupilAxisM,b.pupilRaw,b.pupilAxisM,a.geometry.relayFocal2Mm*1e-3*p.projNA*1.1);
+        rows(end+1)=struct('name',[cases{c} ' / ' label],'imageError',ei,'pupilError',ep,...
+            'imageAbsoluteError',ai,'pupilAbsoluteError',ap,'pass',max([ei,ep,ai,ap])<.05);
+        if displayReport,fprintf('%s: image %.5f, pupil %.5f; absolute %.5f / %.5f\n',rows(end).name,ei,ep,ai,ap);end
     end
-    fprintf('  Most physical: main image, pupil/image slices, full XY beam path\n');
-    fprintf('  Approx: top sketch and YZ\n');
+end
+report=struct('convergence',rows,'pass',all([rows.pass]),'passCount',sum([rows.pass]),'totalCount',numel(rows));
+if displayReport
+    fprintf('Numerical convergence: %d/%d within 5%%. This does not validate high-NA physical optics.\n',report.passCount,report.totalCount);
 end
 end
-
-function out = ternary(condition, trueText, falseText)
-if condition
-    out = trueText;
-else
-    out = falseText;
-end
-end
-
-function checks = convergenceChecks()
-cases = representativeCases();
-checks = repmat(struct( ...
-    'name', '', ...
-    'pass', false, ...
-    'imageError', nan, ...
-    'pupilError', nan, ...
-    'summary', ''), numel(cases), 1);
-
-for k = 1:numel(cases)
-    coarseParams = cases(k).params;
-    fineParams = cases(k).params;
-    fineParams.gridSize = 384;
-    fineParams.sourceGridSize = 141;
-    fineParams.maxSourceSamples = max(1225, coarseParams.maxSourceSamples);
-
-    coarse = lithography_run_physics(coarseParams);
-    fine = lithography_run_physics(fineParams);
-
-    imageError = resizedDifference(coarse.imageRaw, fine.imageRaw);
-    pupilError = resizedDifference(coarse.pupilRaw, fine.pupilRaw);
-
-    pass = imageError <= 0.08 && pupilError <= 0.08;
-    summary = 'grid/source convergence within 8%';
-    if ~pass
-        summary = 'grid/source convergence worse than 8%';
-    end
-
-    checks(k).name = cases(k).name;
-    checks(k).pass = pass;
-    checks(k).imageError = imageError;
-    checks(k).pupilError = pupilError;
-    checks(k).summary = summary;
-end
-end
-
-function cases = representativeCases()
-defaults = lithography_default_params();
-cases = struct('name', {}, 'params', {});
-
-p = defaults;
-p.sourceType = 'Circular';
-p.sourceOuter = 0.30;
-p.maskType = '1D Grating';
-p.maskSizeUm = 2.0;
-p.gratingPitchUm = 0.80;
-p.gratingDuty = 0.50;
-p.lensType = 'Circular';
-p.projNA = 0.75;
-cases(end + 1) = struct('name', 'Conventional dense lines', 'params', p); %#ok<AGROW>
-
-p = defaults;
-p.sourceType = 'Annular';
-p.sourceOuter = 0.80;
-p.sourceInner = 0.50;
-p.maskType = '1D Grating';
-p.maskSizeUm = 2.0;
-p.gratingPitchUm = 0.80;
-p.gratingDuty = 0.50;
-p.lensType = 'Circular';
-p.projNA = 0.75;
-cases(end + 1) = struct('name', 'Annular dense lines', 'params', p); %#ok<AGROW>
-
-p = defaults;
-p.sourceType = 'Annular';
-p.sourceOuter = 0.80;
-p.sourceInner = 0.50;
-p.maskType = 'Circular Aperture';
-p.maskSizeUm = 6.0;
-p.lensType = 'Circular';
-p.projNA = 0.75;
-cases(end + 1) = struct('name', 'Open annular pupil image', 'params', p); %#ok<AGROW>
-end
-
-function err = resizedDifference(dataA, dataB)
-normA = dataA / max(max(dataA(:)), eps);
-normB = dataB / max(max(dataB(:)), eps);
-normB = resizeLike(normB, size(normA));
-err = norm(normA(:) - normB(:)) / max(norm(normA(:)), eps);
-end
-
-function dataOut = resizeLike(dataIn, targetSize)
-if isequal(size(dataIn), targetSize)
-    dataOut = dataIn;
-    return;
-end
-
-sourceAxisX = linspace(-1, 1, size(dataIn, 2));
-sourceAxisY = linspace(-1, 1, size(dataIn, 1));
-targetAxisX = linspace(-1, 1, targetSize(2));
-targetAxisY = linspace(-1, 1, targetSize(1));
-[Xq, Yq] = meshgrid(targetAxisX, targetAxisY);
-dataOut = interp2(sourceAxisX, sourceAxisY, dataIn, Xq, Yq, 'linear', 0);
+function [err,absoluteError]=physicalDifference(a,xa,b,xb,half)
+inside=abs(xa)<=half;
+axis=xa(inside);[X,Y]=meshgrid(axis,axis);
+a=a(inside,inside);b=interp2(xb,xb,b,X,Y,'linear',0);
+absoluteError=norm(a(:)-b(:))/max(norm(b(:)),realmin);
+a=a/max(max(a(:)),eps);b=b/max(max(b(:)),eps);
+err=norm(a(:)-b(:))/max(norm(b(:)),eps);
 end

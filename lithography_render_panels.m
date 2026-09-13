@@ -4,91 +4,104 @@ showSource(app.axSource, result);
 showMask(app.axMask, result);
 showPupil(app.axPupil, result);
 showImage(app.axImage, result);
+if isfield(app,'axElements'),lithography_render_plane_sizes(app.axElements,params,result);end
 end
 
 function showSource(axHandle, result)
-cla(axHandle);
+clearPanel(axHandle);
 imagesc(axHandle, [-result.sourceExtent result.sourceExtent], ...
     [-result.sourceExtent result.sourceExtent], result.source);
 axis(axHandle, 'image');
 set(axHandle, 'YDir', 'normal');
 colormap(axHandle, hot(256));
 caxis(axHandle, [0 1]);
-hold(axHandle, 'on');
-plot(axHandle, result.sourceSamplesU, result.sourceSamplesV, 'wo', 'MarkerSize', 4, 'LineWidth', 0.8);
-hold(axHandle, 'off');
 title(axHandle, sprintf('Source (%d samples)', result.sourceCount), 'FontSize', 10);
 xlabel(axHandle, 'u / NA', 'FontSize', 9);
 ylabel(axHandle, 'v / NA', 'FontSize', 9);
+if isfield(result,'maskIllumination')
+    title(axHandle,'Source weights','FontSize',10);
+    xlabel(axHandle,'x / source unit','FontSize',9);
+    ylabel(axHandle,'y / source unit','FontSize',9);
+end
 set(axHandle, 'FontSize', 9);
 cb = colorbar(axHandle, 'eastoutside');
-cb.Label.String = 'Source weight';
-cb.Ticks = [0 0.5 1];
+setappdata(axHandle,'colorbarHandle',cb);
+cb.Label.String = '';
+cb.Ticks = [0 1];
 cb.FontSize = 8;
 cb.Label.FontSize = 8;
 end
 
 function showMask(axHandle, result)
-cla(axHandle);
+clearPanel(axHandle);
 imagesc(axHandle, [-result.maskExtentUm result.maskExtentUm], ...
     [-result.maskExtentUm result.maskExtentUm], result.mask);
 axis(axHandle, 'image');
 set(axHandle, 'YDir', 'normal');
 colormap(axHandle, gray(256));
 caxis(axHandle, [0 1]);
-title(axHandle, 'Mask transmission', 'FontSize', 10);
-xlabel(axHandle, 'x on mask (um)', 'FontSize', 9);
-ylabel(axHandle, 'y on mask (um)', 'FontSize', 9);
+title(axHandle, 'Mask patch (amplitude)', 'FontSize', 10);
+xlabel(axHandle, 'x (um)', 'FontSize', 9);
+ylabel(axHandle, 'y (um)', 'FontSize', 9);
 set(axHandle, 'FontSize', 9);
 cb = colorbar(axHandle, 'eastoutside');
-cb.Label.String = 'Transmission';
+setappdata(axHandle,'colorbarHandle',cb);
+cb.Label.String = '';
 cb.Ticks = [0 1];
 cb.FontSize = 8;
 cb.Label.FontSize = 8;
 end
 
 function showPupil(axHandle, result)
-cla(axHandle);
-nativeExtent = max(result.pupilNativeExtent, eps);
-displayExtent = max(result.pupilDisplayExtent, nativeExtent);
-nativeAxis = linspace(-nativeExtent, nativeExtent, size(result.pupilSampled, 1));
-displayAxis = linspace(-displayExtent, displayExtent, size(result.pupilSampled, 1));
-[displayX, displayY] = meshgrid(displayAxis, displayAxis);
-pupilDisplay = interp2(nativeAxis, nativeAxis, result.pupilSampled, displayX, displayY, 'linear', 0);
-imagesc(axHandle, [-displayExtent displayExtent], ...
-    [-displayExtent displayExtent], pupilDisplay);
+clearPanel(axHandle);
+axisValues=result.pupilAxisM*1e3;
+imagesc(axHandle,axisValues,axisValues,result.pupilSampled);
 axis(axHandle, 'image');
+radius=max(axisValues)/result.pupilNativeExtent;
+xlim(axHandle,[-1.1,1.1]*radius);ylim(axHandle,[-1.1,1.1]*radius);
 set(axHandle, 'YDir', 'normal');
 colormap(axHandle, turbo(256));
 caxis(axHandle, [0 1]);
-title(axHandle, 'Beam intensity at pupil plane', 'FontSize', 10);
-xlabel(axHandle, 'normalized pupil x', 'FontSize', 9);
-ylabel(axHandle, 'normalized pupil y', 'FontSize', 9);
+title(axHandle, 'Pupil (local scale)', 'FontSize', 10);
+xlabel(axHandle, 'x (mm)', 'FontSize', 9);
+ylabel(axHandle, 'y (mm)', 'FontSize', 9);
 set(axHandle, 'FontSize', 9);
 cb = colorbar(axHandle, 'eastoutside');
-cb.Label.String = 'Normalized intensity';
-cb.Ticks = [0 0.5 1];
+setappdata(axHandle,'colorbarHandle',cb);
+cb.Label.String = '';
+cb.Ticks = [0 1];
 cb.FontSize = 8;
 cb.Label.FontSize = 8;
 end
 
 function showImage(axHandle, result)
-cla(axHandle);
-imagesc(axHandle, [-result.imageExtentUm result.imageExtentUm], ...
-    [-result.imageExtentUm result.imageExtentUm], result.image);
+clearPanel(axHandle);
+imagesc(axHandle, result.imageAxisM*1e6, result.imageAxisM*1e6, result.image);
 axis(axHandle, 'image');
+half=result.maskExtentUm*result.projectionRelay.absMagnification;
+xlim(axHandle,[-half,half]);ylim(axHandle,[-half,half]);
 set(axHandle, 'YDir', 'normal');
 colormap(axHandle, parula(256));
 caxis(axHandle, [0 1]);
-title(axHandle, 'Detector image', 'FontSize', 10);
-xlabel(axHandle, 'x on detector (um)', 'FontSize', 9);
-ylabel(axHandle, 'y on detector (um)', 'FontSize', 9);
+title(axHandle, 'Image (local scale)', 'FontSize', 10);
+xlabel(axHandle, 'x (um)', 'FontSize', 9);
+ylabel(axHandle, 'y (um)', 'FontSize', 9);
 set(axHandle, 'FontSize', 9);
 cb = colorbar(axHandle, 'eastoutside');
-cb.Label.String = 'Normalized intensity';
-cb.Ticks = [0 0.5 1];
+setappdata(axHandle,'colorbarHandle',cb);
+cb.Label.String = '';
+cb.Ticks = [0 1];
 cb.FontSize = 8;
 cb.Label.FontSize = 8;
+end
+
+function clearPanel(axHandle)
+if isappdata(axHandle,'colorbarHandle')
+    previous=getappdata(axHandle,'colorbarHandle');
+    if isgraphics(previous),delete(previous);end
+    rmappdata(axHandle,'colorbarHandle');
+end
+colorbar(axHandle,'off');cla(axHandle);
 end
 
 function showPropagation(axHandle, params, result)
@@ -97,8 +110,9 @@ geom = propagationGeometry(params, result.projectionRelay);
 cla(axHandle);
 hold(axHandle, 'on');
 set(axHandle, 'Color', 'w');
-axis(axHandle, [geom.xMin geom.xMax -1.32 1.32]);
-axis(axHandle, 'off');
+axis(axHandle, [geom.xMin geom.zSliceMax -1.15 1.15]);
+set(axHandle,'Visible','on','Box','off','YTick',[],'FontSize',9,'TickDir','out');
+axHandle.YAxis.Visible='off';
 
 plot(axHandle, [geom.xMin + 2 geom.xMax - 4], [0 0], 'k-', 'LineWidth', 1.1);
 quiver(axHandle, geom.xMax - 8, 0, 4, 0, 0, 'k', 'LineWidth', 1.1, 'MaxHeadSize', 0.45);
@@ -117,26 +131,22 @@ drawPupilTransmissionMarker(axHandle, geom, params);
 drawLens(axHandle, geom.zProjection2, geom.projectionHalf, [0.76 0.76 0.76]);
 drawImagePlane(axHandle, geom.zImage, geom.imageHalf);
 
-dimensionY = -0.98;
-drawDoubleArrow(axHandle, geom.zSourcePlane, geom.zCondenser, dimensionY, ...
-    sprintf('d_{SC} = %.0f mm', params.sourceToCondenserMm), [0.15 0.15 0.15]);
-drawDoubleArrow(axHandle, geom.zCondenser, geom.zField, dimensionY, ...
-    sprintf('f_C = %.0f mm', params.condenserFocalMm), [0.00 0.38 0.68]);
-drawDoubleArrow(axHandle, geom.zField, geom.zPupil, dimensionY, ...
-    sprintf('d_{prop} = %.0f mm', params.fieldToPupilMm), [0.15 0.15 0.15]);
-drawDoubleArrow(axHandle, geom.zPupil, geom.zImage, dimensionY, ...
-    sprintf('f_P = %.0f mm', params.projectionFocalMm), [0.00 0.38 0.68]);
-
-text(axHandle, geom.zSourcePlane, 1.19, 'Source Plane', 'HorizontalAlignment', 'center', 'FontSize', 15, 'FontWeight', 'bold');
-text(axHandle, geom.zCondenser, -1.16, 'Condenser Lens', 'HorizontalAlignment', 'center', 'VerticalAlignment', 'top', 'FontSize', 14, 'FontWeight', 'bold');
-text(axHandle, geom.zField, 1.17, 'Field Plane (Mask / Object)', 'HorizontalAlignment', 'center', 'FontSize', 14, 'FontWeight', 'bold');
-text(axHandle, 0.5 * (geom.zProjection1 + geom.zProjection2), -1.16, 'Projection Lenses', 'HorizontalAlignment', 'center', 'VerticalAlignment', 'top', 'FontSize', 14, 'FontWeight', 'bold');
-text(axHandle, geom.zPupil, 1.19, 'Pupil Plane', 'HorizontalAlignment', 'center', 'FontSize', 15, 'FontWeight', 'bold');
-text(axHandle, geom.zImage, 1.19, 'Image Plane', 'HorizontalAlignment', 'center', 'FontSize', 15, 'FontWeight', 'bold');
-text(axHandle, geom.xMax - 2.5, 0.05, 'z', 'FontSize', 20, 'FontWeight', 'bold');
-text(axHandle, geom.zField, -1.22, sprintf('%s', params.maskType), ...
-    'HorizontalAlignment', 'center', 'FontSize', 11, 'Color', [0.2 0.2 0.2]);
+% Label lane is outside the clipped ray area. Evenly spaced names have
+% leaders to the actual z planes, including closely spaced high-reduction lenses.
+names={'Source','Condenser','Mask','Lens 1','Pupil','Lens 2','Image'};
+planes=[0 geom.zCondenser geom.zField geom.zProjection1 geom.zPupil geom.zProjection2 geom.zImage];
+limits=xlim(axHandle);labelX=linspace(.045,.955,numel(names));
+for j=1:numel(names)
+    xLabel=limits(1)+labelX(j)*diff(limits);
+    plot(axHandle,[planes(j) xLabel],[1.16 1.64],'-','Color',[.55 .61 .66],...
+        'LineWidth',.65,'Clipping','off','Tag','GeometryLeader');
+    text(axHandle,labelX(j),1.34,names{j},'Units','normalized','Clipping','off',...
+        'HorizontalAlignment','center','FontSize',9,'FontWeight','bold','Tag','GeometryLabel');
+end
+set(findall(axHandle,'Type','patch'),'Clipping','on');
 hold(axHandle, 'off');
+t=title(axHandle,'Geometry sketch | shared z axis | transverse sizes not to scale','FontSize',10);
+set(t,'Units','normalized','Position',[.5 1.90 0]);
 end
 
 function geom = propagationGeometry(params, projectionRelay)
@@ -435,7 +445,7 @@ plot(axHandle, [x1 x1 + headDx], [y y - headDy], '-', 'Color', colorValue, 'Line
 plot(axHandle, [x2 x2 - headDx], [y y + headDy], '-', 'Color', colorValue, 'LineWidth', 1.1);
 plot(axHandle, [x2 x2 - headDx], [y y - headDy], '-', 'Color', colorValue, 'LineWidth', 1.1);
 text(axHandle, 0.5 * (x1 + x2), y + 0.07, labelText, ...
-    'HorizontalAlignment', 'center', 'Color', colorValue, 'FontSize', 11, 'FontWeight', 'bold');
+    'HorizontalAlignment', 'center', 'Color', colorValue, 'FontSize', 9, 'FontWeight', 'bold');
 end
 
 function value = clampValue(value, lowValue, highValue)

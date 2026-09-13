@@ -6,18 +6,22 @@ geom.zSourcePlane = 0;
 geom.zCondenser = params.sourceToCondenserMm;
 geom.zField = geom.zCondenser + params.condenserFocalMm;
 geom.zPupil = geom.zField + params.fieldToPupilMm;
-geom.zImage = geom.zPupil + projectionRelay.imageDistanceMm;
+geom.zImageNominal = geom.zPupil + params.projectionFocalMm / params.reduction;
+geom.zImage = geom.zImageNominal + params.defocusUm * 1e-3;
 
-geom.zProjection1 = geom.zField + 0.5 * (geom.zPupil - geom.zField);
-geom.zProjection2 = geom.zPupil + 0.5 * (geom.zImage - geom.zPupil);
+geom.zProjection1 = geom.zPupil - params.projectionFocalMm / 2;
+geom.zProjection2 = geom.zPupil + params.projectionFocalMm / (2 * params.reduction);
+if geom.zProjection1 <= geom.zField
+    error('Lithography:Geometry', 'Field-to-pupil distance must exceed half the projection focal parameter.');
+end
 geom.projectionLensSeparation = geom.zProjection2 - geom.zProjection1;
 
 geom.fieldToLens1Mm = geom.zProjection1 - geom.zField;
 geom.lens1ToPupilMm = geom.zPupil - geom.zProjection1;
 geom.pupilToLens2Mm = geom.zProjection2 - geom.zPupil;
 geom.lens2ToImageMm = geom.zImage - geom.zProjection2;
-geom.relayFocal1Mm = max(0.5 * (geom.zPupil - geom.zField), eps);
-geom.relayFocal2Mm = max(0.5 * (geom.zImage - geom.zPupil), eps);
+geom.relayFocal1Mm = params.projectionFocalMm / 2;
+geom.relayFocal2Mm = geom.relayFocal1Mm / params.reduction;
 
 geom.totalLength = geom.zImage;
 postImageMargin = max(24, 0.14 * geom.totalLength);

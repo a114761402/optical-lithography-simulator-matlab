@@ -4,3 +4,7 @@
 *.png
 beam_path_checks/
 beam_path_checks_fix2/
+validation_artifacts/
+*.log
+# Only reproducible publication figures belong in version control.
+!docs/assets/*.png

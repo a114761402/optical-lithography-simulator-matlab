@@ -1,5 +1,19 @@
 function info = lithography_artifact_warnings(params, result)
 messages = {};
+if any(strcmp(params.maskType,{'1D Grating','2D Grating'})) && any(result.sourceWeights>0)
+    extent=max(hypot(result.sourceSamplesU(result.sourceWeights>0),result.sourceSamplesV(result.sourceWeights>0)));
+    minimumPitch=params.wavelengthNm*.001*params.reduction/(params.projNA*(1+extent));
+    if params.gratingPitchUm<minimumPitch
+        messages{end+1}='Note: nominal first grating orders lie outside the imaging cutoff; unresolved lines can be physical.';
+    end
+end
+diameterPixels=numel(result.pupilAxisM)/max(result.pupilNativeExtent,eps);
+if diameterPixels<12
+    messages{end+1}=sprintf('Warning: pupil diameter uses only %.1f samples; enlarge the propagation window.',diameterPixels);
+end
+if max(result.mask(:))==0
+    messages{end+1}='Warning: mask is empty or unresolved on this grid.';
+end
 
 if isfield(result, 'pupilNativeExtent') && isfield(result, 'pupilDisplayExtent') && ...
         result.pupilNativeExtent + 1e-9 < result.pupilDisplayExtent
@@ -17,21 +31,9 @@ if isfield(result, 'pupilNativeExtent') && isfield(result, 'pupilDisplayExtent')
 end
 
 if isfield(result, 'sourceSamplingClipped') && result.sourceSamplingClipped
-    if isfield(result, 'pupilConsistencyError') && result.pupilConsistencyError <= 0.12
-        messages{end + 1} = sprintf( ...
-            'Note: source sampling reduced to %d / %d active pixels.', ...
-            result.sourceUsedCount, result.sourceActiveCount);
-    else
-        messages{end + 1} = sprintf( ...
-            'Warning: source sampling reduced to %d / %d active pixels.', ...
-            result.sourceUsedCount, result.sourceActiveCount);
-    end
-end
-
-if isfield(result, 'pupilConsistencyError') && result.pupilConsistencyError > 0.12
     messages{end + 1} = sprintf( ...
-        'Warning: pupil mismatch %.3f.', ...
-        result.pupilConsistencyError);
+        'Note: source quadrature uses %d / %d active pixels; check convergence for quantitative work.', ...
+        result.sourceUsedCount, result.sourceActiveCount);
 end
 
 if any(strcmp(params.maskType, {'Circular Aperture', 'Square Aperture', 'Diamond Aperture', 'Annular Aperture'})) && ...
@@ -56,14 +58,6 @@ elseif pixelsPerMinFeature > 0 && pixelsPerMinFeature < 6
         pixelsPerMinFeature);
 end
 
-if params.condenserAperture > 1.02
-    messages{end + 1} = 'Note: cond aperture > 1 acts like 1 here.';
-end
-
-if params.projNA > 1.02
-    messages{end + 1} = 'Note: NA > 1 is a normalized stress test here.';
-end
-
 if strcmp(params.lensType, 'Freeform') && isfield(params, 'customPupilMask') && ~isempty(params.customPupilMask)
     openFraction = mean(double(params.customPupilMask(:)) > 0.5);
     if openFraction < 0.02
@@ -82,11 +76,21 @@ if strcmp(params.sourceType, 'Point') && abs(params.pointSourceU) > 1e-3
     messages{end + 1} = 'Note: top sketch is Y-Z only; point x offset does not move ray height.';
 end
 
-messages{end + 1} = 'Note: illumination uses an angular source model at the mask.';
+if isfield(result,'maskIllumination')
+    messages{end+1}='Note: Gaussian emitters propagate through a Gaussian-aperture condenser into the mask; not a hard circular stop.';
+else
+    messages{end+1}='Note: legacy angular-source mathematical benchmark.';
+end
 messages{end + 1} = 'Note: pupil panel shows direct beam intensity at the pupil plane.';
 messages{end + 1} = 'Note: detector image uses an equivalent 4f relay, not a full lens design.';
-messages{end + 1} = 'Note: XY beam path uses the same wave relay as the detector.';
-messages{end + 1} = 'Note: top sketch and YZ are still visualization models.';
+messages{end + 1} = 'Note: RS near mask; scalar paraxial relay elsewhere. See each panel for axis units.';
+if params.projNA > 0.3
+    messages{end + 1} = 'Warning: high image NA. Paraxial scalar relay is illustrative, not a quantitative high-NA model.';
+end
+if result.sourceUsedCount==0 || sum(result.sourceWeights)==0
+    messages{end+1}='Warning: no transmitted illumination; image is dark.';
+end
+messages{end + 1} = 'Note: top sketch is geometry only; YZ is a coarse sampled wave preview. Use XY for full source quadrature.';
 
 info = struct();
 info.messages = messages;

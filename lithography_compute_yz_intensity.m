@@ -1,6 +1,11 @@
-function yzData = lithography_compute_yz_intensity(params, result)
+function yzData = lithography_compute_yz_intensity(params, result, progress)
+if nargin<3,progress=[];end
 if nargin < 2 || isempty(result) || ~isfield(result, 'projectionRelay') || ~isfield(result, 'mask')
     result = lithography_run_physics(params);
+end
+if isfield(result,'maskIllumination')
+    yzData=lithography_wave_yz_preview(params,result,progress);
+    return;
 end
 
 if ~isfield(params, 'yzMode') || isempty(params.yzMode)
@@ -26,7 +31,12 @@ else
 end
 
 rawIntensity = intensity;
-[intensity, normalizationPeak] = lithography_normalize_intensity(rawIntensity, params, result);
+if ~any(result.sourceRaw(:)),rawIntensity(:)=0;end
+if sum(result.sourceWeights)==0,rawIntensity(:,zAxis>=geom.zField)=0;end
+if params.condenserAperture==0,rawIntensity(:,zAxis>=geom.zCondenser)=0;end
+if ~any(result.pupilRaw(:)),rawIntensity(:,zAxis>=geom.zPupil)=0;end
+schematic=params;schematic.intensityNorm='Local';
+[intensity, normalizationPeak] = lithography_normalize_intensity(rawIntensity, schematic, result);
 
 yzData = struct();
 yzData.zMm = zAxis;
@@ -35,7 +45,7 @@ yzData.rawIntensity = rawIntensity;
 yzData.intensity = intensity;
 yzData.mode = params.yzMode;
 yzData.view = params.yzView;
-yzData.normalizationMode = params.intensityNorm;
+yzData.normalizationMode = 'Local';
 yzData.normalizationPeak = normalizationPeak;
 yzData.planes = struct( ...
     'source', geom.zSourcePlane, ...
@@ -461,7 +471,7 @@ end
 function projection = buildProjectionRelay(params)
 projection = struct();
 projection.modelType = 'equivalent-4f-relay';
-projection.imageDistanceMm = params.projectionFocalMm;
+projection.imageDistanceMm = params.projectionFocalMm/params.reduction;
 projection.magnification = -1 / params.reduction;
 projection.absMagnification = abs(projection.magnification);
 end

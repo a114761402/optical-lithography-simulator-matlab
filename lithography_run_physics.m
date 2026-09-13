@@ -1,135 +1,112 @@
 function result = lithography_run_physics(params)
-N = params.gridSize;
-L = params.fieldSizeUm * 1e-6;
-lambda = params.wavelengthNm * 1e-9;
-dx = L / N;
-
-condenserFocal = params.condenserFocalMm * 1e-3;
-sourceToCondenser = params.sourceToCondenserMm * 1e-3;
-projectionFocal = params.projectionFocalMm * 1e-3;
-fieldToPupil = params.fieldToPupilMm * 1e-3;
-
-x = ((0:N-1) - N/2) * dx;
-[X, Y] = meshgrid(x, x);
-
-freq = ((0:N-1) - N/2) / L;
-[FX, FY] = meshgrid(freq, freq);
-cutoff = params.projNA / lambda;
-freqRadius = sqrt(FX.^2 + FY.^2) / cutoff;
-
-sourceExtent = sourceCoordinateExtent(params);
-[U, V] = meshgrid(linspace(-sourceExtent, sourceExtent, params.sourceGridSize));
-sourceDisplay = makeSource(U, V, params);
-source = applyCondenserAperture(U, V, sourceDisplay, params);
-[sourceU, sourceV, sourceW, sourceActiveCount, sourceUsedCount] = sampleSource(U, V, source, params);
-
-mask = makeMask(X, Y, params);
-projectionPupilAmp = makeProjectionPupil(freqRadius, FX / cutoff, FY / cutoff, params);
-projectionRelay = buildProjectionRelay(params);
-
-% Equivalent lithography relay:
-% sourceToCondenser = f_C gives nominal collimation at the mask plane.
-% fieldToPupil = f_P gives the focused Fourier-imaging condition.
-illuminationCurvature = (condenserFocal - sourceToCondenser) / max(condenserFocal^2, eps);
-illuminationAngleScale = condenserFocal / max(sourceToCondenser, eps);
-effectiveDefocus = (params.defocusUm * 1e-6) + (fieldToPupil - projectionFocal);
-illuminationPhase = exp(1i * pi * illuminationCurvature * (X.^2 + Y.^2) / lambda);
-defocusPhase = exp(-1i * pi * lambda * effectiveDefocus * (FX.^2 + FY.^2));
-projectionPupil = projectionPupilAmp .* defocusPhase;
-
-maskSpectrumPower = abs(fftshift(fft2(ifftshift(mask)))).^2;
-sourceKernelPupil = makeSourceKernelAtPupil(FX / cutoff, FY / cutoff, illuminationAngleScale, params);
-truePupilIntensity = abs(projectionPupilAmp).^2 .* fftConvolveSame(maskSpectrumPower, sourceKernelPupil);
-
-accumulatedPupil = zeros(N, N);
-imageIntensity = zeros(N, N);
-
-for k = 1:numel(sourceW)
-    fxShift = sourceU(k) * cutoff * illuminationAngleScale;
-    fyShift = sourceV(k) * cutoff * illuminationAngleScale;
-    incidentField = exp(1i * 2 * pi * (fxShift * X + fyShift * Y)) .* illuminationPhase;
-    fieldAfterMask = mask .* incidentField;
-    pupilField = fftshift(fft2(ifftshift(fieldAfterMask)));
-    filteredField = pupilField .* projectionPupil;
-    accumulatedPupil = accumulatedPupil + sourceW(k) * abs(filteredField).^2;
-    detectorField = fftshift(ifft2(ifftshift(filteredField)));
-    imageIntensity = imageIntensity + sourceW(k) * abs(detectorField).^2;
+if isfield(params,'enforceLimits') && params.enforceLimits
+    planned=lithography_check_settings(params);
+    if planned.gridSize~=params.gridSize || planned.propagationPadding~=params.propagationPadding || ...
+            planned.sourceGridSize~=params.sourceGridSize || planned.maxSourceSamples~=params.maxSourceSamples
+        error('Lithography:Settings','Sampling needs adjustment. First use p = lithography_check_settings(p).');
+    end
 end
-
-result = struct();
-result.sourceRaw = sourceDisplay;
-result.source = safeNormalize(sourceDisplay);
-result.mask = mask;
-result.pupilSampledRaw = accumulatedPupil;
-result.pupilRaw = truePupilIntensity;
-result.imageRaw = imageIntensity;
-result.pupilSampled = safeNormalize(accumulatedPupil);
-result.pupil = safeNormalize(truePupilIntensity);
-result.pupilConsistencyError = normalizedDifference(result.pupil, result.pupilSampled);
-result.image = safeNormalize(imageIntensity);
-result.sourceSamplesU = sourceU;
-result.sourceSamplesV = sourceV;
-result.sourceWeights = sourceW;
-result.sourceCount = numel(sourceW);
-result.sourceActiveCount = sourceActiveCount;
-result.sourceUsedCount = sourceUsedCount;
-result.sourceSamplingClipped = sourceUsedCount < sourceActiveCount;
-result.sourceExtent = sourceExtent;
-result.maskExtentUm = params.fieldSizeUm / 2;
-result.imageExtentUm = 0.5 * params.fieldSizeUm * projectionRelay.absMagnification;
-result.pupilNativeExtent = max(abs(freq / cutoff));
-result.pupilDisplayExtent = pupilCoordinateExtent(params);
-result.freqExtent = result.pupilNativeExtent;
-result.illuminationDetuneMm = params.sourceToCondenserMm - params.condenserFocalMm;
-result.focusDetuneMm = params.fieldToPupilMm - params.projectionFocalMm;
-result.projectionRelay = projectionRelay;
-result.xyzReferencePeak = max([max(accumulatedPupil(:)), max(truePupilIntensity(:)), max(imageIntensity(:)), eps]);
+validateattributes(params.gridSize, {'numeric'}, {'scalar','integer','>=',16,'<=',2048});
+validateattributes(params.fieldSizeUm, {'numeric'}, {'scalar','positive','finite'});
+validateattributes(params.wavelengthNm, {'numeric'}, {'scalar','positive','finite'});
+validateattributes(params.reduction, {'numeric'}, {'scalar','>=',1,'finite'});
+validateattributes(params.projNA, {'numeric'}, {'scalar','>',0,'<=',1});
+validateattributes(params.sourceGridSize, {'numeric'}, {'scalar','integer','>=',3});
+validateattributes(params.maxSourceSamples, {'numeric'}, {'scalar','integer','>=',1});
+if isfield(params,'propagationPadding')
+    validateattributes(params.propagationPadding,{'numeric'},{'scalar','integer','>=',1,'<=',8});
+    if params.gridSize*params.propagationPadding>2048
+        error('Lithography:GridBudget','Padded grid must not exceed 2048. Reduce grid or padding.');
+    end
 end
-
-function source = makeSource(U, V, params)
-radial = sqrt(U.^2 + V.^2);
-
-switch params.sourceType
-    case 'Point'
-        source = double((U - params.pointSourceU).^2 + (V - params.pointSourceV).^2 <= 0.04^2);
-
-    case 'Circular'
-        source = double(radial <= params.sourceOuter);
-
-    case 'Square'
-        source = double(max(abs(U), abs(V)) <= params.sourceOuter);
-
-    case 'Annular'
-        source = double(radial <= params.sourceOuter & radial >= params.sourceInner);
-
-    case 'Dipole X'
-        source = double((U - 0.5 * params.quadSeparation).^2 + V.^2 <= params.sourceOuter^2) + ...
-                 double((U + 0.5 * params.quadSeparation).^2 + V.^2 <= params.sourceOuter^2);
-
-    case 'Dipole Y'
-        source = double(U.^2 + (V - 0.5 * params.quadSeparation).^2 <= params.sourceOuter^2) + ...
-                 double(U.^2 + (V + 0.5 * params.quadSeparation).^2 <= params.sourceOuter^2);
-
-    case 'Quadrupole'
-        sigma = 0.10;
-        shift = params.quadSeparation / sqrt(2);
-        source = zeros(size(U));
-        centers = [ shift,  shift;
-                    shift, -shift;
-                   -shift,  shift;
-                   -shift, -shift];
-        for idx = 1:size(centers, 1)
-            source = source + exp(-((U - centers(idx, 1)).^2 + (V - centers(idx, 2)).^2) / (2 * sigma^2));
-        end
-
-    case 'Freeform'
-        source = lithography_custom_source_values(U, V, params);
-
-    otherwise
-        source = double(radial <= params.sourceOuter);
+N=params.gridSize;
+dx=params.fieldSizeUm*1e-6/N;
+x=((0:N-1)-floor(N/2))*dx;
+[X,Y]=meshgrid(x,x);
+extent=sourceCoordinateExtent(params);
+if isfield(params,'illuminationModel') && strcmp(params.illuminationModel,'Incoherent Gaussian emitters')
+    extent=lithography_source_extent(params);
 end
-
-source = safeNormalize(source);
+[U,V]=meshgrid(linspace(-extent,extent,params.sourceGridSize));
+displaySource=makeSource(U,V,params);
+fullWave=isfield(params,'illuminationModel') && strcmp(params.illuminationModel,'Incoherent Gaussian emitters');
+samplingParams=params;
+if fullWave
+    source=displaySource;
+    samplingParams.condenserAperture=Inf; % Weights describe emitters BEFORE condenser loss.
+else
+    source=displaySource.*double(params.condenserAperture>0 & hypot(U,V)<=params.condenserAperture);
+end
+[u,v,w,active,used]=sampleSource(U,V,source,samplingParams);
+if any(hypot(u,v).*double(w>0)*params.projNA/params.reduction>=1)
+    error('Lithography:SourceAngle','Illumination direction must be a propagating wave in air.');
+end
+if ~strcmp(params.sourceType,'Point')
+    w=w*sum(source(:))/max(sum(displaySource(:)),eps);
+end
+result=struct('mask',makeMask(X,Y,params),'objectAxisM',x,...
+    'sourceRaw',displaySource,'source',safeNormalize(displaySource),...
+    'sourceSamplesU',u,'sourceSamplesV',v,'sourceWeights',w,...
+    'sourceCount',numel(w),'sourceActiveCount',active,'sourceUsedCount',used,...
+    'sourceSamplingClipped',used<active,'sourceExtent',extent,...
+    'maskExtentUm',params.fieldSizeUm/2,'projectionRelay',buildProjectionRelay(params));
+result.geometry=lithography_projection_geometry(params,result.projectionRelay);
+if fullWave
+    result.maskIllumination=lithography_gaussian_illumination(params,result.geometry.zField);
+    checkAxis=linspace(-params.maskSizeUm*.5e-6,params.maskSizeUm*.5e-6,7);
+    reference=lithography_illumination_wave_slice(params,result,result.geometry.zField,[],checkAxis);
+    sampled=zeros(numel(checkAxis));
+    for j=1:numel(w)
+        input=lithography_gaussian_mode(result.maskIllumination,checkAxis,checkAxis,u(j),v(j));
+        sampled=sampled+w(j)*abs(input).^2;
+    end
+    result.illuminationQuadratureError=norm(sampled(:)-reference.rawIntensity(:))/max(norm(reference.rawIntensity(:)),realmin);
+    if params.enforceLimits && result.illuminationQuadratureError>.02
+        error('Lithography:Settings','Source quadrature differs from the continuous illumination integral by %.2f%% (limit 2%%). Enlarge the Gaussian condenser radius or reduce source extent; this result is not displayed.',100*result.illuminationQuadratureError);
+    end
+end
+result.maskIncidentRaw=zeros(N); result.maskExitRaw=zeros(N);
+result.pupilRaw=[]; result.imageRaw=[];
+for k=1:numel(w)
+    f=lithography_coherent_fields(params,result,u(k),v(k));
+    if isempty(result.pupilRaw)
+        result.pupilRaw=zeros(size(f.pupil)); result.imageRaw=zeros(size(f.image));
+    end
+    if w(k)==0, continue; end
+    result.maskIncidentRaw=result.maskIncidentRaw+w(k)*abs(f.incident).^2;
+    result.maskExitRaw=result.maskExitRaw+w(k)*abs(f.mask).^2;
+    result.pupilRaw=result.pupilRaw+w(k)*abs(f.pupil).^2;
+    field=lithography_fresnel_same(f.image,params.wavelengthNm*1e-9,...
+        f.imageAxis(2)-f.imageAxis(1),params.defocusUm*1e-6);
+    result.imageRaw=result.imageRaw+w(k)*abs(field).^2;
+end
+result.pupilAxisM=f.pupilAxis; result.imageAxisM=f.imageAxis;
+if any(~isfinite(result.pupilRaw(:))) || any(~isfinite(result.imageRaw(:)))
+    error('Lithography:Numerics','Nonfinite field; no image is shown. Check sampling and geometry.');
+end
+result.imageExtentUm=max(abs(f.imageAxis))*1e6;
+result.pupilSampledRaw=result.pupilRaw;
+result.pupilSampled=safeNormalize(result.pupilRaw);
+result.pupil=result.pupilSampled;
+result.image=safeNormalize(result.imageRaw);
+result.pupilNativeExtent=max(abs(f.pupilAxis))/(result.geometry.relayFocal2Mm*1e-3*params.projNA);
+result.pupilDisplayExtent=1.1;
+result.freqExtent=result.pupilNativeExtent;
+result.pupilConsistencyError=0; % Shared result, NOT an independent accuracy check.
+result.illuminationDetuneMm=params.sourceToCondenserMm-params.condenserFocalMm;
+result.focusDetuneMm=params.fieldToPupilMm-params.projectionFocalMm;
+result.xyzReferencePeak=max([max(result.pupilRaw(:)),max(result.imageRaw(:)),max(result.maskIncidentRaw(:)),eps]);
+if fullWave
+    sourceSlice=lithography_illumination_wave_slice(params,result,0,[]);
+    result.sourceReferencePeak=max(sourceSlice.rawIntensity(:));
+    result.xyzReferencePeak=max(result.xyzReferencePeak,result.sourceReferencePeak);
+    b=result.maskIllumination;
+    result.condenserTransmission=sum(w.*(b.powerPrefactor*exp(2*b.beta*b.sourceScaleM^2*(u.^2+v.^2))));
+    result.sourcePower=sum(w);
+end
+end
+function source = makeSource(U,V,params)
+source=safeNormalize(lithography_source_values(U,V,params));
 end
 
 function source = applyCondenserAperture(U, V, source, params)
@@ -139,6 +116,17 @@ source = safeNormalize(source);
 end
 
 function mask = makeMask(X, Y, params)
+% Pixel-area quadrature avoids grid-dependent extra rows on aperture edges.
+dx=X(1,2)-X(1,1);
+mask=zeros(size(X));
+for sx=[-.375,-.125,.125,.375]
+    for sy=[-.375,-.125,.125,.375]
+        mask=mask+binaryMask(X+sx*dx,Y+sy*dx,params)/16;
+    end
+end
+end
+
+function mask = binaryMask(X,Y,params)
 featureSize = params.maskSizeUm * 1e-6;
 
 switch params.maskType
@@ -161,15 +149,15 @@ switch params.maskType
         pitch = params.gratingPitchUm * 1e-6;
         duty = params.gratingDuty;
         gratingEnvelope = double(abs(X) <= featureSize / 2 & abs(Y) <= featureSize / 2);
-        gratingPattern = double(mod(X + max(abs(X(:))), pitch) < duty * pitch);
+        gratingPattern = double(abs(mod(X+pitch/2,pitch)-pitch/2) < duty*pitch/2);
         mask = gratingEnvelope .* gratingPattern;
 
     case '2D Grating'
         pitch = params.gratingPitchUm * 1e-6;
         duty = params.gratingDuty;
         gratingEnvelope = double(abs(X) <= featureSize / 2 & abs(Y) <= featureSize / 2);
-        xPass = mod(X + max(abs(X(:))), pitch) < duty * pitch;
-        yPass = mod(Y + max(abs(Y(:))), pitch) < duty * pitch;
+        xPass = abs(mod(X+pitch/2,pitch)-pitch/2) < duty*pitch/2;
+        yPass = abs(mod(Y+pitch/2,pitch)-pitch/2) < duty*pitch/2;
         mask = gratingEnvelope .* double(xPass & yPass);
 
     case 'Cross'
@@ -216,24 +204,24 @@ function [sampleU, sampleV, sampleW, activeCount, usedCount] = sampleSource(U, V
 if strcmp(params.sourceType, 'Point')
     sampleU = params.pointSourceU;
     sampleV = params.pointSourceV;
-    sampleW = 1;
+    sampleW = double(params.condenserAperture>0 && hypot(sampleU,sampleV) <= params.condenserAperture);
     activeCount = 1;
     usedCount = 1;
     return;
 end
 
-selectionMask = source > 0.15 * max(source(:));
+selectionMask = source > 0;
 activeCount = nnz(selectionMask);
 if activeCount == 0
     sampleU = 0;
     sampleV = 0;
-    sampleW = 1;
-    activeCount = 1;
-    usedCount = 1;
+    sampleW = 0;
+    activeCount = 0;
+    usedCount = 0;
     return;
 end
 
-if activeCount <= params.maxSourceSamples || activeCount <= 4 * params.maxSourceSamples
+if activeCount <= params.maxSourceSamples
     indices = find(selectionMask);
     sampleU = U(indices);
     sampleV = V(indices);
@@ -308,7 +296,7 @@ end
 function projection = buildProjectionRelay(params)
 projection = struct();
 projection.modelType = 'equivalent-4f-relay';
-projection.imageDistanceMm = params.projectionFocalMm;
+projection.imageDistanceMm = params.projectionFocalMm / params.reduction;
 projection.magnification = -1 / params.reduction;
 projection.absMagnification = abs(projection.magnification);
 end

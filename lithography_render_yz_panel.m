@@ -1,26 +1,52 @@
 function lithography_render_yz_panel(axHandle, yzData)
+% A manually positioned MATLAB colorbar can survive cla and become orphaned.
+if isappdata(axHandle,'colorbarHandle')
+    previous=getappdata(axHandle,'colorbarHandle');
+    if isgraphics(previous),delete(previous);end
+    rmappdata(axHandle,'colorbarHandle');
+end
+colorbar(axHandle,'off');
 cla(axHandle);
 set(axHandle, 'Color', 'w');
 
 if nargin < 2 || isempty(yzData)
+    colorbar(axHandle,'off');
     axis(axHandle, [0 1 0 1]);
     axis(axHandle, 'off');
-    text(axHandle, 0.5, 0.60, 'YZ intensity', ...
-        'HorizontalAlignment', 'center', 'FontSize', 12, 'FontWeight', 'bold');
+    text(axHandle, 0.5, 0.60, 'Sampled full-path wave preview', ...
+        'Units','normalized','HorizontalAlignment', 'center', 'FontSize', 12, 'FontWeight', 'bold');
     text(axHandle, 0.5, 0.42, 'Turn on Auto YZ or press "Update YZ". Then click a z plane.', ...
-        'HorizontalAlignment', 'center', 'FontSize', 10, 'Color', [0.25 0.25 0.25]);
+        'Units','normalized','HorizontalAlignment', 'center', 'FontSize', 10, 'Color', [0.25 0.25 0.25]);
     return;
 end
 
-imagesc(axHandle, yzData.zMm, yzData.yNorm, yzData.intensity);
+axis(axHandle,'on');
+wave=isfield(yzData,'axisHalfWidthMm');
+if wave
+    set(axHandle,'Color',[.90 .93 .96]);
+    scale='Local / z';
+    if isappdata(axHandle,'previewScale'),scale=getappdata(axHandle,'previewScale');end
+    display=lithography_preview_display(yzData,scale);
+    [Z,Y]=meshgrid(yzData.zMm,yzData.yNorm);
+    if isfield(yzData,'yPhysicalMm'),Y=yzData.yPhysicalMm;end
+    surface(axHandle,Z,Y,zeros(size(Z)),display.values,'FaceColor','interp','EdgeColor','none','Tag','WavePreview');
+    view(axHandle,2);
+else
+    imagesc(axHandle, yzData.zMm, yzData.yNorm, yzData.intensity);
+end
 set(axHandle, 'YDir', 'normal');
 axis(axHandle, 'tight');
 colormap(axHandle, hot(256));
 caxis(axHandle, [0 1]);
+if wave,caxis(axHandle,display.limits);end
+if isfield(yzData,'axisLimitsMm'),xlim(axHandle,yzData.axisLimitsMm);end
 set(axHandle, 'FontSize', 9);
 axPosition = get(axHandle, 'Position');
-if isfield(yzData, 'mode') && isfield(yzData, 'view') && isfield(yzData, 'normalizationMode')
-    title(axHandle, sprintf('YZ intensity (%s, %s, %s norm)', yzData.mode, yzData.view, yzData.normalizationMode), 'FontSize', 11);
+if wave
+    title(axHandle,{sprintf('Wave preview: x = 0 | %d modes | %d calculated z planes',yzData.sourceSampleCount,numel(yzData.zMm)),...
+        display.note,'Physical y scale; fine focus needs XY | grey = outside sampled window'},'FontSize',9);
+elseif isfield(yzData, 'mode') && isfield(yzData, 'view') && isfield(yzData, 'normalizationMode')
+    title(axHandle, 'YZ ray-density schematic (NOT a diffraction calculation)', 'FontSize', 11);
 elseif isfield(yzData, 'mode') && isfield(yzData, 'view')
     title(axHandle, sprintf('YZ intensity (%s, %s)', yzData.mode, yzData.view), 'FontSize', 11);
 elseif isfield(yzData, 'mode')
@@ -30,14 +56,18 @@ else
 end
 xlabel(axHandle, 'z along system (mm)', 'FontSize', 9);
 ylabel(axHandle, 'normalized y', 'FontSize', 9);
+if wave
+    ylabel(axHandle,'y / half-width','FontSize',9);
+    if isfield(yzData,'yPhysicalMm'),ylabel(axHandle,'y (mm)','FontSize',9);end
+end
 
 hold(axHandle, 'on');
-drawElementMarker(axHandle, yzData.planes.condenser);
-drawElementMarker(axHandle, yzData.planes.projection1);
+drawPlaneMarker(axHandle, yzData.planes.condenser,'C');
+drawPlaneMarker(axHandle, yzData.planes.projection1,'L1');
 drawPlaneMarker(axHandle, yzData.planes.source, 'Source');
-drawPlaneMarker(axHandle, yzData.planes.field, 'Field');
+drawPlaneMarker(axHandle, yzData.planes.field, 'Mask');
 drawPlaneMarker(axHandle, yzData.planes.pupil, 'Pupil');
-drawElementMarker(axHandle, yzData.planes.projection2);
+drawPlaneMarker(axHandle, yzData.planes.projection2,'L2');
 drawPlaneMarker(axHandle, yzData.planes.image, 'Image');
 if isfield(yzData, 'labels')
     drawElementLabel(axHandle, yzData.planes.condenser, yzData.labels.condenser);
@@ -47,17 +77,25 @@ end
 hold(axHandle, 'off');
 
 cb = colorbar(axHandle, 'eastoutside');
-if isfield(yzData, 'normalizationMode') && strcmp(yzData.normalizationMode, 'XYZ')
-    cb.Label.String = 'Normalized intensity (XYZ)';
+setappdata(axHandle,'colorbarHandle',cb);
+if wave
+    cb.Label.String=display.label;
+elseif isfield(yzData, 'normalizationMode') && strcmp(yzData.normalizationMode, 'XYZ')
+    cb.Label.String = 'XYZ scale';
+elseif wave
+    cb.Label.String = 'Local / z';
 else
-    cb.Label.String = 'Normalized intensity';
+    cb.Label.String = 'Relative ray density (schematic only)';
 end
 cb.Ticks = [0 0.5 1];
+if wave,cb.Ticks=display.ticks;end
 cb.FontSize = 8;
 cb.Label.FontSize = 8;
 set(axHandle, 'Position', axPosition);
 gap = 0.008;
 cbWidth = 0.012;
+set(cb,'Units',get(axHandle,'Units'));
+if strcmp(get(axHandle,'Units'),'pixels'),gap=12;cbWidth=12;end
 cbPos = [axPosition(1) + axPosition(3) + gap, axPosition(2), cbWidth, axPosition(4)];
 set(cb, 'Position', cbPos);
 end
@@ -76,9 +114,13 @@ elseif zValue >= xLimits(2) - offset
     alignment = 'right';
 end
 plot(axHandle, [zValue zValue], yLimits, '--', 'Color', [0.90 0.90 0.90], 'LineWidth', 0.9);
-text(axHandle, textX, yLimits(2) - 0.08 * (yLimits(2) - yLimits(1)), labelText, ...
+labelHeight=.08;
+if strcmp(labelText,'L2'),labelHeight=.35;end
+if strcmp(labelText,'Image'),labelHeight=.62;end
+text(axHandle, textX, yLimits(2) - labelHeight * (yLimits(2) - yLimits(1)), labelText, ...
     'HorizontalAlignment', alignment, 'VerticalAlignment', 'top', ...
-    'Color', [1 1 1], 'FontSize', 9, 'FontWeight', 'bold');
+    'Color', [1 1 1], 'BackgroundColor',[.10 .13 .16],'Margin',1,...
+    'FontSize', 9, 'FontWeight', 'bold');
 end
 
 function drawElementMarker(axHandle, zValue)

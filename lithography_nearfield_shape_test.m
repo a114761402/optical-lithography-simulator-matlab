@@ -11,13 +11,13 @@ for k = 1:numel(targetNames)
     idx = find(strcmp({showcases.name}, targetNames{k}), 1);
     assert(~isempty(idx), 'Missing expected near-field showcase: %s', targetNames{k});
     params = showcases(idx).params;
-    params.gridSize = 96;
-    params.sourceGridSize = 41;
-    params.maxSourceSamples = 121;
+    params=lithography_check_settings(params);
     result = lithography_run_physics(params);
     fieldSlice = lithography_compute_xy_slice(params, result, params.sourceToCondenserMm + params.condenserFocalMm);
     nearSlice = lithography_compute_xy_slice(params, result, params.xySliceZMm);
-    corrValue = corr(fieldSlice.intensity(:), nearSlice.intensity(:));
+    % Base-MATLAB correlation; no Statistics Toolbox needed for this check.
+    correlation = corrcoef(fieldSlice.intensity(:), nearSlice.intensity(:));
+    corrValue = correlation(1,2);
 
     reports(k).name = targetNames{k};
     reports(k).correlation = corrValue;

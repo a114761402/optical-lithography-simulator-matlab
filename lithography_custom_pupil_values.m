@@ -12,6 +12,10 @@ end
 
 mask(~isfinite(mask)) = 0;
 mask = min(max(mask, 0), 1);
+if isscalar(mask)
+    values = mask .* double(abs(U)<=1 & abs(V)<=1);
+    return;
+end
 
 axisValues = linspace(-1, 1, size(mask, 1));
 values = interp2(axisValues, axisValues, mask, U, V, 'linear', 0);

@@ -13,7 +13,11 @@ end
 if ~isempty(sharedPeak) && isfinite(sharedPeak) && sharedPeak > 0
     normalizationPeak = sharedPeak;
 else
-    normalizationPeak = localPeak;
+    if strcmp(normMode,'XYZ') && nargin>=3 && isfield(result,'xyzReferencePeak')
+        normalizationPeak=result.xyzReferencePeak;
+    else
+        normalizationPeak = localPeak;
+    end
 end
 
 normalizedData = rawData;

@@ -16,6 +16,7 @@ report = lithography_full_path_wave_test(true);
 assert(report.pass);
 lithography_specular_gui('uitest');
 lithography_specular_gui('layouttest');
+lithography_specular_gui('snapshotstest');
 lithography_xy_display_test();
 lithography_preview_mesh_test();
 lithography_export_documentation(p,r);
@@ -49,6 +50,7 @@ lithography_full_path_display_test(fullfile(pwd,'validation_artifacts'));
 | `lithography_xy_display_test` | Four XY colour modes, unchanged raw data, faint/zero/tiny/bright signals and other masks/planes |
 | `lithography_preview_mesh_test` | Physical y coordinates, refined z mesh, image-plane continuity and observation-marker invariance |
 | GUI `uitest`, `layouttest`, `previewuitest` | Reusable windows, invalid-input recovery, layout, named planes, display caching, preview labels and scales |
+| GUI `snapshotstest` | No overview colour bars, lens icons, independent XY/XZ/plate/details snapshots, separate colour controls, rejected-input preservation and reuse only after explicit close |
 
 Historical helper entry points remain available for compatibility; many now wrap shared suites. Do not add their totals to the underlying suites as if they were independent tests.
 
@@ -98,6 +100,7 @@ save(fullfile(tempdir,'lithography-results.mat'),'p','r');
 | Per-emitter relay | `lithography_coherent_fields`, `lithography_pupil_amplitude` |
 | Propagation | `lithography_wave_propagate`, `lithography_lct`, `lithography_fresnel_same`, `lithography_projection_slice` |
 | XY display | `lithography_compute_xy_slice`, `lithography_xy_display`, `lithography_render_xy_slice` |
+| Snapshot windows | `lithography_plot_figure`: shared creation and explicit-close-only reuse, scoped to the parent simulator |
 | Preview and dimensions | `lithography_wave_yz_preview`, `lithography_preview_z_grid`, `lithography_render_yz_panel`, plane-size and mask-scale renderers |
 
 One legacy parameter needs care: `projectionFocalMm = 2*f1`. The GUI displays **Lens 1 f (mm)** and converts it on input/output. `projNA` is image-side NA in air, `reduction` is positive R, and image magnification is −1/R. Mask lengths are supplied in µm, layout distances in mm, wavelength in nm; field axes and operators use metres.

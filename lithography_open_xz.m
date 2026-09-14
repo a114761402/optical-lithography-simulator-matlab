@@ -1,5 +1,6 @@
-function fig=lithography_open_xz(params)
+function fig=lithography_open_xz(params,owner)
 % Actual y=0 intensity section, unlike the ray-density overview.
+if nargin<2,owner=[];end
 p=lithography_check_settings(params);
 % Keep the approved spatial grid; only source quadrature is reduced for preview.
 p.enforceLimits=false;p.maxSourceSamples=min(params.maxSourceSamples,25);
@@ -15,14 +16,9 @@ for k=1:numel(r.sourceWeights)
         data(:,j)=data(:,j)+r.sourceWeights(k)*abs(field(floor(p.gridSize/2)+1,:)).'.^2;
     end
 end
-persistent previewFigure
-if isempty(previewFigure) || ~isgraphics(previewFigure)
-    previewFigure=figure('Name','XZ diffraction near mask','NumberTitle','off','Tag','LithographyXZPreview',...
-        'MenuBar','none','ToolBar','none','CloseRequestFcn',@(src,~)set(src,'Visible','off'));
-else
-    clf(previewFigure);set(previewFigure,'Visible','on');
-end
-fig=previewFigure;if isprop(fig,'Theme'),set(fig,'Theme','light');end
+visibility='on';if isgraphics(owner,'figure'),visibility=get(owner,'Visible');end
+fig=lithography_plot_figure(owner,'LithographyXZPreview',...
+    'Name','XZ diffraction near mask','Visible',visibility);
 ax=axes('Parent',fig);
 imagesc(ax,zUm,r.objectAxisM*1e6,data);axis(ax,'xy');colormap(ax,'hot');colorbar(ax);
 xlabel('Distance AFTER mask (um)');ylabel('x (um), y = 0');

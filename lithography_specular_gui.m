@@ -14,6 +14,9 @@ if nargin >= 1 && ischar(varargin{1})
         case 'layouttest'
             runLayoutTest();
             return;
+        case 'snapshotstest'
+            runSnapshotTest();
+            return;
         case 'previewuitest'
             runPreviewUITest();
             return;
@@ -278,7 +281,7 @@ y = y - sectionGap;
 app.sectionTitles.views = createSectionTitle(app.controlPanel, y, 'View Controls');
 y = y - dy;
 app.controls.xzButton=createActionRowButton(app.controlPanel,'XZ diffraction near mask',...
-    @(~,~) safeUI(app.fig,@() lithography_open_xz(lithography_collect_input(guidata(app.fig)))));
+    @(~,~) safeUI(app.fig,@() lithography_open_xz(lithography_collect_input(guidata(app.fig)),app.fig)));
 y = y - dy;
 app.controls.rayDensity = createPopup(app.controlPanel, y, 'Ray density', ...
     {'Low', 'Medium', 'High', 'Ultra High'}, params.rayDensity, cb);
@@ -466,16 +469,9 @@ end
 
 function showModelDetails(fig)
 if ~isappdata(fig,'modelDetails'),return;end
-detail=[];
-if isappdata(fig,'detailsFigure'),detail=getappdata(fig,'detailsFigure');end
-if isempty(detail)||~isgraphics(detail)
-    detail=figure('Name','Model details and checks','NumberTitle','off','MenuBar','none','ToolBar','none',...
-        'Tag','LithographyDetails','Color','w','Position',initialWindowPosition(),...
-        'CloseRequestFcn',@(src,~)set(src,'Visible','off'));
-    setappdata(fig,'detailsFigure',detail);
-else
-    clf(detail);set(detail,'Visible','on');
-end
+detail=lithography_plot_figure(fig,'LithographyDetails',...
+    'Name','Model details and checks','Position',initialWindowPosition(),'Visible',get(fig,'Visible'));
+setappdata(fig,'detailsFigure',detail);
 uicontrol(detail,'Style','edit','Units','normalized','Position',[.03 .03 .94 .94],...
     'Max',100,'Min',0,'Enable','inactive','HorizontalAlignment','left','BackgroundColor','w',...
     'FontSize',11,'String',getappdata(fig,'modelDetails'));
@@ -1065,25 +1061,22 @@ if nargin >= 3 && ~isempty(varargin{1})
 end
 
 figPosition = nextSliceFigurePosition(mainFigHandle);
-fig=[];
+mode='Local linear';
 if ishghandle(mainFigHandle) && isappdata(mainFigHandle,'reusableXYFigure')
     candidate=getappdata(mainFigHandle,'reusableXYFigure');
-    if isgraphics(candidate,'figure'),fig=candidate;clf(fig);set(fig,'Visible',visibleState,'Name',sprintf('XY slice at z = %.6f mm',slice.zMm));end
+    if isgraphics(candidate,'figure') && isappdata(candidate,'xyScaleMode')
+        mode=getappdata(candidate,'xyScaleMode');
+    end
 end
-if isempty(fig)
-fig = figure( ...
+fig = lithography_plot_figure(mainFigHandle,'LithographyXYSlice', ...
     'Name', sprintf('XY slice at z = %.6f mm', slice.zMm), ...
     'NumberTitle', 'off', ...
     'Color', 'w', ...
     'Tag', 'LithographyXYSlice', ...
     'Position', figPosition, ...
-    'Visible', visibleState, 'MenuBar','none','ToolBar','none', ...
-    'CloseRequestFcn',@(src,~) set(src,'Visible','off'));
+    'Visible', visibleState);
 if ishghandle(mainFigHandle),setappdata(mainFigHandle,'reusableXYFigure',fig);end
-end
 if isprop(fig,'Theme'),set(fig,'Theme','light');end
-mode='Local linear';
-if isappdata(fig,'xyScaleMode'),mode=getappdata(fig,'xyScaleMode');end
 lithography_render_xy_slice(fig,slice,mode);
 end
 
@@ -1093,18 +1086,11 @@ if isempty(app.lastResult)||~samePhysicsSettings(p,app.lastParams)
     updatePlots(mainFig);app=guidata(mainFig);
 end
 if isempty(app.lastResult),return;end
-f=[];
-if isappdata(mainFig,'maskScaleFigure')
-    candidate=getappdata(mainFig,'maskScaleFigure');
-    if isgraphics(candidate),f=candidate;clf(f);set(f,'Visible',get(mainFig,'Visible'));end
-end
-if isempty(f)
-    f=figure('Name','Mask plate and local calculation region','NumberTitle','off',...
-        'Tag','LithographyMaskScale','Position',[40 80 850 470],...
-        'Visible',get(mainFig,'Visible'),'MenuBar','none','ToolBar','none',...
-        'CloseRequestFcn',@(src,~)set(src,'Visible','off'));
-    setappdata(mainFig,'maskScaleFigure',f);
-end
+position=nextSliceFigurePosition(mainFig);position(3:4)=[850 470];
+f=lithography_plot_figure(mainFig,'LithographyMaskScale',...
+    'Name','Mask plate and local calculation region','Position',position,...
+    'Visible',get(mainFig,'Visible'));
+setappdata(mainFig,'maskScaleFigure',f);
 lithography_render_mask_scale(f,p,app.lastResult);
 end
 
@@ -1514,9 +1500,7 @@ catch err
         ax=app.(name{1});cla(ax);title(ax,'Not calculated: check settings');
     end
     for ax=app.axElements,cla(ax);title(ax,'');end
-    if isappdata(fig,'reusableXYFigure')
-        xy=getappdata(fig,'reusableXYFigure');if isgraphics(xy),set(xy,'Visible','off');end
-    end
+    % Independent snapshot windows retain their previously valid data.
     set(app.controls.infoBadge,'String','Settings rejected','BackgroundColor',[1,.8,.75]);
     set(app.controls.infoBox,'String',err.message,'BackgroundColor',[1,.9,.85]);
     setappdata(fig,'modelDetails',err.message);
@@ -1531,8 +1515,53 @@ if isgraphics(fig)
 end
 end
 
+function runSnapshotTest()
+app=buildGui('off');cleanup=onCleanup(@()cleanupSnapshotTest(app.fig));
+app=guidata(app.fig);p=app.lastParams;r=app.lastResult;
+assert(isempty(findall(app.fig,'Type','ColorBar')));
+assert(numel(findall(app.fig,'Tag','LensIcon'))==2);
+s=lithography_compute_xy_slice(p,r,r.geometry.zField);
+first=showXYSliceFigure(s,app.fig,'on');before=getappdata(first,'xySliceData');
+im=findall(first,'Type','image');pixels=get(im,'CData');name=get(first,'Name');
+second=showXYSliceFigure(lithography_compute_xy_slice(p,r,r.geometry.zImage),app.fig,'off');
+assert(first~=second && isgraphics(first) && isequal(getappdata(first,'xySliceData'),before));
+assert(strcmp(get(first,'Visible'),'on'),'New XY request hid the earlier snapshot.');
+set(first,'Visible','off'); % Test-hidden is not explicitly closed or reusable.
+assert(isequal(get(im,'CData'),pixels) && strcmp(get(first,'Name'),name));
+popup=findall(second,'Tag','XYScale');set(popup,'Value',4);cb=get(popup,'Callback');cb(popup,[]);
+assert(strcmp(getappdata(first,'xyScaleMode'),'Local linear'),'Snapshots share colour controls.');
+third=showXYSliceFigure(s,app.fig,'off');assert(third~=first && third~=second);
+assert(strcmp(getappdata(third,'xyScaleMode'),'XYZ log (dB)'));
+showMaskScale(app.fig);a=getappdata(app.fig,'maskScaleFigure');
+showMaskScale(app.fig);b=getappdata(app.fig,'maskScaleFigure');assert(a~=b && isgraphics(a));
+showModelDetails(app.fig);a=getappdata(app.fig,'detailsFigure');
+showModelDetails(app.fig);b=getappdata(app.fig,'detailsFigure');assert(a~=b && isgraphics(a));
+% Test actual XZ generation twice (one emitter for a bounded test runtime).
+q=p;q.sourceType='Point';a=lithography_open_xz(q,app.fig);
+im=findall(a,'Type','image');pixels=get(im,'CData');
+b=lithography_open_xz(q,app.fig);assert(a~=b && isequal(get(im,'CData'),pixels));
+% Rejected input must not hide an existing valid snapshot.
+set(first,'Visible','on');set(app.controls.projNA,'String','0.9');updatePlots(app.fig);
+assert(strcmp(get(first,'Visible'),'on') && isequal(getappdata(first,'xySliceData'),before));
+set(first,'Visible','off');
+set(app.controls.projNA,'String',num2str(p.projNA));updatePlots(app.fig);
+assert(isempty(get(get(app.axYZ,'Title'),'String')),'Stale error title survived recovery.');
+cb=get(second,'CloseRequestFcn');cb(second,[]);
+reused=showXYSliceFigure(s,app.fig,'off');assert(reused==second && isgraphics(first));
+exportapp(app.fig,fullfile(tempdir,'lithography_ui_cleanup.png'));
+fprintf('UI snapshots: no overview bars, two lens icons, independent XY/XZ/plate/details windows, per-window scales, error preservation and closed-only reuse passed.\n');
+end
+
+function cleanupSnapshotTest(owner)
+figs=findall(groot,'Type','figure');
+for k=1:numel(figs)
+    if isequal(getappdata(figs(k),'plotOwner'),owner),delete(figs(k));end
+end
+if isgraphics(owner),delete(owner);end
+end
+
 function runUITest()
-app=buildGui('off');cleanup=onCleanup(@() delete(app.fig));
+app=buildGui('off');cleanup=onCleanup(@() cleanupSnapshotTest(app.fig));
 app=guidata(app.fig);assert(~isempty(app.lastResult),'Default settings rejected');
 p=app.lastParams;r=app.lastResult;
 assert(p.xySliceZMm==r.geometry.zImage && get(app.controls.slicePlane,'Value')==7,'GUI startup must select the image plane.');
@@ -1563,7 +1592,9 @@ for k=1:20
     callback=get(f,'CloseRequestFcn');callback(f,[]);
     assert(isgraphics(f) && strcmp(get(f,'Visible'),'off'));
 end
-assert(numel(findall(groot,'Tag','LithographyXYSlice'))==1,'Slice windows accumulated');
+figs=findall(groot,'Tag','LithographyXYSlice');owned=0;
+for j=1:numel(figs),owned=owned+isequal(getappdata(figs(j),'plotOwner'),app.fig);end
+assert(owned==1,'Explicitly closed test windows were not reused.');
 delete(f);
 set(app.controls.projNA,'String','0.9');updatePlots(app.fig);
 state=guidata(app.fig);assert(isempty(state.lastResult),'Stale result survived invalid input');
@@ -1573,7 +1604,7 @@ fprintf('GUI guards, recovery and 20 hide/reuse cycles passed. Native OS close-b
 end
 
 function runLayoutTest()
-app=buildGui('off');cleanup=onCleanup(@()delete(app.fig));
+app=buildGui('off');cleanup=onCleanup(@()cleanupSnapshotTest(app.fig));
 app=guidata(app.fig);assert(~isempty(app.lastResult),'Default UI calculation failed.');
 original=app.lastParams;baseline=app.lastResult;count=0;
 assert(str2double(get(app.controls.projectionFocalMm,'String'))==original.projectionFocalMm/2);
@@ -1605,7 +1636,8 @@ calls=app.calculationCount;
 setPopupValue(app.controls.intensityNorm,'Local');updatePlots(app.fig);
 app=guidata(app.fig);assert(app.calculationCount==calls,'Display normalization repeated the solver.');
 assert(isequal(app.lastResult.imageRaw,baseline.imageRaw),'UI change altered raw physics.');
-assert(numel(findall(app.fig,'Type','ColorBar'))==4,'Overview colorbars accumulated after redraw.');
+assert(isempty(findall(app.fig,'Type','ColorBar')),'Overview colorbars should be absent.');
+assert(numel(findall(app.fig,'Tag','LensIcon'))==2,'Missing lens-shaped icons.');
 for choice=2:7
     set(app.controls.slicePlane,'Value',choice);selectSlicePlane(app.fig);
     p=lithography_collect_input(guidata(app.fig));
@@ -1641,7 +1673,7 @@ assert(all(max(baseline(:,between),[],1)>0),'Default relay contains an unexpecte
 for mode={'Local / z','XYZ linear','XYZ log (dB)'}
     setPopupValue(app.controls.previewScale,mode{1});changePreviewScale(app.fig);
     state=guidata(app.fig);assert(state.calculationCount==calls,'Preview scale repeated optics.');
-    assert(numel(findall(app.fig,'Type','ColorBar'))==5,'Colorbars accumulated after a scale change.');
+    assert(numel(findall(app.fig,'Type','ColorBar'))==1,'Only the YZ scale bar should remain.');
     assert(isequal(state.lastYZ.rawIntensity,baseline),'Display transform changed physical intensity.');
     surfaceHandle=findobj(app.axYZ,'Tag','WavePreview');values=get(surfaceHandle,'CData');
     assert(all(isfinite(values(:))),'Nonfinite preview display.');

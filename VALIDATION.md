@@ -2,6 +2,19 @@
 
 [README](README.md) · [How to run the tests](docs/DEVELOPMENT.md) · [Model assumptions](FULL_PATH_MODEL.md)
 
+## Unreleased UI refinement — 2026-09-14
+
+MATLAB R2026a checks for the requested overview/window cleanup:
+
+- `snapshotstest`: no overview colour bars, two lens-shaped icons, independent XY/XZ/plate/details windows, per-window colour controls, unchanged earlier data, preservation after invalid input, and reuse only after explicit close passed.
+- `layouttest`: all 132 size/shape/page checks passed; display changes retained the same raw optical results.
+- `lithography_xy_display_test`: four controls, 20 numerical corners and 16 mask/plane cases passed, with unchanged raw data.
+- `previewuitest`: shared z alignment at three window sizes, 101 nonzero relay columns, three raw-data-preserving scales, dark views and seven pupil shapes passed; only the YZ colour bar remains in the main window.
+- `uitest`: 20 explicit-close/reuse cycles and invalid-input recovery passed, also with an unrelated pre-existing figure that remained untouched.
+- The exported GUI was visually inspected. The four overview bars are absent, lens labels remain readable, and a stale error heading after recovery was found, corrected and retested.
+
+Only rendering and auxiliary-window behaviour changed; the optical operators and default parameters are unchanged. These local changes are separate from the published v0.2.0 record below.
+
 ## Public release verification — v0.2.0
 
 The following were rerun on 2026-09-14 in MATLAB R2026a on macOS while preparing the public documentation:

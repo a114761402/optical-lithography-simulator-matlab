@@ -24,12 +24,6 @@ if isfield(result,'maskIllumination')
     ylabel(axHandle,'y / source unit','FontSize',9);
 end
 set(axHandle, 'FontSize', 9);
-cb = colorbar(axHandle, 'eastoutside');
-setappdata(axHandle,'colorbarHandle',cb);
-cb.Label.String = '';
-cb.Ticks = [0 1];
-cb.FontSize = 8;
-cb.Label.FontSize = 8;
 end
 
 function showMask(axHandle, result)
@@ -44,12 +38,6 @@ title(axHandle, 'Mask patch (amplitude)', 'FontSize', 10);
 xlabel(axHandle, 'x (um)', 'FontSize', 9);
 ylabel(axHandle, 'y (um)', 'FontSize', 9);
 set(axHandle, 'FontSize', 9);
-cb = colorbar(axHandle, 'eastoutside');
-setappdata(axHandle,'colorbarHandle',cb);
-cb.Label.String = '';
-cb.Ticks = [0 1];
-cb.FontSize = 8;
-cb.Label.FontSize = 8;
 end
 
 function showPupil(axHandle, result)
@@ -66,12 +54,6 @@ title(axHandle, 'Pupil (local scale)', 'FontSize', 10);
 xlabel(axHandle, 'x (mm)', 'FontSize', 9);
 ylabel(axHandle, 'y (mm)', 'FontSize', 9);
 set(axHandle, 'FontSize', 9);
-cb = colorbar(axHandle, 'eastoutside');
-setappdata(axHandle,'colorbarHandle',cb);
-cb.Label.String = '';
-cb.Ticks = [0 1];
-cb.FontSize = 8;
-cb.Label.FontSize = 8;
 end
 
 function showImage(axHandle, result)
@@ -87,12 +69,6 @@ title(axHandle, 'Image (local scale)', 'FontSize', 10);
 xlabel(axHandle, 'x (um)', 'FontSize', 9);
 ylabel(axHandle, 'y (um)', 'FontSize', 9);
 set(axHandle, 'FontSize', 9);
-cb = colorbar(axHandle, 'eastoutside');
-setappdata(axHandle,'colorbarHandle',cb);
-cb.Label.String = '';
-cb.Ticks = [0 1];
-cb.FontSize = 8;
-cb.Label.FontSize = 8;
 end
 
 function clearPanel(axHandle)

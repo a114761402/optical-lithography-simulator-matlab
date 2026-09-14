@@ -1,5 +1,12 @@
 # Changes
 
+## Unreleased
+
+- Removed colour bars from the four overview panels; retained XY/YZ scale bars and unchanged normalization.
+- Replaced the Lens 1/2 infinity glyphs with schematic biconvex icons, retaining ideal/unbounded labels.
+- New XY, XZ, plate-scale and model-details requests preserve open snapshots. Only explicitly closed windows may be reused; rejected input no longer hides a previously valid XY snapshot.
+- Added focused snapshot/visual regression coverage. No optical calculation changes.
+
 ## v0.2.0 — 2026-09-14
 
 ### Connected wave model

@@ -10,6 +10,7 @@ cla(axHandle);
 set(axHandle, 'Color', 'w');
 
 if nargin < 2 || isempty(yzData)
+    title(axHandle,'');xlabel(axHandle,'');ylabel(axHandle,'');
     colorbar(axHandle,'off');
     axis(axHandle, [0 1 0 1]);
     axis(axHandle, 'off');

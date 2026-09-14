@@ -49,7 +49,7 @@ Lens 1 has f₁ = 100 mm and Lens 2 has f₂ = 25 mm. The 4f relay requires mask
 
 Named selections such as **Image** follow geometry changes. **Custom z** stays at its absolute coordinate. Defocus moves the observation plane relative to nominal focus; it does not insert an optical surface. Exact condenser, mask and pupil slices show the exit side.
 
-The geometry drawing exaggerates transverse sizes. The relay lenses have no mechanical edge in this model; **∞** means an unbounded ideal lens, not a measured diameter. The finite pupil still limits transmitted spatial frequencies.
+The geometry drawing exaggerates transverse sizes. Lens 1 and Lens 2 use schematic biconvex icons, not physical lens profiles or measured diameters. The labels still say **Ideal, unbounded**: the finite pupil, not a modelled mechanical lens edge, limits transmitted spatial frequencies.
 
 ## What each picture means
 
@@ -65,6 +65,10 @@ The geometry drawing exaggerates transverse sizes. The relay lenses have no mech
 | XZ | Additional reduced-source propagation preview |
 
 YZ is not the full beam envelope. Grey regions are **outside the sampled transverse windows**, not opaque material. Interpolation joins calculated z samples; it is not an extra calculation at every screen pixel. Thin elements have no drawn physical thickness. Micrometre features can disappear visually when the millimetre-scale path is shown.
+
+The four small overview panels omit colour bars to reduce clutter; their normalization is unchanged. XY and YZ retain their scale bars for quantitative reading.
+
+**Show XY**, XZ, **Plate vs local pattern** and **Model details** open independent snapshots. Existing windows retain their data and individual colour controls when another plot is requested, settings change or input is rejected. A new XY window starts with the latest XY window's colour-mode choice. Closing a snapshot hides it safely and makes that closed window eligible for reuse; an open snapshot is never recycled. **Hide extra views** remains an explicit action to hide auxiliary windows.
 
 ### Colour scales
 

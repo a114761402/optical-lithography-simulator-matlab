@@ -1,6 +1,12 @@
 # Validation record — connected full-path model
 
-[README](README.md) · [How to run the tests](docs/DEVELOPMENT.md) · [Model assumptions](FULL_PATH_MODEL.md)
+[README](../README.md) · [How to run the tests](DEVELOPMENT.md) · [Model assumptions](FULL_PATH_MODEL.md)
+
+## Folder organization — 2026-09-15
+
+After grouping the files, MATLAB R2026a passed root-GUI startup with a fresh path, all 128 independent regression checks, and a scripted image/XY agreement check from a different current folder. A clean copy in a directory containing spaces also passed helper lookup and exported its documentation figure to that copy's `docs/assets/` folder.
+
+Content hashes confirmed that 65 moved MATLAB helpers and all moved local output files were unchanged. The export utility's destination was adjusted for its new `tools/` location, and the root GUI now calls `lithography_setup`. Relative documentation links were checked after relocation. Run `lithography_setup` before direct helper/test commands.
 
 ## Unreleased UI refinement — 2026-09-14
 
@@ -115,6 +121,7 @@ The 2% illumination preflight is a **necessary local sampling check**, not a con
 
 ## Reproduce and inspect
 
+    projectRoot = lithography_setup();
     report = lithography_full_path_wave_test(true); assert(report.pass)
     lithography_illumination_corner_tests()
     lithography_settings_tests(true)
@@ -122,6 +129,6 @@ The 2% illumination preflight is a **necessary local sampling check**, not a con
     lithography_physicality_report(true)
     lithography_nearfield_shape_test(true)
     lithography_specular_gui('uitest')
-    lithography_full_path_display_test(fullfile(pwd,'validation_artifacts'))
+    lithography_full_path_display_test(fullfile(projectRoot,'outputs','validation'))
 
-`lithography_full_path_display_test` creates full-path XY/preview figures and `full-path-result.mat` in the selected output directory. Other report functions return MATLAB structures; save those explicitly if needed. Earlier local runs also saved report files, but these are not shipped or required. Figures use local scaling for shape comparison and label that choice; propagation retains raw intensities. See [the testing guide](docs/DEVELOPMENT.md) for the complete current command list.
+`lithography_full_path_display_test` creates full-path XY/preview figures and `full-path-result.mat` in the selected output directory. Other report functions return MATLAB structures; save those explicitly if needed. Earlier local runs also saved report files, but these are not shipped or required. Figures use local scaling for shape comparison and label that choice; propagation retains raw intensities. See [the testing guide](DEVELOPMENT.md) for the complete current command list.

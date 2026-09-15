@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Grouped MATLAB helpers into `src/config`, `src/optics` and `src/ui`, checks into `tests`, and the export utility into `tools`. The root GUI initializes its paths automatically; `lithography_setup` supports direct helper/test use.
+- Moved model/validation documents into `docs` and existing local results into `outputs`, preserving output file contents and updating documentation links.
 - Removed colour bars from the four overview panels; retained XY/YZ scale bars and unchanged normalization.
 - Replaced the Lens 1/2 infinity glyphs with schematic biconvex icons, retaining ideal/unbounded labels.
 - New XY, XZ, plate-scale and model-details requests preserve open snapshots. Only explicitly closed windows may be reused; rejected input no longer hides a previously valid XY snapshot.
@@ -41,7 +43,7 @@
 
 ### Known limits
 
-This remains a scalar, low-NA teaching model with ideal lenses and a Gaussian condenser. It excludes thick masks, polarization, substrate/resist physics and real lens aberrations. Input admission is not a convergence guarantee for every case. Native MATLAB/macOS close-button crash elimination is not established by callback tests. See [VALIDATION.md](VALIDATION.md).
+This remains a scalar, low-NA teaching model with ideal lenses and a Gaussian condenser. It excludes thick masks, polarization, substrate/resist physics and real lens aberrations. Input admission is not a convergence guarantee for every case. Native MATLAB/macOS close-button crash elimination is not established by callback tests. See [VALIDATION.md](docs/VALIDATION.md).
 
 ## Initial public version
 

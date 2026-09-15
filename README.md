@@ -31,6 +31,26 @@ The app starts at **Image, z = 450 mm**. The lower-right panel should show three
 - Physical-coordinate XY slices and reduced-source YZ/XZ previews.
 - Independent display scales for weak signals, plus sampling and model-validity checks.
 
+## Folder layout
+
+```text
+optical-lithography-simulator-matlab/
+├── lithography_specular_gui.m   Main app — run this
+├── lithography_setup.m          Set up paths for scripts and tests
+├── src/
+│   ├── config/                  Defaults, presets and settings checks
+│   ├── optics/                  Source, diffraction and imaging calculations
+│   └── ui/                      Plotting, editors and window helpers
+├── tests/                       Numerical and display checks
+│   └── fixtures/                Mathematical benchmark settings
+├── tools/                       Documentation figure generator
+├── docs/                        Guides, equations and validation record
+│   └── assets/                  Published example figures
+└── outputs/                     Local screenshots, data and previous results
+```
+
+The GUI sets up its paths automatically. For direct use of helper functions or tests, run `lithography_setup` once in each MATLAB session. The setup uses the project's location and also works after changing the current folder. Existing output files have been grouped under `outputs/`; they keep their original contents.
+
 ## A meaningful starting scale
 
 | Quantity | Startup value |
@@ -53,8 +73,8 @@ The calculation is an **isolated local pattern**, not the whole 50.8 mm plate. T
 | Read | What it explains |
 |---|---|
 | [User guide](docs/USER_GUIDE.md) | Controls, units, sensible experiments, input limits and common confusing pictures |
-| [Model and equations](FULL_PATH_MODEL.md) | Source coherence, propagation operators, pupil filtering, coordinates and approximations |
-| [Validation record](VALIDATION.md) | Measured numerical results, test scope and historical reference cases |
+| [Model and equations](docs/FULL_PATH_MODEL.md) | Source coherence, propagation operators, pupil filtering, coordinates and approximations |
+| [Validation record](docs/VALIDATION.md) | Measured numerical results, test scope and historical reference cases |
 | [Testing and development](docs/DEVELOPMENT.md) | Reproduce the checks, generate the figure and locate the implementation |
 | [Changes](CHANGELOG.md) | What changed since the initial public version |
 
@@ -63,6 +83,7 @@ The calculation is an **isolated local pattern**, not the whole 50.8 mm plate. T
 From the project folder in MATLAB:
 
 ```matlab
+lithography_setup
 lithography_practical_defaults_test       % Actual startup, convergence and corner cases
 lithography_full_path_wave_test(true)     % Independent numerical reference suites
 lithography_specular_gui('selftest')      % Reference regression + GUI construction
@@ -71,6 +92,7 @@ lithography_specular_gui('selftest')      % Reference regression + GUI construct
 These are real calculations and may take several minutes. For a custom scripted case:
 
 ```matlab
+lithography_setup;
 p = lithography_default_params();
 p.sourceType = 'Point';
 p = lithography_check_settings(p);       % Validate and plan sampling first
@@ -91,7 +113,7 @@ xlabel('x (um)'); ylabel('y (um)'); title('Raw image intensity');
 
 ## Physical background
 
-The propagation follows scalar diffraction and paraxial imaging concepts described by [TU Delft](https://qiweb.tudelft.nl/aoi/coherentimaging/coherentimaging/). The numerical references include [Shen and Wang's FFT Rayleigh–Sommerfeld integration](https://pubmed.ncbi.nlm.nih.gov/16523770/) and [Matsushima and Shimobaba's band-limited angular-spectrum method](https://pubmed.ncbi.nlm.nih.gov/19997186/). See the [model document](FULL_PATH_MODEL.md#references) for context and explicit differences from commercial optics.
+The propagation follows scalar diffraction and paraxial imaging concepts described by [TU Delft](https://qiweb.tudelft.nl/aoi/coherentimaging/coherentimaging/). The numerical references include [Shen and Wang's FFT Rayleigh–Sommerfeld integration](https://pubmed.ncbi.nlm.nih.gov/16523770/) and [Matsushima and Shimobaba's band-limited angular-spectrum method](https://pubmed.ncbi.nlm.nih.gov/19997186/). See the [model document](docs/FULL_PATH_MODEL.md#references) for context and explicit differences from commercial optics.
 
 ## Questions, bugs and reuse
 

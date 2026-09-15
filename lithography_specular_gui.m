@@ -6,6 +6,8 @@
 %   lithography_specular_gui
 %   lithography_specular_gui('selftest')
 
+lithography_setup();
+
 if nargin >= 1 && ischar(varargin{1})
     switch lower(varargin{1})
         case 'uitest'

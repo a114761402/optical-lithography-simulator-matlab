@@ -1,6 +1,6 @@
 # User guide
 
-[README](../README.md) · [Equations](../FULL_PATH_MODEL.md) · [Validation](../VALIDATION.md)
+[README](../README.md) · [Equations](FULL_PATH_MODEL.md) · [Validation](VALIDATION.md)
 
 ## First experiment
 
@@ -87,11 +87,11 @@ A finite pupil filters spatial detail. Exact focus cannot recover diffraction or
 
 For an on-axis coherent plane-wave estimate, the object-side cutoff is `NA_image / (R * wavelength)`. The default 20 µm pitch has first-order frequency 0.05 cycles/µm, below the cutoff of about 0.103 cycles/µm. This is a useful check, not the complete finite, partially coherent grating calculation. The default test also confirms three image peaks at 5 µm spacing.
 
-Near a mask, diffraction rounds edges and produces fringes without a lens. A rough scale is `z ~ a² / wavelength`, where `a` is the feature scale being inspected. There is no universal distance at which the mask vanishes: contrast, feature size and coherence matter, and periodic gratings can form Talbot revivals. Use XY slices and convergence tests instead of treating this estimate as a rule. See the [diffraction references](../FULL_PATH_MODEL.md#references).
+Near a mask, diffraction rounds edges and produces fringes without a lens. A rough scale is `z ~ a² / wavelength`, where `a` is the feature scale being inspected. There is no universal distance at which the mask vanishes: contrast, feature size and coherence matter, and periodic gratings can form Talbot revivals. Use XY slices and convergence tests instead of treating this estimate as a rule. See the [diffraction references](FULL_PATH_MODEL.md#references).
 
 ## Controls and admission limits
 
-[lithography_check_settings.m](../lithography_check_settings.m) selects the grid and rejects unsupported combinations. The solver also checks incident-illumination quadrature before the relay sum. Invalid settings clear stale optical results.
+[lithography_check_settings.m](../src/config/lithography_check_settings.m) selects the grid and rejects unsupported combinations. The solver also checks incident-illumination quadrature before the relay sum. Invalid settings clear stale optical results.
 
 | Control | Range or coupled condition |
 |---|---|

@@ -1,6 +1,6 @@
 # Full optical path: model contract
 
-[README](README.md) · [User guide](docs/USER_GUIDE.md) · [Propagation equations](docs/EQUATIONS.md) · [Validation](VALIDATION.md)
+[README](../README.md) · [User guide](USER_GUIDE.md) · [Propagation equations](EQUATIONS.md) · [Validation](VALIDATION.md)
 
 This is a **scalar teaching model**, not a measured-source reconstruction or a Maxwell solution of real lenses and mask materials. The GUI uses this model by default. No geometrical illumination image is substituted for an XY wave calculation.
 

@@ -1,16 +1,17 @@
 # Testing and development
 
-[README](../README.md) · [Validation record](../VALIDATION.md) · [Model](../FULL_PATH_MODEL.md)
+[README](../README.md) · [Validation record](VALIDATION.md) · [Model](FULL_PATH_MODEL.md)
 
 ## Environment
 
 The release checks were run in MATLAB R2026a on macOS. Dependency analysis with `matlab.codetools.requiredFilesAndProducts('lithography_specular_gui.m')` reports MATLAB only. Other MATLAB/OS combinations remain unverified. Tests that create figures need MATLAB graphics support; run GUI suites in a separate session if you have unsaved simulator work.
 
-Run commands from the repository root. There is no external dataset, Python package, web service or credential requirement. Numerical suites can take several minutes; GUI layout and extended sweeps add further time.
+Start from the repository root and run `lithography_setup` before calling helper functions or tests directly. Launching `lithography_specular_gui` performs setup automatically. Setup adds only the explicit code/test/tool directories to the current MATLAB session; it does not save the global MATLAB path or add generated output folders. There is no external dataset, Python package, web service or credential requirement. Numerical suites can take several minutes; GUI layout and extended sweeps add further time.
 
 ## Recommended release check
 
 ```matlab
+lithography_setup;
 [p,r] = lithography_practical_defaults_test();
 report = lithography_full_path_wave_test(true);
 assert(report.pass);
@@ -27,6 +28,7 @@ The practical-default test asserts results directly and optionally returns param
 ### Extended checks
 
 ```matlab
+projectRoot = lithography_setup();
 report = lithography_settings_tests(true); assert(report.pass);
 report = lithography_limit_tests(); assert(report.pass);
 report = lithography_illumination_corner_tests(); assert(report.pass);
@@ -34,7 +36,7 @@ report = lithography_physicality_report(true); assert(report.pass);
 report = lithography_nearfield_shape_test(true); assert(report.pass);
 lithography_specular_gui('previewuitest');
 lithography_display_test();
-lithography_full_path_display_test(fullfile(pwd,'validation_artifacts'));
+lithography_full_path_display_test(fullfile(projectRoot,'outputs','validation'));
 ```
 
 | Suite | What it checks |
@@ -78,6 +80,7 @@ The default refinement metric is relative L2 intensity difference on a common im
 ## Generate documentation figures
 
 ```matlab
+lithography_setup;
 lithography_export_documentation();   % Recalculate the actual startup
 ```
 
@@ -90,6 +93,8 @@ save(fullfile(tempdir,'lithography-results.mat'),'p','r');
 ```
 
 ## Code map
+
+The main GUI and path setup are in the root. Calculation helpers are in `src/optics/`, configuration and presets in `src/config/`, and renderers/editors in `src/ui/`. Test functions and reporting suites are in `tests/`, with benchmark settings in `tests/fixtures/`. The export utility is in `tools/`. Function names are unchanged; see the [folder overview](../README.md#folder-layout).
 
 | Area | Main files |
 |---|---|

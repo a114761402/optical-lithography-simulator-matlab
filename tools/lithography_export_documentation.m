@@ -7,7 +7,7 @@ if nargin==0
 elseif nargin~=2
     error('Lithography:Documentation','Supply both parameters and results, or neither.');
 end
-outputDir=fullfile(fileparts(mfilename('fullpath')),'docs','assets');
+outputDir=fullfile(lithography_setup(),'docs','assets');
 if ~isfolder(outputDir),mkdir(outputDir);end
 outputFile=fullfile(outputDir,'default-imaging.png');
 fig=figure('Visible','off','Color','w','Position',[40 40 1380 480]);

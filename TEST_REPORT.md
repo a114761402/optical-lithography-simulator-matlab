@@ -362,3 +362,10 @@ These are desktop browser viewport simulations, not physical iOS/Android touch o
 - At 1228px the detail switch and compute button share the same vertical bounds, and both slice/wave compute right edges are 839.484px. Browser reported no warnings/errors.
 - 24 existing targeted tests passed (quality policy, observation lifecycle, view isolation, positions, desktop path and compact bench). No optical solver changes; no new accuracy/performance claim.
 - Screenshots: .sites-runtime/polish-phone.png and .sites-runtime/polish-desktop.png. Responsive emulation, not physical-phone testing.
+
+## 2026-09-27 — Lighter aperture and closer position control
+
+- Mobile position trigger sits next to Observation screen instead of the far right.
+- Both beam diagrams use thin aperture blades, blue when selected, without a filled selection rectangle. Transparent hit targets and annular obstruction are preserved.
+- Browser checks at 320×740, 611×836 and 1176×836: no horizontal overflow; long micrometre position labels fit, disclosure opens and mobile aperture still opens its editor. No browser warnings/errors. Seven existing compact/path tests passed; solver unchanged.
+- Screenshots: .sites-runtime/aperture-phone.png and .sites-runtime/aperture-desktop.png.

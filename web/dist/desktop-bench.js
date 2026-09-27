@@ -1,5 +1,5 @@
-import {RAY_BLUE,RAY_YELLOW} from './light-palette.js';
-import {pathFrame} from './path-layout.js';
+import {RAY_BLUE,RAY_YELLOW} from './light-palette.js?v=20260927-illumination2';
+import {pathFrame} from './path-layout.js?v=20260927-illumination2';
 // Responsive drawing coordinates keep the physical z scale without stretching
 // lenses when a wide monitor offers more horizontal space.
 export function desktopBench({width,geometry:g,params:p,components,selected,screen,pupilValue,mode,defs,lensDiagram,maskDiagram,pictures,observations=[],activeId='D'}){
@@ -24,7 +24,7 @@ export function desktopBench({width,geometry:g,params:p,components,selected,scre
     else if(key==='lens1'||key==='lens2')shape=lensDiagram(key==='lens1'?64:54,key==='lens1'?13:10);
     else if(key==='mask')shape=`<g transform="skewY(-9) scale(.29,1.1)">${maskDiagram()}</g>`;
     else if(key==='pupil')shape=`<rect x="-14" y="-55" width="28" height="110" rx="2" fill="#080b0e"/><image href="${pictures.pupil}" x="-11" y="-49" width="22" height="98" preserveAspectRatio="none"/>`;
-    else shape=`<g transform="skewY(18)"><rect x="-12" y="-32" width="26" height="64" fill="#ffffff" stroke="#8ba7c0" stroke-width="2"/></g>`;
+    else shape=`<g transform="skewY(18)"><rect x="-12" y="-32" width="26" height="64" fill="#ffffff" stroke="#8ba7c0" stroke-width="2"/>${pictures.image?`<image data-fixed-image-preview href="${pictures.image}" x="-10" y="-30" width="22" height="60" preserveAspectRatio="none"/>`:""}</g>`;
     svg+=`<g data-label="${key}" class="bench-label ${active?'selected':''}" style="cursor:pointer"><path d="M${xx} 65V52L${labels[i]} 41" fill="none" stroke="#c6d4e1"/><text class="component-index" x="${labels[i]}" y="14" text-anchor="${i===0?'start':i===6?'end':'middle'}">0${i+1}</text><text class="component-label" x="${labels[i]}" y="33" text-anchor="${i===0?'start':i===6?'end':'middle'}">${name}</text></g><g class="component ${active?'selected':''}" role="button" tabindex="0" data-component="${key}" aria-label="Select ${name}" aria-pressed="${active}" transform="translate(${xx},${C})"><rect class="selection" x="${-hit}" y="-55" width="${2*hit}" height="115" rx="6" fill="#e3efff" stroke="#80b0ed" stroke-dasharray="3 4"/><g transform="scale(${sx},.66)">${shape}<path d="M0 ${key==='image'?32:66}V90M-17 90h34" fill="none" stroke="#9badbc" stroke-width="2"/></g><rect x="${-hit}" y="-57" width="${2*hit}" height="117" fill="transparent"/></g>`;
   });
   const positionsToDraw=observations.length?observations:screen!==null?[{id:activeId,z:screen}]:[];

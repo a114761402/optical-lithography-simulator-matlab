@@ -2,14 +2,14 @@ export function setupObservationUI(getPlanes,{onSelect,onRemove,onAdd,onUndo,onR
   const $=id=>document.getElementById(id),grid=document.createElement('div');
   grid.id='observation-grid';grid.setAttribute('role','group');grid.setAttribute('aria-label','Observation positions');
   $('observation-layout').before(grid);
-  const preset=document.createElement('div');preset.id='reference-preset-row';preset.innerHTML='<span>Explore any position</span><button type="button" id="reference-positions" class="secondary" title="Restore Source, Mask, Aperture and Image positions">Default positions</button>';
+  const preset=document.createElement('div');preset.id='reference-preset-row';preset.innerHTML='<span>Explore any position</span><button type="button" id="reference-positions" class="secondary" title="Restore Pupil, Mask, Aperture and Image positions">Default positions</button>';
   $('position-controls').before(preset);$('reference-positions').onclick=onReference;
   const toolbar=document.createElement('div');toolbar.className='observation-toolbar';
   toolbar.innerHTML='<button id="add-position" class="secondary" type="button">+ Add position</button><span id="removed-position" role="status"></span><button id="undo-position" class="quiet" type="button" hidden>Undo</button>';
   toolbar.prepend($('reference-positions'));
   $('observation-title').closest('.observation-heading').append(toolbar);$('add-position').onclick=onAdd;$('undo-position').onclick=onUndo;
   const empty=document.createElement('p');empty.id='observation-empty';empty.textContent='Add a position to explore the light.';grid.after(empty);
-  const active=document.createElement('p');active.id='active-observation';active.setAttribute('aria-live','polite');document.querySelector('#position-controls .screen-track').before(active);
+  const active=document.createElement('p');active.id='active-observation';active.setAttribute('aria-live','polite');$('reference-preset-row').append(active);
   const badge=document.createElement('span');badge.id='observation-state';badge.className='slice-state';$('observation-label').after(badge);
   $('observation-title').innerHTML='<span class="wide-label">Key positions</span><span class="phone-label">Observation screen</span>';
   return {

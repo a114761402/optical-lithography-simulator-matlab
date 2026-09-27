@@ -1,5 +1,5 @@
-import {defaults} from './optics.js';
-import {STARTUP_PARAMS} from './cache.js';
+import {defaults} from './optics.js?v=20260927-illumination2';
+import {STARTUP_PARAMS} from './cache.js?v=20260927-illumination2';
 
 // Illumination presets change the source distribution, not the projection stop.
 export function experiment(name){

@@ -1,4 +1,4 @@
-import {defaults,validate,geometry,axis,makeMask,sourceSamples,gaussianBeam,gaussianMode,lct,pupilValue,maximum} from './optics.js';
+import {defaults,validate,geometry,axis,makeMask,sourceSamples,gaussianBeam,gaussianMode,lct,pupilValue,maximum} from './optics.js?v=20260927-illumination2';
 // Evaluate the same discrete mask Fourier integral on a small, dense physical
 // pupil window. No global padding or interpolation of the optical field.
 export function densePupil(params,{size=257,progress=()=>{}}={}){

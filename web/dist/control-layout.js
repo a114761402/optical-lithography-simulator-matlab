@@ -25,6 +25,9 @@ export function setupControlLayout(){
   };
   new MutationObserver(mirrorWave).observe(waveStatus,{childList:true,subtree:true,characterData:true});mirrorWave();
   $('profile-dialog').addEventListener('close',()=>$('open-profile').focus({preventScroll:true}));
+  const raySettings=document.createElement('section');raySettings.id='ray-settings';raySettings.innerHTML='<h3>Beam path</h3>';
+  const rays=document.querySelector('[aria-label="Ray display"]');raySettings.append(rays);$('display-dialog-controls').prepend(raySettings);
+  const presetLabel=document.querySelector('.preset-label'),presetHome=document.createComment('preset home');presetLabel.after(presetHome);
   // The same controls move between the desktop layout and mobile dialogs.
   const media=matchMedia('(max-width:780px), (max-width:1000px) and (max-height:600px)');
   const display=$('view-display-controls');
@@ -48,7 +51,7 @@ export function setupControlLayout(){
   referenceDetails.innerHTML='<summary>Calculation details</summary>';
   const detailHomes=['status','calculation-detail'].map(id=>{const node=$(id),home=document.createComment(id+' home');node.after(home);return {node,home};});
   const referenceWindows=document.createElement('div');referenceWindows.className='reference-window-details';
-  const windowHomes=[['source-axis','Source'],['mask-axis','Mask'],['pupil-axis','Aperture plane'],['image-axis','Image Plane']].map(([id,name])=>{
+  const windowHomes=[['source-axis','Pupil plane'],['mask-axis','Mask'],['pupil-axis','Aperture plane'],['image-axis','Image Plane']].map(([id,name])=>{
     const node=$(id),home=document.createComment(id+' home'),row=document.createElement('div'),label=document.createElement('strong');node.after(home);label.textContent=name;row.append(label);referenceWindows.append(row);return {node,home,row};
   });
   sliceSettings.append(referenceOptions,referenceDetails);
@@ -72,7 +75,7 @@ export function setupControlLayout(){
   const focusHeading=document.createElement('div');focusHeading.className='focus-heading';focusHeading.innerHTML='<span>Fine tuning <small id="tuning-anchor"></small></span><button type="button" id="return-focus" class="quiet">Reset offset</button>';
   focus.prepend(focusHeading);
   const planeSelect=$('plane'),planeLabels=[...planeSelect.options].map(o=>o.textContent);
-  const shortLabels={image:'Image',mask:'Mask',near:'Mask + 1 µm',source:'Source',condenser:'Condenser',lens1:'Lens 1',pupil:'Aperture',lens2:'Lens 2',custom:'Custom'};
+  const shortLabels={image:'Image',mask:'Mask',near:'Mask + 1 µm',source:'Pupil',condenser:'Condenser',lens1:'Lens 1',pupil:'Aperture',lens2:'Lens 2',custom:'Custom'};
   function shortenPlane(){[...planeSelect.options].forEach((o,i)=>{o.textContent=media.matches&&o.selected?shortLabels[o.value]:planeLabels[i];});}
   function fullPlane(){[...planeSelect.options].forEach((o,i)=>{o.textContent=planeLabels[i];});}
   planeSelect.addEventListener('pointerdown',fullPlane);planeSelect.addEventListener('keydown',fullPlane);planeSelect.addEventListener('blur',shortenPlane);planeSelect.addEventListener('change',shortenPlane);
@@ -91,7 +94,9 @@ export function setupControlLayout(){
     referenceDetails.hidden=!compact;
     compact?modelHome.before(modelButton):aboutSettings.append(modelButton);
     if(compact)document.querySelector('.header-actions').prepend($('reset'));
-    else document.querySelector('.workspace-heading').append($('reset'));
+    else document.querySelector('.bench-toolbar').prepend(presetLabel,$('reset'));
+    if(compact)presetHome.before(presetLabel);
+    raySettings.hidden=compact;
     for(const {node,home} of detailHomes)compact?referenceDetails.append(node):home.before(node);
     for(const {node,home,row} of windowHomes)compact?row.append(node):home.before(node);
     referenceDetails.append(referenceWindows);

@@ -1,0 +1,48 @@
+/* Compact controls; left-hand content alone determines the desktop height. */
+body:not(.phone-bench) #bench-workspace{position:relative;align-items:start}
+body:not(.phone-bench) #component-inspector{position:absolute;inset:0 0 0 auto;width:var(--inspector-width);height:100%;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable;padding:16px 18px}
+body:not(.phone-bench) .inspector-heading{position:sticky;top:-16px;z-index:2;background:#fbfcfe;padding:14px 0 8px;margin-top:-14px}
+body:not(.phone-bench) .inspector-heading h2{font-size:1.4rem;margin-top:6px}
+body:not(.phone-bench) .inspector .control{margin-bottom:16px}
+body:not(.phone-bench) .workspace-heading{display:none}
+body:not(.phone-bench) .bench-toolbar{display:flex;gap:10px;align-items:center;padding:12px 24px 8px}
+body:not(.phone-bench) .bench-toolbar .preset-label{display:flex;align-items:center;gap:8px;min-width:0;font-size:.875rem}
+body:not(.phone-bench) .bench-toolbar #preset{min-width:0;width:clamp(160px,24vw,260px);font-size:.875rem;min-height:40px}
+body:not(.phone-bench) .bench-toolbar #reset{min-height:40px;padding:6px 12px;flex:none}
+body:not(.phone-bench) #bench-summary{margin-left:auto;font-size:.75rem;white-space:nowrap}
+#ray-settings .segmented{display:flex;width:100%}#ray-settings .segmented button{flex:1;min-height:44px;font-size:.875rem}
+#reference-preset-row{padding-top:6px;min-height:30px;gap:8px;flex-wrap:wrap}
+#reference-preset-row #active-observation{margin:0;font-size:.8125rem;font-weight:400;min-height:24px}
+#position-controls .screen-track{padding:0;margin:0;min-height:0}
+#position-controls .screen-track input{min-height:36px;height:36px;margin:0}
+#focus-options{position:relative;margin:0!important}
+body:not(.phone-bench) #focus-options .focus-heading{margin:0;min-height:34px;padding-right:110px}
+body:not(.phone-bench) #focus-control{position:static}
+body:not(.phone-bench) #focus-control .control{position:static;display:block;margin:0}
+body:not(.phone-bench) #focus-control .control>label{position:absolute;top:0;right:0;height:34px;margin:0}
+body:not(.phone-bench) #focus-control .control>input{width:100%;height:32px;min-height:32px}
+#position-controls .slice-bar{margin-top:4px}
+body:not(.phone-bench) #bench-navigation{padding-bottom:12px}
+.image-plane-meta{font-size:.875rem;color:var(--muted);margin:6px 0 14px}
+.fixed-image-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.fixed-image-actions button{min-height:44px;padding:8px;font-size:.875rem}
+#fixed-image-status{font-size:.8125rem;line-height:1.45}
+#component-controls:has(#fixed-image-zoom)+.component-help{margin-top:16px}
+.phone-bench #reference-preset-row{display:none}
+.phone-bench.editing-key-positions #reference-preset-row{display:flex;min-height:32px;padding-top:4px}
+.phone-bench.editing-key-positions #reference-preset-row>span:first-child{display:none}
+.phone-bench.editing-key-positions #active-observation{display:block!important;margin:0!important}
+.phone-bench.editing-key-positions #position-controls::before{content:none}
+.phone-bench #position-controls .screen-track input{height:44px;min-height:44px}
+.phone-bench #focus-options>summary,.phone-bench.editing-key-positions #focus-options>summary{display:flex;align-items:center;min-height:40px;padding:0;line-height:20px}
+.phone-bench #focus-options .focus-heading,.phone-bench.editing-key-positions #focus-options .focus-heading{display:none!important}
+.phone-bench #focus-options[open] .focus-heading{display:flex!important;position:absolute;right:0;top:0;height:40px;min-height:40px;pointer-events:none;margin:0;padding:0 24px 0 0}
+.phone-bench #focus-options[open] .focus-heading>span{display:none!important}
+.phone-bench #focus-options[open] #return-focus{pointer-events:auto;position:static;min-height:40px;line-height:20px;padding:0 4px;font-size:.75rem}
+.phone-bench #focus-options:not([open]) #focus-control{display:none!important}
+.phone-bench #focus-options[open] #focus-control{display:block}
+.phone-bench #focus-control .control{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;margin:0}
+.phone-bench #focus-control input[type=range]{width:100%;height:44px;min-height:44px;margin:0}
+.phone-bench #position-controls .slice-bar{margin-top:2px}
+.phone-bench #bench-navigation{padding-bottom:8px}
+@media(min-width:781px) and (max-width:1100px){body:not(.phone-bench) .bench-toolbar{flex-wrap:wrap}body:not(.phone-bench) #bench-summary{flex-basis:100%;text-align:right;height:16px}}

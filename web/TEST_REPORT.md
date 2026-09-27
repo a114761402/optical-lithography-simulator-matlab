@@ -1,3 +1,22 @@
+# Current verification — 27 September 2026, compact controls and continuous illumination
+
+**92/92 tests passed** (`node --test tests/*.test.mjs`, 165.0 s on this Mac), with zero skips or cancellations. Syntax and whitespace checks passed. No MATLAB source was changed.
+
+- Circular/annular illumination now uses continuous exact source boundaries. Tests cover an independent closed-form on-axis integral, independent polar source quadrature, integrated power before the condenser (error < 1e-4), transverse symmetry, and off-grid cached annular cuts (normalized maximum error < 0.04 at five early-z positions). These validate the implemented scalar emitter model, not a real optical instrument.
+- All five Fine preset assets and the legacy default wave asset match the updated engine and parameter keys. The full path has 205 z planes. Reference slices and illumination columns were recomputed; unchanged projection columns were reused only after source/parameter/provenance checks. Fresh Fine 2D calculations before, at and after the projection pupil match cached central cuts below 1e-12, including the local dense pupil evaluation.
+- Projection MATLAB comparisons retain the original strict tolerance. Two historical illumination-screen fixtures represent the replaced raster-source approximation; they are explicitly excluded from screen equality and replaced by the independent analytic/quadrature checks. Their axes and projection-pupil fields are still checked. See MATLAB_PARITY.md.
+- Desktop/browser sizes: actual 995, 1319 and 1512 CSS pixels. Mobile: 320, 390 and 430 portrait, 844 × 390 landscape. No document horizontal overflow. At 995 px, all four image canvases were equal 410.60 px squares. Portrait Key positions has two columns; landscape has four. These are browser emulations, not physical phone certification.
+- At 995 px, switching the long Source pupil inspector (874 px content in a 579 px scroll area) to Lens 1 left the workspace height at 580.5 px and Key positions at document y = 686.5 px. All source controls remain accessible by scrolling inside the inspector. Preset/Reset occupy the beam toolbar; ray controls work inside Settings.
+- Mobile Key positions shows A–D under the beam. Compute all slices commits fine offsets before collapsing edit controls. Verified cached batches and a real Fine point-source batch with A = 0.005 mm: all four finished, no queued/error states remained, the editor stayed hidden, and reopening retained the offset. A long multi-emitter batch was also cancelled successfully. The narrow-screen controls retain 44 px main touch targets; the fine numeric entry no longer overlaps its slider.
+- The fixed Image thumbnail stayed unchanged when observation D moved to the mask. Fit/2×/4× and Save image are available in the Image inspector. Save PNG produced a valid 960 × 960 RGBA image. No email was sent. The annular preset loaded its matching cached ring, image and full-path wave.
+- Wave canvas defaults to a complete dark rectangle; Show calculation window toggles the optional grey support indication. XZ/YZ, components, yellow/blue stages and physical position markers remain. The ±7 mm labels are removed. Final browser console contained no application warnings or errors.
+
+Screenshots are retained locally in `.sites-runtime/desktop-wave-verified.png` and `.sites-runtime/mobile-key-positions-verified.png`.
+
+The following records describe earlier revisions, including superseded labels and numerical approximations.
+
+---
+
 # Current verification — 27 September 2026
 
 **87/87 tests pass** (`npm test`, 90.6 seconds on this Mac). This includes fresh Fine comparisons against the original wave cache, MATLAB parity fixtures, independent DFT/Gaussian checks, numerical guards, observation lifecycle/queue tests, and new preset/dense-pupil checks. No MATLAB code was changed.

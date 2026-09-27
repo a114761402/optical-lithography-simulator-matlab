@@ -9,7 +9,7 @@ import {computeWave,centerCuts} from '../dist/wave.js';
 import {referenceScreens} from '../dist/observation-state.js';
 const encode=v=>JSON.stringify(v,(_,a)=>ArrayBuffer.isView(a)?Array.from(a):a);
 const dir=new URL('../dist/data/presets/',import.meta.url);mkdirSync(dir,{recursive:true});
-const engineHash=createHash('sha256').update(['optics.js','wave.js','wave-cuts.js','dense-pupil.js'].map(f=>readFileSync(new URL('../dist/'+f,import.meta.url))).join('')).digest('hex');
+const engineHash=createHash('sha256').update(['optics.js','wave.js','wave-cuts.js','dense-pupil.js','radial-illumination.js'].map(f=>readFileSync(new URL('../dist/'+f,import.meta.url))).join('')).digest('hex');
 if(!isMainThread){
   const id=workerData.id,p=presetParams(id),start=performance.now();
   parentPort.postMessage({stage:'XY'});

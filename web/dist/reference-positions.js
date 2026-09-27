@@ -1,4 +1,4 @@
-import {createPlanes,restorePlane,observationZ,sliceKey} from './observation-state.js';
+import {createPlanes,restorePlane,observationZ,sliceKey} from './observation-state.js?v=20260927-illumination2';
 
 // New identities prevent in-flight work for the replaced layout from attaching.
 export function restorePositions(saved=null){return saved?saved.map(restorePlane):createPlanes();}

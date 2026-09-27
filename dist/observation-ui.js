@@ -1,4 +1,4 @@
-export function setupObservationUI(getPlanes,{onSelect,onRemove,onAdd,onUndo,onReference}){
+export function setupObservationUI(getPlanes,{onSelect,onRemove,onAdd,onUndo,onReference,onZoom}){
   const $=id=>document.getElementById(id),grid=document.createElement('div');
   grid.id='observation-grid';grid.setAttribute('role','group');grid.setAttribute('aria-label','Observation positions');
   $('observation-layout').before(grid);
@@ -30,7 +30,8 @@ export function setupObservationUI(getPlanes,{onSelect,onRemove,onAdd,onUndo,onR
             onSelect(next.id);$(`slice-panel-${next.id}`).focus();
           };
           const remove=document.createElement('button');remove.type='button';remove.className='remove-position';remove.textContent='−';remove.title=`Remove position ${panel.id}`;remove.setAttribute('aria-label',remove.title);remove.onclick=()=>onRemove(panel.id);
-          item.append(button,remove);
+          const zoom=document.createElement('button');zoom.type='button';zoom.id=`zoom-position-${panel.id}`;zoom.className='zoom-position';zoom.textContent='↗';zoom.title=`View larger ${panel.id}`;zoom.setAttribute('aria-label',zoom.title);zoom.setAttribute('aria-haspopup','dialog');zoom.onclick=()=>onZoom(panel.id);
+          item.append(button,remove,zoom);
         }
         grid.append(item);
       }

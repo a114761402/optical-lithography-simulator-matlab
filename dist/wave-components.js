@@ -9,7 +9,7 @@ export function waveComponentLayout(result,width,height){
   return items.map((item,i)=>{
     const gap=Math.min(i?item.x-items[i-1].x:Infinity,i<items.length-1?items[i+1].x-item.x:Infinity);
     return {...item,halfWidth:Math.max(.6,Math.min(8,gap*.22)),halfHeight:item.key==='lens2'?29:36,
-      label:['source','mask','image'].includes(item.key)||(width>=680&&gap>46),labelY:height<=128?height-9:height-38+(width>=680&&i>3&&i%2?14:0)};
+      label:['source','mask','image'].includes(item.key)||(height>128&&width>=680&&gap>65),labelY:height<=128?height-9:height-38+(width>=680&&i>3&&i%2?14:0)};
   });
 }
 export function waveComponentSVG(result,width,height){

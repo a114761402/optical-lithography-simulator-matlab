@@ -230,3 +230,10 @@ body:not(.phone-bench) #position-controls .slice-controls{grid-template-columns:
   .phone-bench .workspace-heading .preset-label select{min-width:0;width:0;flex:1}
 }
 @media(max-width:350px){.phone-bench .workspace-heading{flex-direction:row}}
+
+/* Keep the position beside its heading; selection uses the aperture itself. */
+.phone-bench .observation-heading{justify-content:flex-start;gap:clamp(12px,4vw,24px);max-width:480px}
+.phone-bench .observation-heading>div{flex:0 1 auto}
+#bench [data-component="pupil"] .selection{display:none}
+#bench [data-component="pupil"].selected .aperture-blade{stroke:var(--blue)}
+#bench [data-component="pupil"]:focus-visible{outline:2px solid var(--blue);outline-offset:3px}

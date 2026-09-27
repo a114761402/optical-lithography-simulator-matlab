@@ -190,3 +190,43 @@ body .wave-heading .wave-action-group{width:auto!important;flex:0 0 auto;justify
 .phone-bench .wave-heading #wave-title{min-width:70px}
 .phone-bench #profile-menu .detail-toggle{font-size:.875rem}
 .slice-state.fast-detail{background:#e7eff9;color:#466583}
+
+/* Position controls share the observation heading, leaving the coarse track clear. */
+.phone-bench .observation-heading{display:flex;flex-wrap:nowrap;align-items:center;gap:8px}
+.phone-bench .observation-heading>div{min-width:0;flex:1}
+.phone-bench .observation-heading h2{margin:0;line-height:1.2}
+#standard-position-toggle{display:flex;align-items:center;gap:6px;flex:none;white-space:nowrap;min-height:44px;padding:6px 8px;font-size:.875rem;color:var(--muted)}
+#standard-position-label{margin:0}
+#standard-position-options>summary{display:none}
+#standard-position-options[open]{padding:0 0 12px;margin-bottom:12px;border-bottom:1px solid var(--line)}
+.phone-bench #standard-position-options .slice-bar{padding:0;margin:4px 0 0}
+.phone-bench #standard-position-options .slice-bar>div:first-child{display:none}
+.phone-bench #standard-position-options .slice-controls{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;width:100%}
+.phone-bench #standard-position-options .slice-controls select{grid-column:auto;max-width:none;min-width:0;width:100%;min-height:44px;padding-inline:8px 20px;font-size:.875rem}
+.phone-bench #standard-position-options .z-input{display:flex;min-width:0;gap:4px;padding:0 8px}
+.phone-bench #standard-position-options .z-input input{flex:1;width:0;min-width:0;font-size:1rem}
+.phone-bench #app-menu>summary{width:auto;min-width:76px;padding:8px 10px;font-size:.875rem;letter-spacing:normal;border:1px solid var(--line);border-radius:5px;list-style:none}
+.phone-bench #app-menu>summary::-webkit-details-marker{display:none}
+.phone-bench #app-menu nav{width:230px;max-width:calc(100vw - 24px)}
+.phone-bench #app-menu .contact-menu-link span{display:block;font-size:.875rem;color:var(--muted);margin-top:4px}
+@media(max-width:350px){
+  .phone-bench .workspace-heading{display:flex;align-items:center;gap:6px}
+  .phone-bench .workspace-heading .preset-label{min-width:0;flex:1}
+  .phone-bench .workspace-heading #reset{flex:none;padding-inline:10px}
+  .phone-bench #standard-position-toggle{padding-inline:6px}
+}
+/* Keep precision and calculation together, with one shared right edge. */
+body:not(.phone-bench) .slice-compute-action{flex-direction:row;align-items:center;gap:12px;justify-content:flex-end}
+body:not(.phone-bench) .slice-compute-action .detail-toggle{order:-1;white-space:nowrap;min-height:44px;flex:none}
+body:not(.phone-bench) #position-controls .slice-controls{grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;align-items:center}
+@media(min-width:781px) and (max-width:1150px){
+  body:not(.phone-bench) #position-controls .slice-controls{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  body:not(.phone-bench) .slice-compute-action{grid-column:1/-1}
+}
+#standard-position-options:after,#standard-position-options>summary:after{content:none!important}
+@media(max-width:350px){
+  .phone-bench .workspace-heading{flex-wrap:nowrap}
+  .phone-bench .workspace-heading .preset-label{width:0;flex:1 1 0}
+  .phone-bench .workspace-heading .preset-label select{min-width:0;width:0;flex:1}
+}
+@media(max-width:350px){.phone-bench .workspace-heading{flex-direction:row}}

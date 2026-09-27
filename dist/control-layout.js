@@ -27,6 +27,7 @@ export function setupControlLayout(){
   const raySettings=document.createElement('section');raySettings.id='ray-settings';raySettings.innerHTML='<h3>Beam path</h3>';
   const rays=document.querySelector('[aria-label="Ray display"]');raySettings.append(rays);$('display-dialog-controls').prepend(raySettings);
   const componentSettings=document.createElement('section');componentSettings.id='component-settings';componentSettings.innerHTML='<h3>Components</h3><button type="button" id="open-components" class="secondary" aria-haspopup="dialog" aria-controls="component-dialog">Edit components</button>';raySettings.after(componentSettings);
+  const menuComponents=document.createElement('button');menuComponents.type='button';menuComponents.className='quiet';menuComponents.id='menu-components';menuComponents.textContent='Components';menuComponents.setAttribute('aria-haspopup','dialog');menuComponents.setAttribute('aria-controls','component-dialog');$('open-display-settings').after(menuComponents);menuComponents.onclick=()=>{$('app-menu').open=false;$('open-components').click();};
   const resetHelp=document.createElement('p');resetHelp.className='muted reset-help';resetHelp.textContent='Top Reset restores the default optical setup and positions. Reset in Expert Mode restores positions only.';$('display-dialog-controls').append(resetHelp);$('reset').title='Restore all default settings';$('reset').setAttribute('aria-label','Reset all settings');
   const presetLabel=document.querySelector('.preset-label'),presetHome=document.createComment('preset home');presetLabel.after(presetHome);
   // The same controls move between the desktop layout and mobile dialogs.
@@ -82,7 +83,11 @@ export function setupControlLayout(){
   function fullPlane(){[...planeSelect.options].forEach((o,i)=>{o.textContent=planeLabels[i];});}
   planeSelect.addEventListener('pointerdown',fullPlane);planeSelect.addEventListener('keydown',fullPlane);planeSelect.addEventListener('blur',shortenPlane);planeSelect.addEventListener('change',shortenPlane);
   const advanced=document.createElement('details');advanced.id='standard-position-options';
-  advanced.innerHTML='<summary>Position settings <span id="standard-position-label">450 mm</span></summary>';controls.append(advanced);
+  advanced.innerHTML='<summary>Position settings</summary>';
+  const positionButton=document.createElement('button');positionButton.id='standard-position-toggle';positionButton.className='secondary';positionButton.type='button';positionButton.title='Position settings';positionButton.setAttribute('aria-controls',advanced.id);positionButton.setAttribute('aria-expanded','false');positionButton.innerHTML='<span id="standard-position-label">z = 450 mm</span><span aria-hidden="true">⌄</span>';
+  const observationHeading=document.querySelector('.observation-heading');observationHeading.append(positionButton);observationHeading.after(advanced);
+  positionButton.onclick=()=>{advanced.open=!advanced.open;positionButton.setAttribute('aria-expanded',String(advanced.open));};
+  advanced.addEventListener('toggle',()=>positionButton.setAttribute('aria-expanded',String(advanced.open)));
   const sliceBar=controls.querySelector('.slice-bar'),sliceControls=sliceBar.querySelector('.slice-controls');
   const computeHome=document.createComment('slice action');$('show-slice').before(computeHome);
   const action=document.createElement('div');action.className='slice-compute-action';action.append($('show-slice'));computeHome.after(action);
@@ -91,7 +96,7 @@ export function setupControlLayout(){
   const expertDetail=detailToggle('expert-high-detail');$('calculate').after(expertDetail);
   const notice=document.createElement('p');notice.id='slice-compute-notice';notice.className='state-notice';notice.setAttribute('role','status');notice.hidden=true;controls.append(notice);
   function adaptPosition(){
-    const standard=media.matches&&nav.dataset.view==='explore';advanced.hidden=!standard;action.hidden=media.matches&&!standard;
+    const standard=media.matches&&nav.dataset.view==='explore';advanced.hidden=!standard;positionButton.hidden=!standard;action.hidden=media.matches&&!standard;
     if(standard){
       if(focus.parentElement!==advanced)advanced.append(focus,sliceBar);if(action.parentElement!==$('profile-menu'))$('profile-menu').prepend(action);action.after($('cancel-screen'),notice);
     }else{
@@ -99,7 +104,7 @@ export function setupControlLayout(){
       if(media.matches){$('calculate').closest('.calculation-actions').after($('cancel-screen'),notice);}
       else{sliceBar.after($('cancel-screen'),notice);}
     }
-    $('standard-position-label').textContent=$('slice-z').value?Number(Number($('slice-z').value).toFixed(3))+' mm':'';
+    $('standard-position-label').textContent=$('slice-z').value?'z = '+Number(Number($('slice-z').value).toFixed(3))+' mm':'';
   }
   document.addEventListener('position-view-change',adaptPosition);
   document.addEventListener('observation-position-change',adaptPosition);
@@ -117,7 +122,8 @@ export function setupControlLayout(){
     waveSettings.hidden=false;aboutSettings.hidden=compact;
     referenceDetails.hidden=!compact;
     compact?modelHome.before(modelButton):aboutSettings.append(modelButton);
-    if(compact)document.querySelector('.header-actions').prepend($('reset'));
+    if(compact)(matchMedia('(max-width:350px)').matches?document.querySelector('.workspace-heading'):document.querySelector('.header-actions')).append($('reset'));
+    if(compact)document.querySelector('.header-actions').append($('app-menu'));
     else document.querySelector('.bench-toolbar').prepend(presetLabel,$('reset'));
     if(compact)presetHome.before(presetLabel);
     raySettings.hidden=compact;componentSettings.hidden=!compact;
@@ -128,7 +134,7 @@ export function setupControlLayout(){
     compact?waveSettings.querySelector('h3').after(waveRegion):waveControls.prepend(waveRegion);waveOptions.hidden=true;
     waveOptions.open=false;adaptingFocus=true;focus.open=compact?phoneFocusOpen:true;queueMicrotask(()=>adaptingFocus=false);shortenPlane();adaptPosition();
   }
-  media.addEventListener('change',adapt);adapt();
+  media.addEventListener('change',adapt);matchMedia('(max-width:350px)').addEventListener('change',adapt);adapt();
   // Programmatic changes of the position must update its compact label too.
   document.addEventListener('observation-position-change',shortenPlane);
   for(const b of document.querySelectorAll('[data-wave-section]'))b.onclick=()=>{

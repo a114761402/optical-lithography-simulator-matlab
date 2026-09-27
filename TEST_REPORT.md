@@ -352,3 +352,13 @@ These are desktop browser viewport simulations, not physical iOS/Android touch o
 - Fresh uncached point-source checks at image + 10 µm: filtering Fast 0.641 s / Fine 0.781 s; circular diffraction Fast 0.607 s / Fine 0.797 s. Half-height crossings within 0.003 µm. Local Node measurements, not phone timings.
 - Default extended-source at image + 10 µm: Fast 74.988 s in Node. Its fresh Fine timing was stopped before completion to bound testing cost; no extended-source speedup factor is claimed. A fresh browser Fast run at this plane also completed and displayed the Fast badge despite the switch being changed during calculation. Arbitrary defocus remains expensive. Existing default-position cache hits do not run this calculation.
 - Separate image-plane Fast solver checks took about 4.67 s default, 3.22 s annular, 0.82 s dipole, and 0.09 s for the two coherent presets. These solver timings omit cache loading and UI rendering, and do not establish browser end-to-end latency.
+
+## 2026-09-27 — Observation heading and Settings polish
+
+- Mobile position disclosure now opens from the Observation screen heading; shared controls retain their values across Standard/Expert/desktop moves. Mobile idle action reads Compute.
+- Mobile Settings exposes General, Components, About and Contact. Dialog closure restores focus to Settings. At 320px Reset shares the Preset row.
+- Desktop High detail stays with Compute all slices; the action group wraps together on narrow desktops. Desktop aperture uses the mobile-style side section; its inspector retains the front view and annular obstruction remains visible.
+- Browser checked at 320×740, 390×844, 638×836, 995×836 and 1228×836: no horizontal overflow. Position expansion, fine tuning, Standard/Expert switching, cached pupil calculation, stale-result status and all three menu dialogs checked. Contact verified as the existing mailto destination without opening or sending mail.
+- At 1228px the detail switch and compute button share the same vertical bounds, and both slice/wave compute right edges are 839.484px. Browser reported no warnings/errors.
+- 24 existing targeted tests passed (quality policy, observation lifecycle, view isolation, positions, desktop path and compact bench). No optical solver changes; no new accuracy/performance claim.
+- Screenshots: .sites-runtime/polish-phone.png and .sites-runtime/polish-desktop.png. Responsive emulation, not physical-phone testing.

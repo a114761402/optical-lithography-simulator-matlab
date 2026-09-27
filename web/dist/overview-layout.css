@@ -90,11 +90,6 @@ body:not(.phone-bench) .wave-sidebar{display:flex;flex-direction:column;justify-
 .wave-more .wave-notes>summary{min-height:40px;cursor:pointer}
 .phone-bench .wave-title-group{gap:10px;flex-wrap:nowrap}
 .phone-bench .wave-detail-toggle{font-size:.8125rem;gap:5px}
-@media(max-width:560px){
- .phone-bench .wave-heading{flex-wrap:wrap!important;gap:6px}
- .phone-bench .wave-heading>.wave-title-group{flex:1 0 100%!important;justify-content:space-between}
- .phone-bench .wave-heading .wave-action-group{width:100%!important;justify-content:flex-end!important}
-}
 @media(min-width:781px) and (max-width:1100px){
  body:not(.phone-bench) .wave-title-group{gap:10px}
  body:not(.phone-bench) .wave-heading{flex-wrap:wrap!important}
@@ -152,3 +147,16 @@ body:not(.phone-bench) #active-observation.no-active-position{display:none}
 .phone-bench .wave-heading .wave-action-group{max-width:100%;flex-wrap:wrap;align-items:center}
 .phone-bench .wave-heading .wave-actions{flex:0 1 auto;width:auto;min-width:0}
 .phone-bench .wave-heading #calculate-yz{width:auto;min-width:0;white-space:nowrap;padding-inline:12px}
+
+/* Keep the title and all three controls on one shared centre line on phones. */
+.phone-bench .wave-heading{flex-wrap:nowrap!important;align-items:center;gap:6px}
+.phone-bench .wave-heading>.wave-title-group{flex:0 0 auto!important;gap:0}
+.phone-bench .wave-heading h2{font-size:1.125rem}
+.phone-bench .wave-heading .wave-action-group{width:auto;flex:0 0 auto;flex-wrap:nowrap;justify-content:flex-end;gap:6px}
+.phone-bench .wave-action-group>.wave-detail-toggle{flex-direction:column-reverse;min-width:60px;gap:2px;font-size:.75rem;margin-inline:0!important}
+.phone-bench .wave-heading #calculate-yz{font-size:.8125rem;padding-inline:8px;height:44px;min-height:44px}
+@media(max-width:350px){
+ .phone-bench .wave-heading{flex-wrap:wrap!important}
+ .phone-bench .wave-heading>.wave-title-group{flex-basis:100%!important}
+ .phone-bench .wave-heading .wave-action-group{flex-basis:100%}
+}

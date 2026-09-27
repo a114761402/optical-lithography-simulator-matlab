@@ -152,3 +152,41 @@ body:not(.phone-bench) .wave-action-group #calculate-yz{min-height:44px}
   body:not(.phone-bench) .wave-heading>div:first-child{flex-basis:100%}
   body:not(.phone-bench) .wave-action-group{width:100%;justify-content:space-between}
 }
+
+/* Calculation detail is chosen at the action; the old global selector is retired. */
+.quality-label{display:none!important}
+.slice-compute-action{display:flex;flex-direction:column;gap:4px;min-width:0}
+.detail-toggle{display:flex!important;align-items:center;justify-content:flex-end;gap:8px;min-height:36px;margin:0!important;font-size:.875rem;color:var(--muted);cursor:pointer}
+.detail-toggle input{appearance:none;flex:none;width:34px;height:20px;min-height:20px;margin:0;border:1px solid #aab9ca;border-radius:20px;background:#d9e2ed;position:relative;cursor:pointer}
+.detail-toggle input:before{content:'';position:absolute;left:2px;top:2px;width:14px;height:14px;border-radius:50%;background:white;box-shadow:0 1px 2px #20354b40;transition:transform .15s}
+.detail-toggle input:checked{background:var(--blue);border-color:var(--blue)}
+.detail-toggle input:checked:before{transform:translateX(14px)}
+#standard-position-options>summary{display:flex;align-items:center;justify-content:space-between;min-height:40px;font-size:.875rem;color:var(--muted);cursor:pointer}
+#standard-position-options>summary:after{content:'+';margin-left:8px;color:var(--blue)}
+#standard-position-options[open]>summary:after{content:'−'}
+#standard-position-label{margin-left:auto}
+.phone-bench #standard-position-options .slice-controls{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.phone-bench #standard-position-options .slice-bar{margin-bottom:6px}
+.phone-bench #profile-menu .slice-compute-action{width:100%}
+.phone-bench #profile-menu .slice-compute-action button{width:100%;min-height:44px;padding:8px 6px;font-size:.875rem;white-space:normal;line-height:1.25}
+.phone-bench #profile-menu .detail-toggle{flex-direction:column-reverse;justify-content:center;gap:4px;min-height:52px;font-size:.8125rem;line-height:1.2}
+.phone-bench #profile-menu #cancel-screen{width:100%;min-height:44px;margin:0;padding:6px;font-size:.8125rem}
+#slice-compute-notice{font-size:.875rem;line-height:1.4;color:#8a4b05;margin:4px 0;overflow-wrap:anywhere}
+.phone-bench #fixed-panel .calculation-actions{flex-wrap:wrap}
+.phone-bench #fixed-panel .calculation-actions>.detail-toggle{flex:1 0 100%;min-height:36px}
+body:not(.phone-bench) .slice-controls{align-items:start}
+body:not(.phone-bench) .slice-compute-action .detail-toggle{min-height:28px}
+/* Keep title, section and compute in a single row, with internal text wrapping. */
+body .wave-heading{display:flex!important;flex-wrap:nowrap!important;align-items:center;gap:8px}
+body .wave-heading>div:first-child{flex:1 1 auto!important;min-width:0;margin:0}
+body .wave-heading .wave-action-group{width:auto!important;flex:0 0 auto;justify-content:flex-end!important;gap:8px;margin-left:auto!important;align-items:center}
+.phone-bench .wave-heading .wave-actions{flex:0 1 auto}
+.phone-bench .wave-heading #wave-title{font-size:clamp(1rem,3.4vw,1.4rem);line-height:1.15}
+.phone-bench .wave-heading #calculate-yz{width:clamp(96px,25vw,150px);white-space:normal;font-size:.875rem;line-height:1.2;padding:6px;min-height:44px;height:auto}
+.phone-bench .wave-action-group .section-buttons button{padding:4px;min-width:44px}
+@media(max-width:390px){.phone-bench .wave-heading,.phone-bench .wave-heading .wave-action-group{gap:4px}.phone-bench .wave-heading .section-buttons{padding:0}}
+.phone-bench #profile-menu #show-slice{background:var(--blue);border-color:var(--blue);color:white}
+.phone-bench .wave-heading #calculate-yz{min-width:96px}
+.phone-bench .wave-heading #wave-title{min-width:70px}
+.phone-bench #profile-menu .detail-toggle{font-size:.875rem}
+.slice-state.fast-detail{background:#e7eff9;color:#466583}

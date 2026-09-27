@@ -1,10 +1,11 @@
-import {createPlanes,restorePlane,observationZ,sliceKey} from './observation-state.js?v=20260927-positions3';
+import {bestSlice} from './quality-policy.js?v=20260927-detail1';
+import {createPlanes,restorePlane,observationZ,sliceKey} from './observation-state.js?v=20260927-detail1';
 
 // New identities prevent in-flight work for the replaced layout from attaching.
 export function restorePositions(saved=null){return saved?saved.map(restorePlane):createPlanes();}
 export function hydratePositions(planes,geometry,params,cache,revision){
   for(const panel of planes){
-    const key=sliceKey(params,observationZ(panel,geometry)),result=cache.get(key);
+    const z=observationZ(panel,geometry),result=bestSlice([panel.result,...cache.values()].filter(Boolean),params,z),key=result?sliceKey(result.params,result.z):null;
     if(result){panel.result=result;panel.resultKey=key;panel.resultRevision=revision;panel.error='';}
   }
 }

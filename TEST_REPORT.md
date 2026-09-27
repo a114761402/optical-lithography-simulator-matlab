@@ -336,3 +336,19 @@ Validation:
 - Reset restored Fine slice quality, 512 wave detail and the saved Fine path. XZ/YZ switched the displayed cached cut without a calculation. No browser warning/error logs were recorded.
 
 These are desktop browser viewport simulations, not physical iOS/Android touch or software-keyboard tests. A browser zoom shortcut did not change the controlled viewport, so 200% browser zoom is not claimed as verified. The numerical engine and all preset cache assets are unchanged; the expensive numerical cache suite was not rerun for this interface revision.
+
+## Action-local detail and compact controls — 27 September 2026
+
+- Mobile Standard defaults to Fast (256 grid / 13 source bins); mobile Expert and desktop share the independent High detail default (512 / 25). Preferences survive mode changes, resizing and Preset selection; full Reset reloads defaults. Wave detail remains independent.
+- Fine slices satisfy Fast requests without downgrading; physics and z must match. Batch requests snapshot quality. In-flight Fast results remain accepted after a UI toggle, but cannot replace a matching Fine result. Repeated positions share immutable results.
+- Standard positions are collapsed by default under the coarse slider, with Compute slice / High detail above Send. Expert editing retains its controls and closes after Compute all slices. Hidden invalid fields open for validation; inadequate Fast sampling gives an actionable High detail notice and retains previous results.
+- Wave title, XZ/YZ and compute share a row. Desktop source pupil uses a warm emitting pattern in a restrained mount; the independent projection aperture has a transparent opening. Numerical optics and wave caches are unchanged.
+- 27 targeted tests passed: detail policies, cache hydration, lifecycle/cancellation, position groups, responsive beam geometry and screen/reference isolation. Syntax and whitespace checks passed.
+- Browser QA: 320×740, 390×844, 638×836, 995×766, 1228×836; no horizontal page overflow and wave controls share a centerline. Checked Standard/Expert defaults and preference retention; 4/6/8 positions; cache-backed batch completion; Expert collapse; default/annular/dipole/filtering/diffraction preset loading; fresh Fast completion after enabling High detail mid-flight; fresh Fine result; cancellation retaining the old image; and an undersampled 2 µm grating at a 200 µm window producing the High detail notice. New QA tab console had no warnings/errors. These are browser viewport tests, not physical phone measurements.
+
+### Bounded numerical / performance checks
+
+- Fresh Fast image-plane calculation versus validated precomputed Fine image-plane cache, all five presets, center horizontal normalized profile over ±10 µm: RMSE 0.000068–0.000544; maximum pointwise difference 0.00018–0.00190 (relative to normalized peak). Half-height crossing differences at most 0.004 µm. This is an image-plane check, not a universal error bound for arbitrary planes/settings.
+- Fresh uncached point-source checks at image + 10 µm: filtering Fast 0.641 s / Fine 0.781 s; circular diffraction Fast 0.607 s / Fine 0.797 s. Half-height crossings within 0.003 µm. Local Node measurements, not phone timings.
+- Default extended-source at image + 10 µm: Fast 74.988 s in Node. Its fresh Fine timing was stopped before completion to bound testing cost; no extended-source speedup factor is claimed. A fresh browser Fast run at this plane also completed and displayed the Fast badge despite the switch being changed during calculation. Arbitrary defocus remains expensive. Existing default-position cache hits do not run this calculation.
+- Separate image-plane Fast solver checks took about 4.67 s default, 3.22 s annular, 0.82 s dipole, and 0.09 s for the two coherent presets. These solver timings omit cache loading and UI rendering, and do not establish browser end-to-end latency.

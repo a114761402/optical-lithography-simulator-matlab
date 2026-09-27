@@ -20,7 +20,7 @@ test('Reference preset follows geometry while Undo restores custom offsets and r
 });
 test('Restoring positions uses only matching optical settings and quality from cache',()=>{
   const g=geometry(defaults),cache=new SliceCache(),planes=restorePositions();
-  const data={screenRaw:[42]},key=sliceKey(defaults,g.mask);cache.set(key,data);
+  const data={screenRaw:[42],params:defaults,z:g.mask},key=sliceKey(defaults,g.mask);cache.set(key,data);
   hydratePositions(planes,g,defaults,cache,7);
   assert.equal(planes[1].result,data);assert.equal(planes[1].resultRevision,7);
   const changed=restorePositions();hydratePositions(changed,g,{...defaults,gridSize:512},cache,8);

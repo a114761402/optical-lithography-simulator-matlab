@@ -1,29 +1,32 @@
+import {DetailPreferences,sameSlice,bestSlice} from './quality-policy.js?v=20260927-detail1';
 import {sampleIntensity} from './image-sampling.js?v=20260927-positions3';
 import {presetDefinition,presetParams,matchingPreset} from './presets.js?v=20260927-positions3';
 import {loadPresetCache} from './preset-cache.js?v=20260927-positions3';
-import {geometry,sourceValue,sourceExtent,pupilValue,makeMask,maximum} from './optics.js?v=20260927-positions3';
+import {validate,geometry,sourceValue,sourceExtent,pupilValue,makeMask,maximum} from './optics.js?v=20260927-positions3';
 import {centerCuts,brightness} from './wave.js?v=20260927-positions3';
 import {renderWavePixels} from './wave-display.js?v=20260927-positions3';
 import {QUALITY,waveParameters} from './quality.js?v=20260927-positions3';
 import {waveCacheKey} from './cache.js?v=20260927-positions3';
 import {setupViewSwitch} from './view-switch.js?v=20260927-positions3';
-import {setupControlLayout} from './control-layout.js?v=20260927-controls1';
+import {setupControlLayout} from './control-layout.js?v=20260927-detail1';
 import {waveComponentSVG} from './wave-components.js?v=20260927-positions3';
 import {compactBench} from './compact-bench.js?v=20260927-positions3';
 import {regionMarkup} from './path-layout.js?v=20260927-positions3';
-import {desktopBench} from './desktop-bench.js?v=20260927-positions3';
+import {desktopBench} from './desktop-bench.js?v=20260927-detail1';
 import {setupBenchEditor} from './bench-editor.js?v=20260927-controls1';
 import {palette,lightRegion,RAY_BLUE,RAY_YELLOW} from './light-palette.js?v=20260927-positions3';
-import {createPlane,restorePlane,appendPositionGroup,markedPositions,quantizePosition,SliceBatch,createPlanes,PLANE_NAMES,tuningBase,observationZ,setObservation,tuneObservation,sliceKey,sliceRequest,acceptsSlice,screenSnapshot,referenceScreens,SliceCache} from './observation-state.js?v=20260927-positions3';
+import {createPlane,restorePlane,appendPositionGroup,markedPositions,quantizePosition,SliceBatch,createPlanes,PLANE_NAMES,tuningBase,observationZ,setObservation,tuneObservation,sliceKey,sliceRequest,acceptsSlice,screenSnapshot,referenceScreens,SliceCache} from './observation-state.js?v=20260927-detail1';
 import {setupObservationUI} from './observation-ui.js?v=20260927-positions3';
-import {setupScreenDrag} from './screen-drag.js?v=20260927-positions3';
+import {setupScreenDrag} from './screen-drag.js?v=20260927-detail1';
 import {setupSliceShare} from './slice-share.js?v=20260927-controls1';
 import {SerialJobs} from './serial-jobs.js?v=20260927-positions3';
-import {restorePositions,hydratePositions,atReferencePositions,referenceDisplayMode} from './reference-positions.js?v=20260927-positions3';
+import {restorePositions,hydratePositions,atReferencePositions,referenceDisplayMode} from './reference-positions.js?v=20260927-detail1';
 const $=id=>document.getElementById(id),NS='http://www.w3.org/2000/svg';
 setupControlLayout();
 const sliceShare=setupSliceShare();
 const viewTabs=setupViewSwitch();
+const details=new DetailPreferences();
+const compactMedia=matchMedia('(max-width:780px), (max-width:1000px) and (max-height:600px)');
 let p=presetParams('default'),selected='pupil',rayMode='principal',result=null,screenResult=null,screenRevision=-1,yzResult=null,busy=false,revision=0,calculatedRevision=-1,activeJob=null;
 let benchFrame=null,planes=createPlanes(),activeId=matchMedia('(max-width:780px), (max-width:1000px) and (max-height:600px)').matches?'D':null,lastPosition=450,removedPlane=null,previousLayout=null,batch=null;
 const activePlane=()=>planes.find(panel=>panel.id===activeId),sliceCache=new SliceCache();
@@ -91,9 +94,9 @@ function renderInspector(){$('component-inspector').scrollTop=0;$('component-pic
   if((selected==='source'&&p.sourceType==='Freeform')||(selected==='pupil'&&p.lensType==='Freeform')){const b=document.createElement('button');b.className='secondary control';b.textContent='Paint custom pattern';b.addEventListener('click',()=>openPaint(selected));controls.append(b);}
   $('component-note').textContent=note;renderInspectorPreview();
 }
-function rememberSlice(key,r){sliceCache.set(key,r);if(key===sliceKey(screenParams(),geometry(p).image))fixedImageSaved={key,result:r};}
-function savedSlice(key){return sliceCache.get(key)||planes.find(panel=>panel.resultKey===key)?.result||(fixedImageSaved?.key===key?fixedImageSaved.result:null);}
-function fixedImageResult(){return savedSlice(sliceKey(screenParams(),geometry(p).image));}
+function rememberSlice(key,r){sliceCache.set(key,r);if(sameSlice(r,screenParams(),geometry(p).image))fixedImageSaved={key,result:r};}
+function findSavedSlice(params,z){return bestSlice([...sliceCache.values(),...planes.map(panel=>panel.result),fixedImageSaved?.result].filter(Boolean),params,z);}
+function fixedImageResult(){return findSavedSlice({...screenParams(),...QUALITY.standard},geometry(p).image);}
 function fixedImageCanvas(size=256,zoom=1){
   const r=fixedImageResult();if(!r)return null;
   const canvas=document.createElement('canvas');canvas.width=canvas.height=size;
@@ -118,6 +121,14 @@ function renderImageControls(host){
   const status=document.createElement('p');status.id='fixed-image-status';status.className='control-hint';status.setAttribute('role','status');
   actions.append(go,save);host.append(meta,label,actions,status);
 }
+function benchPattern(kind){
+  const c=document.createElement('canvas');c.width=c.height=128;const ctx=c.getContext('2d'),img=ctx.createImageData(128,128),e=kind==='source'?sourceExtent(p):1.1;
+  for(let y=0;y<128;y++)for(let x=0;x<128;x++){
+    let v=0;for(const dy of [.25,.75])for(const dx of [.25,.75]){const u=((x+dx)/128*2-1)*e,w=(1-(y+dy)/128*2)*e;v+=(kind==='source'?sourceValue(p,u,w):1-pupilValue(p,u,w))/4;}
+    const k=4*(y*128+x),color=kind==='source'?[255,225,155]:[38,56,70];img.data.set([...color,Math.round(v*255)],k);
+  }
+  ctx.putImageData(img,0,0);return c.toDataURL();
+}
 function imageDataURL(kind){const c=document.createElement('canvas');c.width=c.height=96;const a=new Float64Array(96*96),e=kind==='source'?sourceExtent(p):1.1;for(let y=0;y<96;y++)for(let x=0;x<96;x++){const u=(x/95*2-1)*e,v=(1-y/95*2)*e;a[y*96+x]=kind==='source'?sourceValue(p,u,v):pupilValue(p,u,v);}paintImage(c,a,96,null,kind==='source'?'warm':'mono',1,false);return c.toDataURL();}
 function maskDiagram(){let marks='';if(p.maskType.includes('Grating')){const pitch=Math.max(5,Math.min(28,p.gratingPitchUm/p.maskSizeUm*74));for(let x=-36;x<=36;x+=pitch)marks+=`<rect x="${x}" y="-34" width="${pitch*p.gratingDuty}" height="68" fill="#e9f5ff"/>`;if(p.maskType==='2D Grating')for(let y=-34;y<34;y+=pitch)marks+=`<rect x="-38" y="${y+pitch*p.gratingDuty}" width="76" height="${pitch*(1-p.gratingDuty)}" fill="#304659"/>`;}else if(p.maskType==='Circular Aperture'||p.maskType==='Annular Aperture'){marks='<circle r="27" fill="#e9f5ff"/>';if(p.maskType==='Annular Aperture')marks+=`<circle r="${27*p.maskInnerRatio}" fill="#304659"/>`;}else if(p.maskType==='Diamond Aperture')marks='<path d="M0-32 32 0 0 32-32 0Z" fill="#e9f5ff"/>';else if(p.maskType==='Cross')marks='<path d="M-10-32H10V-10H32V10H10V32H-10V10H-32V-10H-10Z" fill="#e9f5ff"/>';else marks='<rect x="-27" y="-27" width="54" height="54" fill="#e9f5ff"/>';return `<rect x="-45" y="-43" width="90" height="86" rx="3" fill="#8093a3"/><rect x="-39" y="-37" width="78" height="74" rx="1" fill="#304659"/>${marks}`;}
 function lensDiagram(h=63,w=13){return `<path d="M0 ${-h}Q${-w*2} 0 0 ${h}Q${w*2} 0 0 ${-h}Z" fill="url(#glass)" stroke="#6497b9" stroke-width="1.3"/><path d="M-1 ${-h+8}Q${-w*1.4} 0 -1 ${h-8}" fill="none" stroke="white" stroke-width="1.8" opacity=".8"/><path d="M-7 ${-h}h14M-7 ${h}h14" stroke="#536f87" stroke-width="4"/>`;}
@@ -127,7 +138,7 @@ function drawBench(){
   const host=$('bench'),restoreFocus=document.activeElement?.hasAttribute('data-observation-screen'),width=Math.max(1,$('bench-wrap').clientWidth-16),mode=benchEditor.compact?'many':rayMode;
   $('beam-regions').innerHTML=regionMarkup(geometry(p));
   if(benchEditor.compact){const drawing=compactBench({width,geometry:geometry(p),params:p,components,selected,screen:activePlane()?currentZ():null,pupilValue,mode,observations:viewTabs.keyView?markedPositions(planes.map(panel=>({id:panel.id,z:observationZ(panel,geometry(p))})),activeId,4):[],activeId});host.setAttribute('viewBox',`0 0 ${width} ${drawing.height}`);host.classList.add('compact-beam');host.innerHTML=drawing.svg;bindBench();return;}
-  const drawing=desktopBench({width,geometry:geometry(p),params:p,components,selected,screen:activePlane()?currentZ():null,pupilValue,mode,defs,lensDiagram,maskDiagram,observations:markedPositions(planes.map(panel=>({id:panel.id,z:observationZ(panel,geometry(p))})),activeId,8),activeId,pictures:{source:imageDataURL('source'),pupil:imageDataURL('pupil'),image:fixedImagePicture()}});
+  const drawing=desktopBench({width,geometry:geometry(p),params:p,components,selected,screen:activePlane()?currentZ():null,pupilValue,mode,defs,lensDiagram,maskDiagram,observations:markedPositions(planes.map(panel=>({id:panel.id,z:observationZ(panel,geometry(p))})),activeId,8),activeId,pictures:{source:benchPattern('source'),pupil:benchPattern('pupil'),image:fixedImagePicture()}});
   host.setAttribute('viewBox',`0 0 ${width} ${drawing.height}`);host.classList.remove('compact-beam');host.innerHTML=drawing.svg;
 
   bindBench();if(restoreFocus)host.querySelector('[data-observation-screen]')?.focus({preventScroll:true});
@@ -172,16 +183,17 @@ function paintImage(canvas,data,n,coords=null,kind='blue',peak=null,flip=true,ha
 function arrayPicture(type,params=p,n=128){const a=new Float64Array(n*n),e=type==='source'?sourceExtent(params):1.1;for(let y=0;y<n;y++)for(let x=0;x<n;x++){const u=(x/(n-1)*2-1)*e,v=(y/(n-1)*2-1)*e;a[y*n+x]=type==='source'?sourceValue(params,u,v):pupilValue(params,u,v);}return a;}
 function drawResults(){if(!result)return;const r=result,q=r.params,shared=$('brightness').value.startsWith('shared'),n=q.gridSize,P=n*q.propagationPadding;if($('source-view').value==='weights')paintImage($('source-canvas'),arrayPicture('source',q),128,null,'mono');else paintImage($('source-canvas'),r.sourceRaw,r.sourceAxis.length,null,'warm',shared?r.sharedPeak:null);if($('mask-view').value==='intensity')paintImage($('mask-canvas'),r.maskRaw,n,null,'blue',shared?r.sharedPeak:null);else paintImage($('mask-canvas'),r.mask,n,null,'mono',1);if($('pupil-view').value==='opening')paintImage($('pupil-canvas'),arrayPicture('pupil',q),128,null,'mono',1);else paintImage($('pupil-canvas'),r.pupilRaw,r.pupilAxis.length,r.pupilAxis,'blue',shared?r.sharedPeak:null,true,1.1*r.geometry.f2*.001*q.projNA);paintImage($('image-canvas'),r.screenRaw,r.screenAxis.length,r.screenAxis,'blue',shared?r.sharedPeak:null,true,r.screenHalf);$('source-canvas').setAttribute('aria-label',$('source-view').value==='weights'?'Source distribution':'Pupil plane light intensity');$('mask-canvas').setAttribute('aria-label',$('mask-view').value==='amplitude'?'Mask amplitude transmission':'Mask exit light intensity');$('source-axis').textContent=$('source-view').value==='weights'?`±${fmt(r.sourceExtent)} source units`:`${fmt((r.sourceAxis.at(-1)-r.sourceAxis[0])*1e3)} mm source window`;$('mask-axis').textContent=`${fmt(q.fieldSizeUm)} µm local window`;$('pupil-axis').textContent=`±${fmt(1.1*r.geometry.f2*q.projNA)} mm`;$('image-title').textContent='Image Plane';$('image-z').textContent=`z = ${fmt(r.z,4)} mm`;const width=r.screenHalf?2*r.screenHalf:r.screenAxis.at(-1)-r.screenAxis[0];$('image-axis').textContent=`${width>=.001?fmt(width*1e3)+' mm':fmt(width*1e6)+' µm'} window${r.dark?' · no transmitted light':''}`;$('calculation-detail').textContent=`${n} × ${n} mask grid · ${r.samples} emitter${r.samples===1?'':'s'} · ${fmt(r.elapsed/1000,1)} s · scalar / ideal lenses`;drawScreen();}
 function drawProfile(){if(!screenResult)return;const plotWidth=Math.max(240,$('profile').getBoundingClientRect().width||800),left=42,right=plotWidth-18,mid=(left+right)/2;$('profile').setAttribute('viewBox',`0 0 ${plotWidth} 170`);const r=screenResult,n=r.screenAxis.length,lo=r.screenHalf?-r.screenHalf:r.screenAxis[0],hi=r.screenHalf?r.screenHalf:r.screenAxis.at(-1),samples=[],cut=centerCuts(r.screenRaw,r.screenAxis,r.screenAxisY).xz;let peak=0;for(let x=0;x<n;x++)if(r.screenAxis[x]>=lo&&r.screenAxis[x]<=hi){const v=cut[x];samples.push([r.screenAxis[x],v]);peak=Math.max(peak,v);}let path='';for(let j=0;j<samples.length;j++){const [x,v]=samples[j];path+=`${j?'L':'M'}${left+(x-lo)/(hi-lo)*(right-left)},${133-(peak?v/peak:0)*104}`;}const useMm=Math.max(Math.abs(lo),Math.abs(hi))>=.001,unit=useMm?'mm':'µm',u=useMm?1e3:1e6;$('profile-plane').textContent=`${benchEditor.compact?'':activeId+' · '}${r.label} · z = ${fmt(r.z,4)} mm${screenRevision!==revision?' · previous settings':''}`;$('profile-description').textContent='Horizontal cut at y = 0; normalized to its own peak.';$('profile').innerHTML=`<path d="M${left} 29H${right}M${left} 81H${right}M${left} 133H${right}" stroke="#dfe7f0" stroke-dasharray="3 4"/><path d="${path}" fill="none" stroke="#176bda" stroke-width="2"/><g fill="#728197" font-size="12"><text x="21" y="34">1</text><text x="12" y="85">0.5</text><text x="21" y="138">0</text><text x="${left}" y="158">${fmt(lo*u)}</text><text x="${mid}" y="158" text-anchor="middle">${fmt((lo+hi)/2*u)}</text><text x="${right}" y="158" text-anchor="end">${fmt(hi*u)} ${unit}</text></g>`;}
-function quality(){return QUALITY[$('quality').value];}
+function quality(){return details.quality(compactMedia.matches,viewTabs.keyView);}
 function setBusy(){
   busy=!!jobs.current;activeJob=jobs.current?.job.kind||null;
-  const referencesPending=jobs.has('references'),referencesStale=!!result&&(calculatedRevision!==revision||result.params.gridSize!==quality().gridSize||result.params.sourceBins!==quality().sourceBins);
+  const referencesPending=jobs.has('references'),referencesStale=!!result&&calculatedRevision!==revision;
   $('fixed-panel').classList.toggle('updating-references',referencesPending);
   $('fixed-panel').classList.toggle('references-need-update',referencesStale);
   document.querySelector('.reference-progress-label').textContent=referencesPending?'Calculating…':referencesStale?'Needs update':'';
   const panel=activePlane(),pending=!!panel&&(jobs.has('screen-'+activeId)||jobs.current?.job.request?.instance===panel.instance&&activeJob==='image'),batchPending=!!batch?.active;
-  $('cancel').hidden=!busy;$('cancel-wave').hidden=!jobs.has('wave');$('cancel-screen').hidden=!(batchPending||pending);
+  $('cancel').hidden=activeJob!=='image';$('cancel-wave').hidden=!jobs.has('wave');$('cancel-screen').hidden=!(batchPending||pending);
   $('cancel-screen').textContent=batchPending?'Cancel batch':'Cancel';
+  $('calculate').textContent=batchPending?`Computing ${Math.min(batch.completed+1,batch.total)}/${batch.total}`:'Compute all slices';
   $('calculate').disabled=jobs.has('references')||batchPending||!planes.length;$('calculate-yz').disabled=jobs.has('wave');
   $('show-slice').disabled=(!panel&&benchEditor.compact)||!planes.length||batchPending||pending;
   $('show-slice').textContent=batchPending?`Computing ${Math.min(batch.completed+1,batch.total)}/${batch.total}`:pending?'Calculating…':benchEditor.compact?'Compute slice':'Compute all slices';
@@ -197,11 +209,19 @@ function commitPositionFields(){
 }
 function computeSlices(all=false){
   if(!planes.length||batch?.active)return;
-  if(activePlane()&&(!$('slice-z').reportValidity()||!$('tuning-number').reportValidity()))return;
+  if(activePlane())for(const id of ['slice-z','tuning-number'])if(!$(id).checkValidity()){
+    $('standard-position-options').open=true;$('focus-options').open=true;$(id).reportValidity();return;
+  }
   commitPositionFields();
   const targets=benchEditor.compact&&!all&&!viewTabs.keyView?[activePlane()].filter(Boolean):[activePlane(),...planes.filter(panel=>panel.id!==activeId)].filter(Boolean);
+  const requested={...quality()};
+  try{if(targets.some(panel=>!findSavedSlice({...p,...requested},observationZ(panel,geometry(p)))))validate({...p,...requested});}catch(error){
+    const message=(requested.gridSize<512?'Enable High detail for these settings. ':'')+error.message;
+    const notice=$('slice-compute-notice');notice.textContent=message;notice.hidden=false;return;
+  }
+  $('slice-compute-notice').hidden=true;
   batch=new SliceBatch(targets);const ticket=batch;
-  for(const panel of targets)calculate('screen',null,panel,ticket);
+  for(const panel of targets)calculate('screen',requested,panel,ticket);
   if(benchEditor.compact&&viewTabs.keyView&&viewTabs.editing){const anchor=document.querySelector('#fixed-panel .results-heading'),top=anchor.getBoundingClientRect().top;viewTabs.setEditing(false);activeId=null;refreshObservations();window.scrollBy(0,anchor.getBoundingClientRect().top-top);}
   setBusy();
 }
@@ -257,7 +277,7 @@ function calculate(kind='image',override=null,target=activePlane(),batchTicket=n
   jobs.add({key,kind,request,
     run(done){
       // Check again when this job starts: an earlier view may have filled the cache.
-      if(kind==='screen'){const cached=savedSlice(request.key);if(cached){done(null,{result:cached,elapsed:0});return;}}
+      if(kind==='screen'){const cached=findSavedSlice(params,request.z);if(cached){done(null,{result:cached,elapsed:0});return;}}
       $('error').hidden=true;$('progress').value=0;
       if(kind!=='yz'){panel.pending=true;panel.error='';screenMoved();}else status('Calculating both XZ and YZ wave sections…');
       const worker=new Worker(new URL('./worker.js?v=20260927-positions3',import.meta.url),{type:'module'});
@@ -270,14 +290,16 @@ function calculate(kind='image',override=null,target=activePlane(),batchTicket=n
       worker.postMessage({type:kind,params,z:request.z,scope});return ()=>worker.terminate();
     },
     cancelled(){if(kind!=='yz'){panel.pending=false;panel.progress=null;settle('cancelled');}},
-    failed(error){panel.pending=false;panel.progress=null;settle('error');if(kind==='yz')$('wave-status').textContent=error.message;else panel.error=error.message;if(kind==='image'){$('error').textContent=error.message;$('error').hidden=false;}screenMoved();},
+    failed(error){panel.pending=false;panel.progress=null;settle('error');if(kind==='yz')$('wave-status').textContent=error.message;else panel.error=error.message;if(kind==='image'){$('error').textContent=error.message;$('error').hidden=false;}if(kind!=='yz'){$('slice-compute-notice').textContent=error.message;$('slice-compute-notice').hidden=false;}screenMoved();},
     finished(data){
       $('progress').value=1;
       if(kind==='yz'){if(version===revision){yzResult=data.result;drawYZ();status(`XZ and YZ ready · ${fmt(data.elapsed/1000,1)} s`);}return;}
       panel.pending=false;panel.progress=null;settle('done');
       if(version!==revision)return;
-      const r=screenSnapshot(kind==='screen'?data.result:data.result.screen);rememberSlice(request.key,r);
-      if(retained()&&acceptsSlice(panel,request,geometry(p),screenParams())){panel.result=r;panel.resultKey=request.key;panel.resultRevision=version;panel.error='';}
+      let r=screenSnapshot(kind==='screen'?data.result:data.result.screen);
+      r=findSavedSlice(r.params,r.z)||r;
+      const actualKey=sliceKey(r.params,r.z);rememberSlice(actualKey,r);
+      if(retained()&&acceptsSlice(panel,request,geometry(p),params)){panel.result=r;panel.resultKey=actualKey;panel.resultRevision=version;panel.error='';}
       if(kind==='image'){
         result=data.result.planes;result.elapsed=data.elapsed;calculatedRevision=version;
         for(const reference of referenceScreens(result)){
@@ -286,7 +308,7 @@ function calculate(kind='image',override=null,target=activePlane(),batchTicket=n
         }
         drawResults();renderInspectorPreview();
       }
-      drawScreen();drawBench();renderInspectorPreview();status(`Calculated · ${params.gridSize===512?'fine':params.gridSize===128?'preview':'standard'} detail · ${fmt(data.elapsed/1000,1)} s`);
+      drawScreen();drawBench();renderInspectorPreview();status(`Calculated · ${r.params.gridSize===512?'fine':'fast'} detail · ${fmt(data.elapsed/1000,1)} s`);
     }
   });setBusy();
 }
@@ -324,7 +346,7 @@ $('calculate').onclick=()=>computeSlices(true);$('show-slice').onclick=()=>compu
 $('plane').onchange=()=>{const plane=$('plane').value,g=geometry(p);setPosition(plane==='custom'?currentZ():plane==='near'?g.mask+.001:g[plane],plane);};$('slice-z').oninput=()=>fieldEdits.z=true;$('slice-z').onchange=()=>{if($('slice-z').value.trim()===''){syncScreen();return;}setPosition(Number($('slice-z').value));};$('screen-slider').oninput=()=>setPosition(Number($('screen-slider').value));
 for(const b of document.querySelectorAll('[data-rays]'))b.onclick=()=>{rayMode=b.dataset.rays;for(const t of document.querySelectorAll('[data-rays]')){t.classList.toggle('active',t===b);t.setAttribute('aria-pressed',String(t===b));}drawBench();};
 function preset(name){
-  cancel(false);const choice=presetDefinition(name);p=presetParams(choice.id);selected=choice.selected;$('quality').value='fine';
+  cancel(false);const choice=presetDefinition(name);p=presetParams(choice.id);selected=choice.selected;
   planes=createPlanes();activeId=benchEditor.compact&&!viewTabs.keyView?'D':null;lastPosition=geometry(p).image;removedPlane=null;previousLayout=null;observationUI.removed(null);observationUI.render();
   revision++;sliceCache.clear();fixedImageSaved=null;waveRequest++;waveLoading=false;result=null;yzResult=null;drawYZ();renderInspector();renderFocus();drawBench();syncScreen();drawScreen();updatePresetInfo();restorePresetSlices(choice.id);restoreDefaultWave();
 }
@@ -344,8 +366,15 @@ window.addEventListener('resize',()=>requestAnimationFrame(()=>{drawBench();draw
 $('component-picker').onchange=()=>{selected=$('component-picker').value;renderInspector();drawBench();};
 $('yz-canvas').onkeydown=e=>{if(!yzResult)return;if(['ArrowLeft','ArrowRight','Home','End'].includes(e.key)){e.preventDefault();const step=(yzResult.zMax-yzResult.zMin)/(e.shiftKey?1000:100);selectWavePosition(e.key==='Home'?yzResult.zMin:e.key==='End'?yzResult.zMax:Math.min(yzResult.zMax,Math.max(yzResult.zMin,currentZ()+(e.key==='ArrowRight'?step:-step))));}};
 setupScreenDrag($('bench'),{geometry:()=>geometry(p),currentZ,onMove:setPosition,onSelect:selectObservation,onStart:()=>viewTabs.showObservation(),compact:()=>benchEditor.compact});
-$('quality').addEventListener('change',()=>{batch=null;jobs.cancel('references');for(const panel of planes){jobs.cancel('screen-'+panel.id);panel.generation++;}drawScreen();});
+function syncDetailControls(){
+  for(const toggle of document.querySelectorAll('[data-high-detail]'))toggle.checked=details.get(compactMedia.matches,viewTabs.keyView);
+}
+for(const toggle of document.querySelectorAll('[data-high-detail]'))toggle.addEventListener('change',()=>{
+  details.set(compactMedia.matches,viewTabs.keyView,toggle.checked);syncDetailControls();drawScreen();setBusy();
+});
+compactMedia.addEventListener('change',syncDetailControls);syncDetailControls();
 document.addEventListener('position-view-change',()=>{
+  syncDetailControls();
   if(viewTabs.keyView&&!viewTabs.editing)activeId=null;
   if(!viewTabs.keyView&&benchEditor.compact&&!activePlane())activeId=planes.find(p=>p.id==='D')?.id||planes[0]?.id||null;
   $('edit-key-positions').textContent=viewTabs.editing?'Done':'Edit';
@@ -366,17 +395,17 @@ function panelState(panel){
   if(jobs.current?.job.request?.instance===panel.instance&&jobs.current.job.kind!=='yz')return panel.progress==null?'Calculating…':`${panel.progress}%`;
   if(jobs.has('screen-'+panel.id))return 'Queued';
   if(panel.error)return 'Try again';
-  return panel.resultKey===sliceKey(screenParams(),observationZ(panel,geometry(p)))?'':'Needs update';
+  return sameSlice(panel.result,screenParams(),observationZ(panel,geometry(p)))?(panel.result.params.gridSize<512?'Fast':''):'Needs update';
 }
 function screenMoved(){
   if(!$('observation-grid'))return;
   $('reference-positions').setAttribute('aria-pressed',String(atReferencePositions(planes)));
-  for(const panel of planes){const button=$('slice-panel-'+panel.id);button.setAttribute('aria-pressed',String(panel.id===activeId));button.disabled=viewTabs.keyView&&!viewTabs.editing;$('slice-state-'+panel.id).textContent=panelState(panel);$('slice-state-'+panel.id).title=panel.error||'';const changed=panel.result&&panel.resultKey!==sliceKey(screenParams(),observationZ(panel,geometry(p)));$('slice-target-'+panel.id).textContent=changed?`Target: ${fmt(observationZ(panel,geometry(p)),3)} mm`:'';}
-  $('observation-state').textContent=panelState(activePlane());$('screen-status').hidden=true;$('screen-status').textContent='';
+  for(const panel of planes){const button=$('slice-panel-'+panel.id);button.setAttribute('aria-pressed',String(panel.id===activeId));button.disabled=viewTabs.keyView&&!viewTabs.editing;$('slice-state-'+panel.id).textContent=panelState(panel);$('slice-state-'+panel.id).classList.toggle('fast-detail',panelState(panel)==='Fast');$('slice-state-'+panel.id).title=panel.error||'';const changed=panel.result&&!sameSlice(panel.result,screenParams(),observationZ(panel,geometry(p)));$('slice-target-'+panel.id).textContent=changed?`Target: ${fmt(observationZ(panel,geometry(p)),3)} mm`:'';}
+  $('observation-state').textContent=panelState(activePlane());$('observation-state').classList.toggle('fast-detail',panelState(activePlane())==='Fast');$('screen-status').hidden=true;$('screen-status').textContent='';
 }
 function windowLabel(r){const width=r.screenHalf?2*r.screenHalf:r.screenAxis.at(-1)-r.screenAxis[0];return `${width>=.001?fmt(width*1e3)+' mm':fmt(width*1e6)+' µm'} window${r.dark?' · no light':''}`;}
 function displayMode(panel){
-  return referenceDisplayMode(panel,{source:$('source-view').value,mask:$('mask-view').value,pupil:$('pupil-view').value},!!panel&&panel.resultKey===sliceKey(screenParams(),observationZ(panel,geometry(p))));
+  return referenceDisplayMode(panel,{source:$('source-view').value,mask:$('mask-view').value,pupil:$('pupil-view').value},!!panel&&sameSlice(panel.result,screenParams(),observationZ(panel,geometry(p))));
 }
 function displayName(panel){const mode=displayMode(panel);return mode==='weights'?'Source distribution':mode==='mask-opening'?'Mask · Opening':mode==='aperture-opening'?'Aperture · Opening':panel?.result?.label||PLANE_NAMES[panel?.plane]||'';}
 function displayWindow(panel){const r=panel?.result;if(!r)return '';const mode=displayMode(panel);return mode==='weights'?'Normalized source coordinates':mode==='mask-opening'?`${fmt(r.params.fieldSizeUm)} µm window`:mode==='aperture-opening'?'Normalized aperture coordinates':windowLabel(r);}

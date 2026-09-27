@@ -29,3 +29,13 @@ test('Moving the observation marker does not move fixed components; ray modes re
   assert.equal((render(1000,p,g.image,'none').svg.match(/<polyline/g)||[]).length,0);
   assert.ok((render(1000,p,g.image,'many').svg.match(/<polyline/g)||[]).length>(a.match(/<polyline/g)||[]).length);
 });
+
+test('All position labels remain below the beam, including four coincident targets and no selection',()=>{
+  const p={...defaults},g=geometry(p);
+  for(const z of [0,200,g.max])for(const activeId of [null,'A','D']){
+    const r=desktopBench({width:680,geometry:g,params:p,components,selected:'pupil',screen:activeId?z:null,pupilValue,mode:'none',defs:'',lensDiagram:()=>'',maskDiagram:()=>'',pictures:{source:'',pupil:''},observations:[...'ABCD'].map(id=>({id,z})),activeId});
+    assert.doesNotMatch(r.svg,/F₁|F₂|NaN/);
+    for(const id of 'ABCD')assert.match(r.svg,new RegExp('y="188"[^>]*>'+id+'</text>'));
+    assert.equal((r.svg.match(/data-observation-screen/g)||[]).length,activeId?1:0);
+  }
+});

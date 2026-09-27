@@ -11,7 +11,7 @@ export function setupObservationUI(getPlanes,{onSelect,onRemove,onAdd,onUndo,onR
   const empty=document.createElement('p');empty.id='observation-empty';empty.textContent='Add a position to explore the light.';grid.after(empty);
   const active=document.createElement('p');active.id='active-observation';active.setAttribute('aria-live','polite');document.querySelector('#position-controls .screen-track').before(active);
   const badge=document.createElement('span');badge.id='observation-state';badge.className='slice-state';$('observation-label').after(badge);
-  $('observation-title').innerHTML='<span class="wide-label">Compare positions</span><span class="phone-label">Observation screen</span>';
+  $('observation-title').innerHTML='<span class="wide-label">Key positions</span><span class="phone-label">Observation screen</span>';
   return {
     render(){
       const planes=getPlanes();

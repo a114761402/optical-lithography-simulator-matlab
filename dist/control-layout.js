@@ -84,7 +84,7 @@ export function setupControlLayout(){
     if(displayDialog.open)displayDialog.close();
     $('display-title').textContent='Settings';
     $('calculate').textContent='Compute all slices';
-    referenceOptions.querySelector('legend').textContent=compact?'Key positions':'Reference positions';
+    referenceOptions.querySelector('legend').textContent='Key positions';
     $('display-description').hidden=true;
     sliceSettings.querySelector('h3').hidden=false;
     waveSettings.hidden=false;aboutSettings.hidden=compact;

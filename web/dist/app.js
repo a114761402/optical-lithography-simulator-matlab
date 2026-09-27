@@ -8,12 +8,12 @@ import {renderWavePixels} from './wave-display.js?v=20260927-positions3';
 import {QUALITY,waveParameters} from './quality.js?v=20260927-positions3';
 import {waveCacheKey} from './cache.js?v=20260927-positions3';
 import {setupViewSwitch} from './view-switch.js?v=20260927-positions3';
-import {setupControlLayout} from './control-layout.js?v=20260927-detail1';
+import {setupControlLayout} from './control-layout.js?v=20260927-polish2';
 import {waveComponentSVG} from './wave-components.js?v=20260927-positions3';
 import {compactBench} from './compact-bench.js?v=20260927-positions3';
 import {regionMarkup} from './path-layout.js?v=20260927-positions3';
-import {desktopBench} from './desktop-bench.js?v=20260927-detail1';
-import {setupBenchEditor} from './bench-editor.js?v=20260927-controls1';
+import {desktopBench} from './desktop-bench.js?v=20260927-polish2';
+import {setupBenchEditor} from './bench-editor.js?v=20260927-polish2';
 import {palette,lightRegion,RAY_BLUE,RAY_YELLOW} from './light-palette.js?v=20260927-positions3';
 import {createPlane,restorePlane,appendPositionGroup,markedPositions,quantizePosition,SliceBatch,createPlanes,PLANE_NAMES,tuningBase,observationZ,setObservation,tuneObservation,sliceKey,sliceRequest,acceptsSlice,screenSnapshot,referenceScreens,SliceCache} from './observation-state.js?v=20260927-detail1';
 import {setupObservationUI} from './observation-ui.js?v=20260927-positions3';
@@ -196,7 +196,7 @@ function setBusy(){
   $('calculate').textContent=batchPending?`Computing ${Math.min(batch.completed+1,batch.total)}/${batch.total}`:'Compute all slices';
   $('calculate').disabled=jobs.has('references')||batchPending||!planes.length;$('calculate-yz').disabled=jobs.has('wave');
   $('show-slice').disabled=(!panel&&benchEditor.compact)||!planes.length||batchPending||pending;
-  $('show-slice').textContent=batchPending?`Computing ${Math.min(batch.completed+1,batch.total)}/${batch.total}`:pending?'Calculating…':benchEditor.compact?'Compute slice':'Compute all slices';
+  $('show-slice').textContent=batchPending?`Computing ${Math.min(batch.completed+1,batch.total)}/${batch.total}`:pending?'Calculating…':benchEditor.compact?'Compute':'Compute all slices';
   $('show-slice').title=benchEditor.compact?'Compute the observation screen':`Compute all ${planes.length} observation positions`;
   $('quality').disabled=false;screenMoved();
 }

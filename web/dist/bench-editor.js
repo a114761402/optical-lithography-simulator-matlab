@@ -11,7 +11,7 @@ export function setupBenchEditor({components,onSelect,onLayout}){
   launcher.onclick=()=>{$('display-dialog').close();open();};$('close-component').onclick=close;
   dialog.addEventListener('close',()=>{if(media.matches&&!document.querySelector('dialog[open]'))returnTarget()?.focus({preventScroll:true});});
   function adapt(){const wasOpen=dialog.open,compact=media.matches;close();document.body.classList.toggle('phone-bench',compact);(compact?$('component-editor-host'):$('bench-workspace')).append(inspector);onLayout();if(wasOpen&&!compact)inspector.querySelector('input,select,button')?.focus({preventScroll:true});}
-  menu.addEventListener('click',e=>{if(e.target.closest('button'))menu.open=false;});
+  menu.addEventListener('click',e=>{if(e.target.closest('button,a'))menu.open=false;});
   document.addEventListener('click',e=>{if(!menu.contains(e.target))menu.open=false;});
   menu.addEventListener('keydown',e=>{if(e.key==='Escape'){menu.open=false;menu.querySelector('summary').focus();}});
   media.addEventListener('change',adapt);

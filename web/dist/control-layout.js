@@ -96,6 +96,8 @@ export function setupControlLayout(){
   const expertDetail=detailToggle('expert-high-detail');$('calculate').after(expertDetail);
   const notice=document.createElement('p');notice.id='slice-compute-notice';notice.className='state-notice';notice.setAttribute('role','status');notice.hidden=true;controls.append(notice);
   function adaptPosition(){
+    const expertHome=media.matches?$('reference-title').parentElement:$('calculate').parentElement;
+    if(expertDetail.parentElement!==expertHome){if(media.matches){const mobileActions=$('mobile-position-actions');if(mobileActions)mobileActions.before(expertDetail);else expertHome.append(expertDetail);}else $('calculate').after(expertDetail);}
     const standard=media.matches&&nav.dataset.view==='explore';advanced.hidden=!standard;positionButton.hidden=!standard;action.hidden=media.matches&&!standard;
     if(standard){
       if(focus.parentElement!==advanced)advanced.append(focus,sliceBar);if(action.parentElement!==$('profile-menu'))$('profile-menu').prepend(action);action.after($('cancel-screen'),notice);

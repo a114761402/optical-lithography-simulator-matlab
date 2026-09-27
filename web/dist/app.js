@@ -8,12 +8,12 @@ import {renderWavePixels} from './wave-display.js?v=20260927-positions3';
 import {QUALITY,waveParameters} from './quality.js?v=20260927-positions3';
 import {waveCacheKey} from './cache.js?v=20260927-positions3';
 import {setupViewSwitch} from './view-switch.js?v=20260927-positions3';
-import {setupControlLayout} from './control-layout.js?v=20260927-polish3';
+import {setupControlLayout} from './control-layout.js?v=20260927-detail-heading';
 import {waveComponentSVG} from './wave-components.js?v=20260927-positions3';
-import {compactBench} from './compact-bench.js?v=20260927-polish3';
+import {compactBench} from './compact-bench.js?v=20260927-detail-heading';
 import {regionMarkup} from './path-layout.js?v=20260927-positions3';
-import {desktopBench} from './desktop-bench.js?v=20260927-polish3';
-import {setupBenchEditor} from './bench-editor.js?v=20260927-polish3';
+import {desktopBench} from './desktop-bench.js?v=20260927-detail-heading';
+import {setupBenchEditor} from './bench-editor.js?v=20260927-detail-heading';
 import {palette,lightRegion,RAY_BLUE,RAY_YELLOW} from './light-palette.js?v=20260927-positions3';
 import {createPlane,restorePlane,appendPositionGroup,markedPositions,quantizePosition,SliceBatch,createPlanes,PLANE_NAMES,tuningBase,observationZ,setObservation,tuneObservation,sliceKey,sliceRequest,acceptsSlice,screenSnapshot,referenceScreens,SliceCache} from './observation-state.js?v=20260927-detail1';
 import {setupObservationUI} from './observation-ui.js?v=20260927-positions3';
@@ -50,7 +50,7 @@ function observeCards(){for(const canvas of observedCards)if(!canvas.isConnected
 document.addEventListener('position-grid-updated',observeCards);observeCards();
 const mobilePositionActions=document.createElement('div');mobilePositionActions.id='mobile-position-actions';
 for(const [id,label,action]of [['undo-mobile-position','Undo',undoObservation],['add-mobile-position','＋',addObservation]]){const button=document.createElement('button');button.id=id;button.className='secondary';button.textContent=label;button.onclick=action;if(id.startsWith('undo'))button.hidden=true;else{button.title='Add two comparison positions';button.setAttribute('aria-label','Add two positions');}mobilePositionActions.append(button);}
-$('reference-title').after(mobilePositionActions);
+$('reference-title').parentElement.append(mobilePositionActions);
 
 function updatePresetInfo(){const choice=matchingPreset(p);presetInfo.innerHTML='<h3>Preset</h3><p>'+ (choice?choice.name:'Custom settings')+'</p><p>'+(choice?choice.description:'Your edited optical parameters.')+'</p>'+(choice?.url?'<a target="_blank" rel="noopener" href="'+choice.url+'">'+choice.source+'</a>':'')+'<p class="muted">Literature-inspired teaching examples; ideal scalar optics, not a reproduction of a published instrument.</p>';}
 function requestedWaveKey(){return waveCacheKey(waveParameters(p,$('wave-detail').value),$('wave-scope').value);}

@@ -8,16 +8,16 @@ import {renderWavePixels} from './wave-display.js?v=20260927-positions3';
 import {QUALITY,waveParameters} from './quality.js?v=20260927-positions3';
 import {waveCacheKey} from './cache.js?v=20260927-positions3';
 import {setupViewSwitch} from './view-switch.js?v=20260927-positions3';
-import {setupControlLayout} from './control-layout.js?v=desktop-actions-20260927-overview';
+import {setupControlLayout} from './control-layout.js?v=20260927-touch-explore';
 import {waveComponentSVG} from './wave-components.js?v=20260927-overview';
-import {compactBench} from './compact-bench.js?v=20260927-position-fit';
+import {compactBench} from './compact-bench.js?v=20260927-touch-explore';
 import {regionMarkup,waveView} from './path-layout.js?v=20260927-position-fit';
 import {desktopBench} from './desktop-bench.js?v=20260927-overview';
 import {setupBenchEditor} from './bench-editor.js?v=20260927-mobile-align';
 import {palette,lightRegion,RAY_BLUE,RAY_YELLOW} from './light-palette.js?v=20260927-positions3';
 import {createPlane,restorePlane,appendPositionGroup,markedPositions,quantizePosition,SliceBatch,createPlanes,PLANE_NAMES,tuningBase,observationZ,setObservation,tuneObservation,sliceKey,sliceRequest,acceptsSlice,screenSnapshot,referenceScreens,SliceCache} from './observation-state.js?v=20260927-position-fit';
-import {setupObservationUI} from './observation-ui.js?v=20260927-overview';
-import {setupScreenDrag} from './screen-drag.js?v=20260927-position-fit';
+import {setupObservationUI} from './observation-ui.js?v=20260927-touch-explore';
+import {setupScreenDrag} from './screen-drag.js?v=20260927-touch-explore';
 import {setupSliceShare} from './slice-share.js?v=20260927-controls1';
 import {SerialJobs} from './serial-jobs.js?v=20260927-positions3';
 import {restorePositions,hydratePositions,atReferencePositions,referenceDisplayMode} from './reference-positions.js?v=20260927-detail1';
@@ -28,6 +28,7 @@ const viewTabs=setupViewSwitch();
 const details=new DetailPreferences();
 const compactMedia=matchMedia('(max-width:780px), (max-width:1000px) and (max-height:600px)');
 let p=presetParams('default'),selected='pupil',rayMode='principal',result=null,screenResult=null,screenRevision=-1,yzResult=null,busy=false,revision=0,calculatedRevision=-1,activeJob=null;
+let dragLayout=null;
 let benchFrame=null,planes=createPlanes(),activeId=matchMedia('(max-width:780px), (max-width:1000px) and (max-height:600px)').matches?'D':null,lastPosition=450,removedPlane=null,previousLayout=null,batch=null;
 const activePlane=()=>planes.find(panel=>panel.id===activeId),sliceCache=new SliceCache();
 const screenParams=()=>({...p,...quality(),defocusUm:0});
@@ -40,7 +41,7 @@ let waveRequest=0,waveLoading=true,presetTicket=0;
 $('quality').value='fine';
 const keyHost=document.createElement('div');keyHost.id='mobile-key-grid-host';document.querySelector('#fixed-panel .results-heading').after(keyHost);
 const keyActions=document.querySelector('#fixed-panel .calculation-actions');
-for(const [id,label,action] of [['edit-key-positions','Edit',()=>{viewTabs.setEditing(!viewTabs.editing);activeId=null;refreshObservations();if(viewTabs.editing){$('bench-navigation').scrollIntoView({block:'start',behavior:'smooth'});}}],['reset-key-positions','Reset',useReferencePositions]]){const b=document.createElement('button');b.id=id;b.textContent=label;b.className='secondary';b.onclick=action;if(id==='reset-key-positions'){b.title='Restore default positions only';b.setAttribute('aria-label','Reset key positions');}keyActions.insertBefore(b,$('calculate'));}
+for(const [id,label,action] of [['edit-key-positions','Edit',()=>{viewTabs.setEditing(!viewTabs.editing);refreshObservations();if(viewTabs.editing){$('bench-navigation').scrollIntoView({block:'start',behavior:'smooth'});}}],['reset-key-positions','Reset',useReferencePositions]]){const b=document.createElement('button');b.id=id;b.textContent=label;b.className='secondary';b.onclick=action;if(id==='reset-key-positions'){b.title='Restore default positions only';b.setAttribute('aria-label','Reset key positions');}keyActions.insertBefore(b,$('calculate'));}
 const presetInfo=document.createElement('section');presetInfo.id='preset-info';$('display-dialog-controls').prepend(presetInfo);
 const smoothing=document.createElement('label');smoothing.id='smoothing-option';smoothing.innerHTML='<input type="checkbox" id="smooth-intensity" checked> Smooth intensity display';$('slice-settings').append(smoothing);$('smooth-intensity').onchange=()=>{drawResults();drawScreen();drawBench();renderInspectorPreview();};
 
@@ -77,7 +78,7 @@ function updateComponentSummary(){const g=geometry(p),detail={source:`${p.source
 function status(s){$('status').textContent=s;if(activeJob==='yz'||s.includes('cancelled')||s.includes('changed')||s.includes('stopped'))$('wave-status').textContent=s;}
 function currentZ(){return activePlane()?observationZ(activePlane(),geometry(p)):lastPosition;}
 function loadActiveScreen(){screenResult=activePlane()?.result||null;screenRevision=activePlane()?.resultRevision??-1;}
-function selectObservation(id){if(viewTabs.keyView&&!viewTabs.editing)return;if(!planes.some(panel=>panel.id===id))return;activeId=id;loadActiveScreen();syncScreen();drawBench();drawScreen();setBusy();}
+function selectObservation(id){if(!planes.some(panel=>panel.id===id))return;activeId=id;loadActiveScreen();syncScreen();drawBench();drawScreen();setBusy();}
 function markChanged(){revision++;presetTicket++;updatePresetInfo();waveRequest++;waveLoading=false;$('preset').value='';if(result)status('Settings changed — displayed fields are from the previous calculation.');else status('Ready to calculate.');cancel(false);sliceCache.clear();fixedImageSaved=null;for(const panel of planes){panel.generation++;tuneObservation(panel,geometry(p),panel.offset);}yzResult=null;$('yz-note').textContent='Each column is normalized; brightness cannot be compared along z.';drawYZ();drawBench();syncScreen();renderInspectorPreview();drawScreen();restoreDefaultWave();}
 
 function inputControl(key,label,min,max,step,unit=''){const wrap=document.createElement('div');wrap.className='control';const labelEl=document.createElement('label');labelEl.htmlFor=`${key}-number`;const name=document.createElement('span');name.className='parameter-name';name.textContent=label;labelEl.append(name);const nf=document.createElement('span');nf.className='number-field';const num=document.createElement('input');num.type='number';num.inputMode='decimal';num.min=min;num.max=max;num.step=step;num.value=p[key];num.id=`${key}-number`;num.setAttribute('aria-label',`${label}${unit?' in '+unit:''}`);nf.append(num);if(unit){const suffix=document.createElement('span');suffix.className='field-unit';suffix.textContent=unit;suffix.setAttribute('aria-hidden','true');nf.append(suffix);}labelEl.append(nf);const range=document.createElement('input');range.type='range';range.id=`${key}-range`;range.min=min;range.max=max;range.step=step;range.value=p[key];range.setAttribute('aria-label',label);function change(v){if(v.trim()==='')return;const value=Math.min(max,Math.max(min,Number(v)));if(!Number.isFinite(value))return;range.value=value;num.value=value;p[key]=value;if(key==='maskSizeUm'){p.fieldSizeUm=Math.max(p.fieldSizeUm,Math.ceil(value*4/3/10)*10);const el=$('fieldSizeUm-number');if(el){el.value=p.fieldSizeUm;$('fieldSizeUm-range').value=p.fieldSizeUm;}}if(key==='sourceOuter'&&p.sourceInner>=p.sourceOuter)p.sourceInner=p.sourceOuter*.65;markChanged();if(selected==='mask')$('component-note').textContent=`The 50.8 mm plate is illustrative. Only the ${fmt(p.fieldSizeUm)} µm local window is calculated; everything outside it is blocked.`;}range.addEventListener('input',()=>change(range.value));num.addEventListener('change',()=>{if(num.value.trim()==='')num.value=p[key];else change(num.value);});wrap.append(labelEl,range);return wrap;}
@@ -136,9 +137,10 @@ function lensDiagram(h=63,w=13){return `<path d="M0 ${-h}Q${-w*2} 0 0 ${h}Q${w*2
 const defs=`<defs><linearGradient id="glass"><stop stop-color="#8cc6ea" stop-opacity=".65"/><stop offset=".45" stop-color="#eaf8ff" stop-opacity=".3"/><stop offset="1" stop-color="#68aad6" stop-opacity=".65"/></linearGradient><radialGradient id="soft"><stop stop-color="#e6ad52" stop-opacity=".7"/><stop offset=".6" stop-color="#e6ad52" stop-opacity=".25"/><stop offset="1" stop-color="#e6ad52" stop-opacity="0"/></radialGradient></defs>`;
 function renderInspectorPreview(){updateComponentSummary();if($('save-fixed-image'))$('save-fixed-image').disabled=!fixedImageResult();if($('go-fixed-image'))$('go-fixed-image').disabled=!activePlane();if($('fixed-image-status'))$('fixed-image-status').textContent=fixedImageResult()?'Fixed image plane':'Compute a slice at the image plane to update this preview.';let content;if(selected==='source')content=`<image href="${imageDataURL('source')}" x="-40" y="-40" width="80" height="80"/>`;else if(selected==='pupil')content=`<image href="${imageDataURL('pupil')}" x="-42" y="-42" width="84" height="84"/>`;else if(selected==='mask')content=`<g transform="scale(.85)">${maskDiagram()}</g>`;else if(selected==='image'&&fixedImagePicture(imageZoom))content=`<image href="${fixedImagePicture(imageZoom)}" x="-36" y="-40" width="72" height="80"/>`;else if(selected==='image')content='<rect x="-32" y="-38" width="64" height="76" rx="3" fill="#eef7ff" stroke="#7fa1bd"/>';else content=`${lensDiagram(37,13)}<path d="M-63-23 0-23 57 0M-63 23 0 23 57 0" fill="none" stroke="${selected==='condenser'?RAY_YELLOW:RAY_BLUE[0]}" stroke-width="1.5"/><text x="49" y="17" font-size="10" fill="#54708c">F</text>`;$('component-preview').innerHTML=`<svg viewBox="-75 -46 150 92" aria-hidden="true">${defs}${content}</svg>${selected==='pupil'?'<span class="aperture-legend"><span><i class="transmits"></i>White: passes light</span><span><i class="blocks"></i>Black: blocks light</span><small>Front view · opening shape</small></span>':''}`;}
 function drawBench(){
+  const focusedMarker=document.activeElement?.dataset?.positionMarker;
   const host=$('bench'),restoreFocus=document.activeElement?.hasAttribute('data-observation-screen'),width=Math.max(1,$('bench-wrap').clientWidth-16),mode=benchEditor.compact?'many':rayMode;
   $('beam-regions').innerHTML=regionMarkup(geometry(p));
-  if(benchEditor.compact){const drawing=compactBench({width,geometry:geometry(p),params:p,components,selected,screen:activePlane()?currentZ():null,pupilValue,mode,observations:viewTabs.keyView?markedPositions(planes.map(panel=>({id:panel.id,z:observationZ(panel,geometry(p))})),activeId,4):[],activeId});host.setAttribute('viewBox',`0 0 ${width} ${drawing.height}`);host.classList.add('compact-beam');host.innerHTML=drawing.svg;bindBench();return;}
+  if(benchEditor.compact){const drawing=compactBench({width,geometry:geometry(p),params:p,components,selected,screen:activePlane()?currentZ():null,pupilValue,mode,dragLayout,observations:viewTabs.keyView?markedPositions(planes.map(panel=>({id:panel.id,z:observationZ(panel,geometry(p))})),activeId,4):[],activeId});host.setAttribute('viewBox',`0 0 ${width} ${drawing.height}`);host.classList.add('compact-beam');host.innerHTML=drawing.svg;bindBench();if(focusedMarker)host.querySelector(`[data-position-marker="${focusedMarker}"]`)?.focus({preventScroll:true});else if(restoreFocus)host.querySelector('[data-observation-screen]')?.focus({preventScroll:true});return;}
   const drawing=desktopBench({width,height:240,geometry:geometry(p),params:p,components,selected,screen:activePlane()?currentZ():null,pupilValue,mode,defs,lensDiagram,maskDiagram,observations:markedPositions(planes.map(panel=>({id:panel.id,z:observationZ(panel,geometry(p))})),activeId,8),activeId,pictures:{source:benchPattern('source'),pupil:benchPattern('pupil'),image:fixedImagePicture()}});
   host.setAttribute('viewBox',`0 0 ${width} ${drawing.height}`);host.classList.remove('compact-beam');host.innerHTML=drawing.svg;
 
@@ -159,10 +161,10 @@ function syncFocus(){
 function syncScreen(){
   fieldEdits.z=false;fieldEdits.offset=false;
   if($('go-fixed-image'))$('go-fixed-image').disabled=!activePlane();
-  syncFocus();const g=geometry(p),panel=activePlane(),at=currentZ();for(const id of ['plane','slice-z','screen-slider'])$(id).disabled=!panel;
+  syncFocus();const g=geometry(p),panel=activePlane(),at=currentZ();$('active-observation').classList.toggle('no-active-position',!panel);for(const id of ['plane','slice-z','screen-slider'])$(id).disabled=!panel;
   if(!panel){$('plane').value='';$('slice-z').value='';$('slice-z').placeholder='—';$('screen-slider').value=at;document.dispatchEvent(new Event('observation-position-change'));$('active-observation').textContent=planes.length?'Select an image to edit its position':'Add a position to start';syncWaveCursor();return;}$('plane').value=panel.offset!==0?'custom':panel.plane;$('slice-z').value=fmt(at,3);$('slice-z').max=Math.ceil(g.max*1000)/1000;$('screen-slider').max=g.image;$('screen-slider').value=at;
   const label=PLANE_NAMES[panel.plane];$('screen-location').textContent=`${label} · z = ${fmt(at,3)} mm`;
-  $('active-observation').innerHTML=`Editing <b>${panel.id}</b> ${panel.offset===0?label:'Custom position'}`;
+  $('active-observation').innerHTML=`<span class="phone-label">Editing </span><b aria-label="Observation ${panel.id}">${panel.id}</b><span class="phone-label"> ${panel.offset===0?label:'Custom position'}</span>`;
   document.dispatchEvent(new Event('observation-position-change'));syncWaveCursor();
 }
 function positionChanged(){
@@ -224,7 +226,7 @@ function computeSlices(all=false){
   $('slice-compute-notice').hidden=true;
   batch=new SliceBatch(targets);const ticket=batch;
   for(const panel of targets)calculate('screen',requested,panel,ticket);
-  if(benchEditor.compact&&viewTabs.keyView&&viewTabs.editing){const anchor=document.querySelector('#fixed-panel .results-heading'),top=anchor.getBoundingClientRect().top;viewTabs.setEditing(false);activeId=null;refreshObservations();window.scrollBy(0,anchor.getBoundingClientRect().top-top);}
+  if(benchEditor.compact&&viewTabs.keyView&&viewTabs.editing){const anchor=document.querySelector('#fixed-panel .results-heading'),top=anchor.getBoundingClientRect().top;viewTabs.setEditing(false);refreshObservations();window.scrollBy(0,anchor.getBoundingClientRect().top-top);}
   setBusy();
 }
 function cancelScreens(){
@@ -245,7 +247,6 @@ function removeObservation(id){
 function addObservation(){
   commitPositionFields();previousLayout={planes:planes.map(panel=>({...panel})),activeId,lastPosition};removedPlane=null;
   const added=appendPositionGroup(planes,benchEditor.compact?2:4);observationUI.render();
-  if(benchEditor.compact){viewTabs.setEditing(true);}
   activeId=added[0].id;refreshObservations();observationUI.notice('Added '+added.map(p=>p.id).join('–'));
   $('slice-panel-'+activeId).focus({preventScroll:true});$('slice-panel-'+activeId).scrollIntoView({block:'nearest',behavior:'smooth'});
 }
@@ -367,7 +368,7 @@ $('yz-canvas').onclick=e=>{if(!yzResult)return;const r=e.target.getBoundingClien
 window.addEventListener('resize',()=>requestAnimationFrame(()=>{drawBench();drawYZ();drawScreen();if($('profile-dialog').open)drawProfile();}));
 $('component-picker').onchange=()=>{selected=$('component-picker').value;renderInspector();drawBench();};
 $('yz-canvas').onkeydown=e=>{if(!yzResult)return;if(['ArrowLeft','ArrowRight','Home','End'].includes(e.key)){e.preventDefault();const view=waveView(yzResult),step=(view.zMax-view.zMin)/(e.shiftKey?1000:100);selectWavePosition(e.key==='Home'?view.zMin:e.key==='End'?view.zMax:Math.min(view.zMax,Math.max(view.zMin,currentZ()+(e.key==='ArrowRight'?step:-step))));}};
-setupScreenDrag($('bench'),{geometry:()=>geometry(p),currentZ,onMove:setPosition,onSelect:selectObservation,onStart:()=>viewTabs.showObservation(),compact:()=>benchEditor.compact});
+setupScreenDrag($('bench'),{geometry:()=>geometry(p),currentZ,onMove:setPosition,onSelect:selectObservation,onStart:()=>viewTabs.showObservation(),compact:()=>benchEditor.compact,onDragStart(id,z){dragLayout={id,z,labels:Object.fromEntries([...$('bench').querySelectorAll('[data-position-marker]')].map(el=>[el.dataset.positionMarker,Number(el.dataset.labelX)]))};},onDragEnd(){dragLayout=null;drawBench();}});
 function syncDetailControls(){
   for(const toggle of document.querySelectorAll('[data-high-detail]'))toggle.checked=details.get(compactMedia.matches,viewTabs.keyView);
 }
@@ -377,7 +378,7 @@ for(const toggle of document.querySelectorAll('[data-high-detail]'))toggle.addEv
 compactMedia.addEventListener('change',syncDetailControls);syncDetailControls();
 document.addEventListener('position-view-change',()=>{
   syncDetailControls();
-  if(viewTabs.keyView&&!viewTabs.editing)activeId=null;
+
   if(!viewTabs.keyView&&benchEditor.compact&&!activePlane())activeId=planes.find(p=>p.id==='D')?.id||planes[0]?.id||null;
   $('edit-key-positions').textContent=viewTabs.editing?'Done':'Edit';
   syncScreen();drawScreen();drawBench();setBusy();
@@ -402,7 +403,7 @@ function panelState(panel){
 function screenMoved(){
   if(!$('observation-grid'))return;
   $('reference-positions').setAttribute('aria-pressed',String(atReferencePositions(planes)));
-  for(const panel of planes){const button=$('slice-panel-'+panel.id);$('zoom-position-'+panel.id).disabled=!panel.result;button.setAttribute('aria-pressed',String(panel.id===activeId));button.disabled=viewTabs.keyView&&!viewTabs.editing;$('slice-state-'+panel.id).textContent=panelState(panel);$('slice-state-'+panel.id).classList.toggle('fast-detail',panelState(panel)==='Fast');$('slice-state-'+panel.id).title=panel.error||'';const changed=panel.result&&!sameSlice(panel.result,screenParams(),observationZ(panel,geometry(p)));$('slice-target-'+panel.id).textContent=changed?`Target: ${fmt(observationZ(panel,geometry(p)),3)} mm`:'';}
+  for(const panel of planes){const button=$('slice-panel-'+panel.id);$('zoom-position-'+panel.id).disabled=!panel.result;button.setAttribute('aria-pressed',String(panel.id===activeId));button.disabled=false;$('slice-state-'+panel.id).textContent=panelState(panel);$('slice-state-'+panel.id).classList.toggle('fast-detail',panelState(panel)==='Fast');$('slice-state-'+panel.id).title=panel.error||'';const changed=panel.result&&!sameSlice(panel.result,screenParams(),observationZ(panel,geometry(p)));$('slice-target-'+panel.id).textContent=changed?`Target: ${fmt(observationZ(panel,geometry(p)),3)} mm`:'';}
   $('observation-state').textContent=panelState(activePlane());$('observation-state').classList.toggle('fast-detail',panelState(activePlane())==='Fast');$('screen-status').hidden=true;$('screen-status').textContent='';
 }
 function windowLabel(r){const width=r.screenHalf?2*r.screenHalf:r.screenAxis.at(-1)-r.screenAxis[0];return `${width>=.001?fmt(width*1e3)+' mm':fmt(width*1e6)+' µm'} window${r.dark?' · no light':''}`;}

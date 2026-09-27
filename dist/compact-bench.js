@@ -2,7 +2,7 @@ import {pathFrame} from './path-layout.js?v=20260927-position-fit';
 import {RAY_BLUE,RAY_YELLOW} from './light-palette.js?v=20260927-positions3';
 // A screen-sized schematic. z coordinates keep their physical scale; component
 // heights and ray heights are illustrative, just as in the large bench view.
-export function compactBench({width,geometry:g,params:p,components,selected,screen,pupilValue,mode='many',observations=[],activeId=null}){
+export function compactBench({width,geometry:g,params:p,components,selected,screen,pupilValue,mode='many',observations=[],activeId=null,dragLayout=null}){
   const height=164,{left,right,x:X}=pathFrame(width,g.image),cy=79;
   const positions=components.map(([key])=>X(g[key]));
   const number=n=>Number(n.toFixed(3));
@@ -29,12 +29,12 @@ export function compactBench({width,geometry:g,params:p,components,selected,scre
   });
   observations=observations.filter(o=>o.z>=0&&o.z<=g.image);
   const at=X(screen);
-  if(screen!==null&&screen>=0&&screen<=g.image)svg+=`<g aria-label="Selected observation plane"><title>Observation screen · z = ${number(screen)} mm</title><path d="M${at} 39V117" stroke="#155fdf" stroke-width="1.1" stroke-dasharray="3 3"/><path d="M${at-3} 36h6l-3 5Z" fill="#155fdf"/></g>`;
+  if(screen!==null&&screen>=0&&screen<=g.image)svg+=`<g class="compact-screen-handle" data-observation-screen role="slider" tabindex="0" aria-label="Observation screen position" aria-valuemin="0" aria-valuemax="${g.image}" aria-valuenow="${number(screen)}"><title>Observation screen · z = ${number(screen)} mm</title><path d="M${at} 39V117" stroke="#155fdf" stroke-width="1.1" stroke-dasharray="3 3"/><rect x="${at-6}" y="33" width="12" height="7" rx="3" fill="#155fdf"/><rect x="${Math.max(0,Math.min(width-44,at-22))}" y="28" width="44" height="32" fill="transparent"/><rect x="${Math.max(0,Math.min(width-24,at-12))}" y="60" width="24" height="53" fill="transparent"/></g><g class="drag-position-value" pointer-events="none" transform="translate(${Math.max(52,Math.min(width-52,at))},0)"><rect x="-51" y="1" width="102" height="23" rx="5" fill="#155fdf"/><text x="0" y="17" text-anchor="middle" font-size="12" fill="white">z = ${number(screen)} mm</text></g>`;
   for(const o of observations.filter(o=>o.muted))svg+=`<path data-position-tick="${o.id}" d="M${X(o.z)} 135v5" stroke="#b9c9d8"/>`;
-  const ordered=observations.filter(o=>!o.muted).map(o=>({...o,labelX:X(o.z)})).sort((a,b)=>a.z-b.z);
-  for(let i=1;i<ordered.length;i++)ordered[i].labelX=Math.max(ordered[i].labelX,ordered[i-1].labelX+23);
-  if(ordered.length){ordered.at(-1).labelX=Math.min(right-2,ordered.at(-1).labelX);for(let i=ordered.length-2;i>=0;i--)ordered[i].labelX=Math.min(ordered[i].labelX,ordered[i+1].labelX-23);}
-  for(const o of ordered){const active=o.id===activeId;svg+=`<g class="compact-position-marker" data-position-marker="${o.id}" aria-label="Position ${o.id} at ${number(o.z)} mm"><path d="M${X(o.z)} 113L${o.labelX} 119" fill="none" stroke="#9badbc"/><rect x="${o.labelX-9}" y="118" width="18" height="18" rx="3" fill="${active?'#155fdf':'#e6edf5'}"/><text x="${o.labelX}" y="131" text-anchor="middle" font-size="12" font-weight="600" fill="${active?'white':'#4e657b'}">${o.id}</text></g>`;}
+  const ordered=observations.filter(o=>!o.muted).map(o=>({...o,labelX:Math.max(22,X(o.z))})).sort((a,b)=>a.z-b.z);
+  for(let i=1;i<ordered.length;i++)ordered[i].labelX=Math.max(ordered[i].labelX,ordered[i-1].labelX+44);
+  if(ordered.length){ordered.at(-1).labelX=Math.min(width-22,ordered.at(-1).labelX);for(let i=ordered.length-2;i>=0;i--)ordered[i].labelX=Math.min(ordered[i].labelX,ordered[i+1].labelX-44);}
+  for(const o of ordered){if(dragLayout&&Number.isFinite(dragLayout.labels[o.id]))o.labelX=Math.max(22,Math.min(width-22,dragLayout.labels[o.id]+(o.id===dragLayout.id?X(o.z)-X(dragLayout.z):0)));const active=o.id===activeId;svg+=`<g class="compact-position-marker" data-position-marker="${o.id}" data-label-x="${o.labelX}" role="slider" tabindex="0" aria-label="Observation ${o.id} position" aria-valuemin="0" aria-valuemax="${g.image}" aria-valuenow="${number(o.z)}"><path d="M${X(o.z)} 113L${o.labelX} 119" fill="none" stroke="#9badbc"/><rect x="${o.labelX-9}" y="118" width="18" height="18" rx="3" fill="${active?'#155fdf':'#e6edf5'}"/><text x="${o.labelX}" y="131" text-anchor="middle" font-size="12" font-weight="600" fill="${active?'white':'#4e657b'}">${o.id}</text><rect x="${o.labelX-22}" y="105" width="44" height="44" fill="transparent"/></g>`;}
   for(const z of [0,g.mask,g.image])svg+=`<path d="M${X(z)} 136v6" stroke="#8ca0b0"/><text x="${X(z)}" y="157" text-anchor="${z===0?'start':z===g.image?'end':'middle'}" fill="#667d8f" font-size="12">${number(z)}${z===g.image?' mm':''}</text>`;
   return {svg,height};
 }

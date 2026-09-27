@@ -129,6 +129,9 @@ export function setupControlLayout(){
   const notice=document.createElement('p');notice.id='slice-compute-notice';notice.className='state-notice';notice.setAttribute('role','status');notice.hidden=true;controls.append(notice);
   function adaptPosition(){
     if(expertDetail.previousElementSibling!==$('reset-key-positions'))$('calculate').before(expertDetail);
+    const heading=$('reference-preset-row');
+    if(media.matches){if(sliceControls.parentElement!==sliceBar)sliceBar.append(sliceControls);}
+    else if(heading&&sliceControls.parentElement!==heading)heading.append(sliceControls);
     const standard=media.matches&&nav.dataset.view==='explore';advanced.hidden=!standard;positionButton.hidden=!standard;action.hidden=media.matches&&!standard;
     if(standard){
       if(focus.parentElement!==advanced)advanced.append(sliceBar,focus);if(action.parentElement!==$('profile-menu'))$('profile-menu').prepend(action);action.after($('cancel-screen'),notice);

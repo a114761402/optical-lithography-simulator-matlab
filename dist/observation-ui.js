@@ -2,7 +2,7 @@ export function setupObservationUI(getPlanes,{onSelect,onRemove,onAdd,onUndo,onR
   const $=id=>document.getElementById(id),grid=document.createElement('div');
   grid.id='observation-grid';grid.setAttribute('role','group');grid.setAttribute('aria-label','Observation positions');
   $('observation-layout').before(grid);
-  const preset=document.createElement('div');preset.id='reference-preset-row';preset.innerHTML='<span>Explore any position</span><button type="button" id="reference-positions" class="secondary" title="Restore Pupil, Mask, Aperture and Image positions">Default positions</button>';
+  const preset=document.createElement('div');preset.id='reference-preset-row';preset.innerHTML='<span>Explore</span><button type="button" id="reference-positions" class="secondary" title="Restore Pupil, Mask, Aperture and Image positions">Default positions</button>';
   $('position-controls').before(preset);$('reference-positions').onclick=onReference;
   const toolbar=document.createElement('div');toolbar.className='observation-toolbar';
   toolbar.innerHTML='<button id="add-position" class="secondary" type="button" aria-label="Add position group" title="Add four comparison positions">＋</button><span id="removed-position" role="status"></span><button id="undo-position" class="quiet" type="button" hidden>Undo</button>';

@@ -1,0 +1,269 @@
+## 2026-09-27 — reference preset and compact wave controls
+
+Desktop uses one Explore workspace with Reference positions and one-step Undo. The preset restores A Source / B Mask / C Aperture plane / D Image Plane, follows current geometry, resets offsets, retains optical parameters and reuses matching slice caches. Restored and added cards share a single identity sequence; replaced workers cannot attach to them. All four default views display intensity. Source distribution and Mask/Aperture openings remain available in Settings for exact, current reference planes; opening modes are labelled and switch back to intensity when moved. Enlarged views follow the selected display mode; intensity profiles are disabled for opening/distribution displays.
+
+Both layouts use a 3 px section separator and Compute full path (Compute near mask for that selected region). Desktop Compute all slices and the wave action are 176 x 44 px and vertically aligned. The desktop Image symbol is a white screen. Mobile keeps Explore / Key positions, folds fine tuning by default with its 44 px touch area, removes numeric headings and captions, and uses 24 px titles with a 6 px image gap. Mobile Region and all wave settings are in overall Settings; window metadata is retained under Calculation details. Mobile Key positions and wave actions are 150 x 44 px, aligned at the right edge, including at 320 px.
+
+Verification:
+- 77 automated checks passed, including three new reference-preset tests, optical benchmarks against MATLAB reference cuts, cache integrity, view lifecycle, overlays and interpolation. The expensive fresh Fine cache recomputation was excluded because the optical engine and cached data are unchanged. Ten focused lifecycle/preset checks passed again after consolidating the shared position-identity module. Syntax and diff whitespace checks passed.
+- Desktop browser: removed B, moved D to Lens 1 + 0.5 micrometres, restored references from valid cache, then Undo restored A/C/D and D = 300.0005 mm. Restoring during a running batch cancelled the old positional work. Removing all four produced a functional empty state; Reference positions restored all four. Repeated restore/delete/add kept unique card identities and correct order.
+- Desktop browser: a real Preview Compute all slices batch finished with four current results and no queued/stale states. Source distribution, Mask Opening and Aperture Opening were verified in the merged grid. Fine tuning a Mask view removed its Opening label and selected intensity. Fixed Image symbol has no embedded image thumbnail.
+- Responsive browser widths 320, 390, 482, 844 landscape, 1024, 1280 and 1440: no horizontal overflow. Mobile Key positions and Explore both checked. Desktop cards remain square with aligned rows; both primary actions match size and right edge. Mobile headings have no numbers and no captions under images; Fine tuning stays collapsed with 44 px hit area. Wave Region exists only inside Settings on mobile and remains beside the wave on desktop.
+- Mobile Settings changes update the wave action to Compute near mask, preserve values across layout changes and route the computation correctly. Reset during wave work cancelled it and restored default Full path / Fine cache. This was a cancellation/reset test, not a completed near-wave benchmark.
+- Initial preview exposed a moved-control initialization error, corrected before final verification. No new warning/error messages appeared in subsequent interactions. Testing uses responsive browser viewports, not physical phones.
+
+## 2026-09-27 — unified settings, illumination terminology and aligned comparison views
+
+Desktop Reset now sits beside Experiment. Settings replaces the header overflow menu and contains shared slice detail/brightness/reference-display controls, separate wave controls and About. Region and XZ/YZ stay beside the wave. Fixed reference Compute slice and Update wave share a 140 × 44 px action column. Explore and Fixed reference views share the same square image layout; deleting cards no longer enlarges the remaining cards, and new cards retain insertion order. Phone navigation stays compact and Fine tuning follows its slider without extra spacing.
+
+Terminology distinguishes Source shape (illumination pupil) from Projection aperture / Aperture shape. The fixed third reference and observation location are Aperture plane. Annular illumination now sets an annular source with a circular projection aperture; the two shapes remain independent. Source painting uses Light/Dark, aperture painting uses Transmit/Block. Numerical engine and default Fine data are unchanged.
+
+Verification:
+- 32 automated checks passed: 28 observation lifecycle, geometry, palette, component-overlay and new experiment/label tests, plus 4 cache integrity/parameter matching tests. Initial failures were the two intentionally changed display-label expectations; these were updated while retaining the numerical array/axis comparisons. Syntax and whitespace checks passed.
+- Browser: Annular illumination selects Source shape = Annular and Aperture shape = Circular; changing the aperture does not alter the source. A real Standard annular-source calculation completed (2.8 s), displaying a ring source. The default circular wave cache is rejected for that changed source.
+- Browser: Settings retains shared slice brightness, separate wave brightness and display selections through desktop/mobile changes. About opens and returns to Settings. Reset restores defaults and the saved Fine cache. Main desktop views contain no duplicate brightness selector or Display settings disclosure.
+- Desktop widths 1024, 1280 and 1440: Explore and Fixed images have matching x/width/height, square aspect ratio and matching 2/4-column breakpoints; approximate sides 431.28, 254.40 and 291.20 px respectively. Compute slice and Update wave have identical x/width/height at all three widths. No horizontal overflow.
+- Browser: removing A/B then adding them back retains C/D/A/B order; existing and uncalculated image tops are exactly aligned (622 px in the measured viewport). Compute reuses matching cached slices and keeps all image tops aligned. There is no 7 px shift for new cards.
+- Phone widths 320, 390, 482 and 844 landscape: no overflow in either view. Fine tuning starts collapsed; slider and summary retain 44 px touch areas, with zero extra gap. Reset stays in the header; phone overflow and local wave settings remain available. Fixed images retain the concise mobile captions.
+- Browser console recorded no warning/error logs. Responsive tests use browser viewports, not physical phones. Screenshot capture in the in-app browser produced clipping/stitching artifacts at some desktop overrides; layout measurements and desktop dialog inspection were used alongside the clean normal-size phone screenshot. No optical engine or Fine cache recomputation was required.
+
+## 2026-09-27 — complete reset and compact mobile references
+
+A visible header Reset restarts the bench with all startup defaults, stops current work, resets browser-restored form values, and restores the default Fine wave cache. Beam region labels sit above the diagram; beam and wave region labels are bold. On mobile, Source/Mask/Pupil display selectors move into More options → Display settings, with the original controls and handlers retained. Completed timing/grid detail is available only in the settings disclosure. Active calculation progress, stale-result notices and reference calculation errors remain visible.
+
+Verification:
+- 24 existing observation lifecycle, geometry, palette and overlay checks passed. JavaScript syntax and whitespace checks passed. Optical equations and saved Fine data were unchanged.
+- Browser mobile Reset: changed all three reference display selectors, detail, brightness, experiment, wave region and opened tuning; Reset restored circular pupil, Standard XY detail, all default display modes, Image at 450 mm, four positions, zero offset, collapsed tuning and the saved 512 × 512 / 445-emitter Fine wave.
+- Browser desktop Reset: changed aperture, ray visibility, wave detail/section/brightness/components, comparison brightness and fine offset; deleted A and C, started the remaining two-view batch, then reset while computing. A–D returned, pending work was replaced by the startup calculation, and all controls returned to defaults.
+- Responsive widths 320, 390, 482, 844 landscape, 1024 and 1440: no horizontal overflow; Reset is 44 px high and fits in the header; region labels precede the beam, position controls remain below it. Reference selects move back to desktop captions without duplicate IDs or lost handlers.
+- At 320 px, mobile settings fit without internal horizontal overflow; selecting emitter weights updates the source image label. Changing detail shows Needs update; Update all views shows Calculating and progress, then hides completed timing/grid text.
+- Screenshots reviewed for desktop and mobile. No browser warning/error logs were recorded. Tests used responsive browser viewports, not physical phones. Failure-message rendering was inspected in code; no artificial worker failure was injected.
+
+## 2026-09-27 — batch observations, removable views and mobile sharing
+
+Desktop now computes every retained exploration view with one action (selected view first, serial workers, identical-position cache reuse). Views have stable letters, separate remove controls, Delete/Backspace shortcuts, Undo, Add and a zero-view state. Fine tuning precedes the final position/action row. Mobile tuning starts collapsed and retains explicit disclosure state; mobile Compute updates only its selected view. Mobile wave height is 110–128 px (100 px landscape); optical data and Fine cache remain unchanged. Mobile observation metadata is hidden, Send prepares a 768×768 PNG, and Profile has a border. Desktop contact and shared brightness selection were added.
+
+Verification:
+- 70 distinct automated checks passed: 66 numerical, geometry, interpolation, observation lifecycle and sharing tests, plus 4 cache validation tests. The expensive fresh Fine cache recomputation was not repeated; neither numerical engine nor cache data changed. After final overlay edits the 24 affected observation/geometry checks were rerun and passed.
+- Browser: one Compute completed three independent positions at 0, 200 and 240.0005 mm; selection remained C. During a Fine batch, deleting and restoring C reduced the original batch to A/B, left the restored C marked stale, and Cancel stopped the remaining batch without script errors.
+- Browser: remove non-selected B preserves D selection; Undo restores B; removal down to zero disables controls and removes bench observation markers; Add starts a new view. Delete on a card removes it; Delete inside z input does not remove any card.
+- Browser: mobile tuning starts collapsed, +0.5 µm remains indicated when collapsed, computation does not reopen it, and only the selected view becomes pending. Compute explicitly commits a typed position before starting.
+- Browser: Profile opens with its calculated curve. Send prepares a complete 768×768 PNG and exposes Save PNG/native Share. The save action was invoked, but the in-app browser download bridge did not return a file event/path; actual destination file delivery and physical-phone native email sharing remain unverified. File-support detection, unsupported fallback, successful share, cancellation and errors are covered by an isolated test. No email was sent.
+- Browser widths 320, 390, 430, 482, 844 landscape, 1024, 1280 and 1440: no horizontal overflow; action row below tuning; mobile action buttons have identical x/width/height. Desktop main and fine sliders have identical x/width. Desktop 1024 uses two columns; 1280/1440 use four. Phone wave height measured 110/117/128 px across portrait widths, 100 px landscape. Contact is hidden from the mobile footer.
+- Visual screenshots reviewed for desktop and phone. Physical iOS/Android devices and 200% text zoom were not tested. Optical/default cached data are unchanged.
+
+## 2026-09-27 — independent observation views and Fine tuning
+
+Implemented on desktop and mobile: arbitrary-position Fine tuning (±100 µm, 0.5 µm steps, clipped at path ends), yellow illumination/blue projection in rays and XY/XZ/YZ intensity, and compact stale-result badges retaining the actual calculated z.
+Desktop adds independent A–D views, a shared position editor, draggable/snapping screen and selectable position markers. Mobile keeps one observation image and visible Fine tuning. Fixed Image Plane remains unchanged.
+
+Verification:
+- 63 automated tests passed after the final functional edits: state isolation, stale/late result rejection, serial job replacement, bounded slice caching, physical snapping, all named/custom fine-tuning positions and boundaries, exact XY reference reuse, regional colour rendering, numerical and MATLAB parity, display interpolation and responsive geometry.
+- The separate fresh Fine cache comparison passed (96.6 s): independently recomputed cuts before/at/after the pupil agree with the existing cached data. Optical engine and cache data were not changed.
+- Browser: dragged the observation handle to Mask and verified exact 200 mm snap; keyboard movement worked. At 1024 px, desktop also retains the draggable handle.
+- Browser: D calculated at 200.0005 mm and B at 199.9995 mm while C remained selected at 400 mm. Results returned to D and B; C's view/profile did not change. Re-selecting D restored its +0.5 µm tuning offset, and Reset offset returned its target to 200 mm.
+- Browser: fixed Image Plane remained z = 450 mm after moving observation views.
+- Responsive browser checks: widths 320, 390, 430, 844 landscape, 1024, 1280, 1440; no horizontal page overflow. Fine tuning visible at all widths. Four views on desktop, single view on mobile. Real physical phones were not available for testing.
+- Browser screenshots verified warm illumination and blue projection; explicit asset versions avoid stale dependency colours after refresh.
+
+# Test report — 25 September 2026
+
+This is a chronological record. The final section describes the current release; earlier cache sampling and UI descriptions are historical.
+
+## Numerical tests
+
+27/27 passed with `npm test`. See `MATLAB_PARITY.md` for scenarios, tolerance, convergence results and limitations. MATLAB R2026a generated fresh wave-reference data during this update; reference fixtures are committed with their generator.
+
+## Browser checks
+
+Local HTTP preview in the Codex in-app browser. Checked real worker calculations, not mocked responses.
+
+- Initial standard image calculation: passed.
+- Full-path XZ preview: 128 grid, 25 emitters, 119 z planes; completed in about 27 seconds on this machine.
+- Near-mask wave calculation: 256 grid, point source, 61 z planes; completed in about 7 seconds.
+- Switching between XZ and YZ without recalculation: passed.
+- XYZ log display and −120 to 0 dB legend: passed.
+- Click near-mask plot midpoint → observation z = 200.1 mm → calculate XY slice: passed.
+- Cancel 512-grid wave job → controls usable again: passed.
+- Desktop 1440-pixel viewport: no page overflow; all four field canvases measured 220 × 220 CSS pixels.
+
+- Real numeric input: 11 µm window with a 20 µm mask rejects the calculation; previous valid XY result remains visible. Reset restores working settings.
+- Mobile 390 × 844 viewport: no page-level horizontal overflow; all four canvases measure 173 × 173 CSS pixels; controls and editor remain usable. The geometric bench scrolls horizontally inside its own panel.
+- Custom source painting dialog: clear → apply → calculate gives zero transmitted light.
+- Source weights, mask-exit intensity and shared log selectors: correct labels, no errors on zero fields.
+- Browser console warnings/errors during these interactions: none observed.
+
+A browser automation `fill` alone did not dispatch the committed numeric edit on this browser bridge. The test used a real ArrowUp edit before calculating; the settings and validation message then updated correctly.
+
+Coverage is on this machine/browser. No claim is made of exhaustive cross-browser support or convergence for every possible optical configuration.
+
+## Layout and precalculated startup update — 26 September 2026
+
+31/31 automated tests passed (27 optical tests plus 4 cache regressions). The Fine asset was generated from the current engine: 512 grid, 25 emitters, 119 planes, both raw central cuts; generation took 338.3 seconds. The saved image-plane cuts agree with a fresh Fine calculation to relative error below 10^-12. Tests reject mismatching parameters, model versions and malformed assets, and check the numerical-engine hash.
+
+Browser observations:
+
+- Fresh startup displays “Fine · saved calculation · matches the current optics” before the ordinary XY calculation finishes, without clicking Update wave.
+- Section order is bench, screen results, wave intensity; profile is initially closed.
+- Profile opens with the current result and physical z, closes with Escape, and returns focus to its button.
+- Changing the mask removes the cached wave. Reset restores it. Selecting Preview removes the Fine cache; selecting Fine restores it immediately.
+- XZ/YZ switching retains the cached result. Seven component symbols line up with the physical path.
+- 1440-pixel desktop and 390-pixel phone layouts have no page-level horizontal overflow. Mobile profile dialog fits within the viewport.
+- Footer shows Chuang Lu and the exact mailto contact luchuangl@gmail.com.
+
+The cache covers the default full path only. Changed optics and the near-mask region calculate on request, and Fine updates can take minutes. Cache transfer time depends on the connection; the asset is approximately 4.2 MB before HTTP compression.
+
+Final UI checks: mobile profile axes remain readable after resizing; its Close button works. Update wave reuses the matching Fine cache without starting a long job. Clicking the midpoint of the full wave plot selects z = 235 mm and “Show this slice” starts that XY calculation. No browser console warnings or errors were observed.
+
+## Annular pupil default — 26 September 2026
+
+Startup and Reset now select the existing annular-pupil experiment, with inner/outer radius 0.65. Other experiments retain their previous settings. The saved Fine wave uses the same annular parameters. Its 33 columns at/after the pupil were recomputed; 86 upstream columns were reused only after verifying identical upstream parameters, coordinates, and engine hash (this forward model has no pupil feedback upstream). Fresh Fine calculations at z = 200, 300, 400 and 450 mm match both cached cuts to relative error below 10^-12. Full regeneration remains available through `scripts/precompute-wave.mjs`.
+
+31/31 tests passed. A fresh browser page showed the annular experiment, pupil inspector and matching saved Fine wave. Changing to Circular and pressing Reset restored Annular with obstruction 0.65. No browser warnings or errors were observed.
+
+## Fixed key planes and independent observation screen — 26 September 2026
+
+34/34 automated tests passed. Three new regressions verify that moving the observation screen leaves Source, Mask, Pupil and the fixed Image arrays unchanged; defocus moves only the observation result; shared XY intensity reference stays at nominal focus; screen-only and combined calculations agree; progress completes and invalid z fails. The existing optical engine, MATLAB fixtures and precomputed Fine cache are unchanged.
+
+Browser checks in the Codex in-app browser:
+- Near-mask observation completed at z = 200.001 mm while the final Key planes plot remained Image plane at z = 450 mm. Its profile dialog identified Mask diffraction at the correct position.
+- Through-focus preset completed at Preview detail with the observation at z = 450.025 mm and fixed Image at z = 450 mm; its profile identified Through focus.
+- Reset restored the annular pupil and matching saved Fine wave.
+- Desktop (1440 × 1000) and phone (390 × 844) layouts were visually inspected. The phone page had no page-level horizontal overflow; the optical bench retains its intentional internal horizontal scroll. The observation panel and profile dialog fit the phone width.
+- Pupil preview now has one black plate with the actual white opening, plus explicit transmission/blocking labels. No overlapping gray mount.
+- Previous results remain labeled while position/settings are pending. Focus offset controls are only shown for Image / through focus.
+
+These are functional and regression checks, not a claim of convergence for all possible optical settings or exhaustive cross-browser compatibility.
+
+## Full Fine cache, touch layout and fixed positions — 26 September 2026
+
+**40/40 automated tests passed** with `npm test` (262.32 seconds). Fresh full Fine calculations at z = 200, 300, 400 and 450 mm match both cached cuts to relative error below 10^-12. Existing MATLAB XY and XZ/YZ fixture comparisons pass, as do the fixed-image, independent-screen, invalid-cache, propagation-cache and exact-center-cut regressions. `git diff --check` passed.
+
+The current startup asset uses the highest exposed Fine settings: a 512 × 512 mask grid, 2× propagation padding, 25 × 25 source bins (445 weighted emitters for the default source), and 119 physical z positions. Both XZ and YZ cuts are saved. Every plane was regenerated with all 445 emitters; no old source-reduced columns were reused. Generation took 831.972 seconds and the JSON is 4,222,316 bytes before compression.
+
+Exact calculation optimizations reuse immutable propagation kernels and Fourier transforms within a job, with a 128 MiB kernel-cache limit. LCT center cuts calculate the same bracketing rows/columns and interpolate intensity, matching the full two-dimensional transform; they do not reduce source or spatial sampling.
+
+Browser checks on the local release assets in the Codex in-app browser:
+
+- Fresh load displays the saved Fine path with 512 × 512, 445 emitters and 119 positions, without a wave calculation. Switching XZ/YZ and local/shared-log brightness retains the same cache. Update wave immediately reuses it.
+- A 0.5 µm observation offset updates the screen to z = 450.0005 mm after Show slice. The fixed Image Plane remains at z = 450 mm and the Fine cache remains valid. Numerical regression tests separately compare the fixed arrays.
+- Changing Annular to Circular invalidates the cached wave. Reset restores Annular and the matching Fine cache.
+- Key positions contains four compact plots; the fourth is always Image Plane. Observation screen has a separate result, position controls and profile dialog. Wave intensity is the last section.
+- The pupil inspector shows a single black plate and white transmitting opening with an explicit legend. The gray circular mount has been removed. The optical path and wave plot show component symbols and a linked observation marker.
+- Desktop, 390 × 844 portrait, 320 × 568 narrow portrait and 844 × 390 landscape were checked. No page-level horizontal overflow was found; the bench intentionally scrolls inside its panel. Relevant controls have at least 44 CSS-pixel touch targets. A component selector avoids requiring taps on small optical symbols.
+- At 200% text size in the 320-pixel layout, the component selector, plots and dialogs reflow without page overflow. The profile dialog remains scrollable, Escape closes it and focus returns to its opening button.
+- A real near-mask Preview wave completed; wave arrow-key selection and Show this slice worked. Cancellation retains the previous result and enables the controls again.
+- No browser console warnings or errors were observed in the final release-preview interactions after the new cache was available.
+
+Phone sizes were emulated on this computer, not tested on physical iPhone/Android devices. Fine is the highest current application setting, not proof of convergence for every configuration; the scalar, ideal-lens model limitations still apply.
+
+## Mobile view switch — 26 September 2026
+
+This update changes presentation and navigation only; the optical engine and highest-Fine cache asset are unchanged. The four fixed-plane/observation regressions passed again, both edited JavaScript modules passed syntax checks, and `git diff --check` passed.
+
+Browser checks on the final local assets:
+
+- At 390 × 844 and 320 × 568, Explore any position is first and selected by default. Only its panel is visible. Tapping Fixed reference planes displays the existing four plots; inactive-panel controls are not visible or keyboard-focusable.
+- The sliding thumb follows the selection. A horizontal drag on the switch and left/right keyboard navigation switch panels. Keyboard focus follows the selected tab.
+- Display settings holds the single existing detail selector and brightness selector. Changing Preview and shared-log updates those controls and the summary; switching panels retains their values and calculations.
+- Show slice completed at z = 200.001 mm while Image Plane remained at z = 450 mm and the highest-Fine wave cache remained valid.
+- From Fixed reference planes, selecting a wave position and pressing Show this slice automatically opens Explore any position and calculates the requested observation.
+- At 844 × 390, both modes still use the switch and the observation figure/control layout uses two columns. At 1280 × 900, both original desktop sections are visible, the switch is hidden, and detail/brightness return to their original locations without duplicate controls or tabpanel roles.
+- At 320 pixels with 200% text, both labels wrap, tabs remain usable, and there is no page-level horizontal overflow. Normal mobile tab targets are at least 52 CSS pixels tall.
+- No browser console warnings or errors were observed. Phone checks used emulated dimensions, not physical devices.
+
+## Desktop switch and circular default — 26 September 2026
+
+The sliding view selector now applies to every viewport, including desktop. The observation tab is first and selected on startup; Fixed reference planes shows Key positions. One panel remains visible when the viewport changes, and both share the same display controls. Startup and Reset now use Circular; the Annular preset still selects an annular opening with inner/outer radius 0.65.
+
+The optical engine is unchanged. The 35 optical, MATLAB-parity, independent-screen and wave-cut regressions passed again. JavaScript syntax checks and `git diff --check` passed.
+
+Browser checks:
+
+- Desktop at 1280 pixels shows the switch. Clicking each tab changes the visible panel, and left/right keys move selection and focus.
+- Resizing to 390-pixel portrait and back preserves the selected tab and keeps exactly one panel visible, with no page-level horizontal overflow.
+- Selecting the Annular experiment shows Annular; Reset restores the Circular opening and circular experiment label.
+- Show slice at z = 200.001 mm leaves the fixed Image Plane at z = 450 mm.
+
+For the circular Fine cache, the 86 raw upstream columns are reused only after matching the engine hash, complete coordinates and all non-pupil parameters against the previous 512-grid, 445-emitter asset. This forward model has no pupil feedback upstream. All 33 positions at or after the pupil, plus the common intensity reference, are recalculated with all 445 emitters. A new v4 parameter key and asset filename prevent displaying the previous annular cache as circular.
+
+The completed circular cache contains all 119 positions and both XZ/YZ cuts, uses 512 × 512 with 2× padding and 445 emitters, and is 4,181,732 bytes before compression. Updating it took 570.75 seconds. All five cache regressions passed, including independently recomputed full 2D Fine fields at z = 200, 300, 400 and 450 mm; relative cut errors remain below 10^-12 and the shared intensity references match. The four independent references now run in parallel, completing the cache suite in 97.19 seconds. Together with the 35 earlier regressions, **40/40 tests passed** for this release.
+
+A fresh browser load selected Circular, showed the desktop switch, and displayed the matching saved Fine wave automatically. On desktop, Show this slice from the wave plot returned from Fixed reference planes to Explore any position. Reset restored Circular and its saved wave. The obsolete annular startup asset is no longer shipped.
+
+
+## Smooth wave rendering — 26 September 2026
+
+The prior renderer selected the nearest z column and stretched it horizontally. Its changing transverse calculation windows consequently had visible staircase boundaries. The new renderer interpolates raw intensity and the transverse mesh between calculated planes, then applies the selected linear/log scale. Two horizontal subpixel samples and fractional vertical coverage antialias the computational-window boundary. Thin component changes are not blended upstream. The canvas supports device pixel density up to 2×; labels and component positions stay in CSS coordinates. Narrow-screen axes now show only the start, 200 mm and endpoint labels to avoid overlap.
+
+The seven new display tests cover all 119 exact cached planes for both XZ/YZ, physical coordinate interpolation, no source-data mutation, local/shared normalization, bounded interpolation, thin-component transitions, fractional edge coverage and dark/single-plane cases. Together with the 13 existing wave regressions (including MATLAB XZ/YZ comparisons), **20/20 tests passed**. The numerical engine, default parameters and highest-Fine circular cache are unchanged; the expensive full-cache reference suite was not repeated for this display-only update.
+
+Browser checks on the final local assets in the Codex in-app browser:
+
+- Desktop full-path XZ and YZ show continuous window edges. Local linear and shared logarithmic brightness render correctly.
+- Fresh load and Reset retain Circular and immediately display the saved Fine calculation: 512 × 512, 445 emitters and 119 z planes.
+- At 390 × 844 and 320 × 568, the wave plot fits the viewport with no page-level horizontal overflow. The final narrow axis labels do not overlap, and coordinate-label backgrounds fit their text. These are emulated sizes, not physical phone tests.
+- Selecting z = 0 with the wave plot and confirming Show this slice updates the independent observation to Source plane, while retaining the saved Fine wave.
+- No browser warnings or errors were observed.
+
+A local Node timing check of the pure renderer took 25 ms at 340 × 240, 34 ms at 1164 × 240 and 81 ms at 2328 × 480 pixels. These are developer-machine measurements, not phone performance guarantees. Smoother rendering does not claim additional numerical precision or convergence between saved planes.
+
+## Fit-to-width mobile bench — 26 September 2026
+
+The complete beam path now fits the phone width without an internal horizontal scroller. The mobile layout uses a compact schematic with More rays, a single header, a component summary and an on-demand bottom sheet. Desktop retains its ray controls and side inspector. The observation image is visible much earlier on the page. Numerical routines, defaults and the highest-Fine wave cache are unchanged.
+
+**14/14 targeted automated tests passed**: three compact-bench regressions, four fixed-plane/independent-observation regressions and seven smooth-wave rendering regressions. The compact tests include extreme geometry, proportional z coordinates, all seven components within bounds, selection/accessibility labels, finite output, ray modes and unchanged input parameters. The expensive full-cache numerical suite was not repeated for this presentation-only update.
+
+Browser checks in the Codex in-app browser:
+
+- Emulated 320 × 568, 390 × 844, 430 × 932, 844 × 390 and desktop 1280 × 900: no page-level horizontal overflow; complete optical path fits. Landscape uses the same compact schematic. The 390-pixel first viewport includes the whole beam path and observation image.
+- All seven component choices open the matching settings. Buttons in the sheet have at least 44-pixel targets. The 320-pixel sheet scrolls vertically and stays within the viewport.
+- Annular selection and a real numeric edit from NA 0.15 to 0.16 persist when resizing to desktop. The sheet closes and the same inspector returns to the sidebar. Closing the mobile sheet with Escape restores focus to the summary.
+- Nested Freeform pupil editing opens, Clear and Apply return to the component sheet, and Done returns to the page.
+- Show slice completed at z = 200.001 mm, while Key positions retained Image Plane at z = 450 mm. The two tabs remain usable.
+- About the model opens from More. Reset closes the menu, restores Circular and immediately displays the saved Fine wave (512 × 512, 445 emitters, 119 z planes).
+- No browser warnings or errors were observed.
+
+These are desktop browser simulations of phone dimensions, not physical iPhone/Android tests. Main-page contact details were removed; this update does not change the wave component overlay or optical precision.
+
+## Controls below the beam and in-plot components — 26 September 2026
+
+The shared view switch now sits immediately below the beam on desktop and phone. Observation position controls follow it and hide in Key positions mode. Components opens the existing mobile sheet from above the beam. Fine focus expands on demand; the profile is in the observation options menu. XZ/YZ have direct buttons. Normal cache/detail text and instructions are inside Wave settings; pending, progress, cancellation and error notices stay visible.
+
+Wave components are now a transparent SVG overlay on the intensity canvas, centered on the optical axis at the displayed calculation's z positions. The overlay has no pointer hit area and can be hidden. Image is a fixed symbol; the movable cursor uses a different colour/dashed line. Near-mask plots filter out components outside the displayed interval. The numerical engine and highest-Fine circular cache are unchanged.
+
+**17/17 targeted tests passed**: three new wave-overlay tests plus the existing compact-bench, independent-observation and smooth-wave-display regressions. Overlay tests cover physical coordinates at five widths and extreme focal-length/reduction settings, spacing, finite values, no mutation, near-mask clipping, sparse labels, annular obstruction and the fixed Image symbol. Syntax and whitespace checks passed. The expensive cache recalculation suite was not rerun for this UI change.
+
+Browser verification on local release assets:
+
+- 320 × 568, 390 × 844, 430 × 932, 844 × 390 and 1280 × 900 layouts: the path fits, with no page-level horizontal overflow. The switch sits directly under it on desktop and phone. XZ/YZ and settings controls have 44-pixel touch targets.
+- Explore/Key positions clicks and keyboard switching show the correct panel and hide/show observation controls. A 0.5 µm focus offset survives resizing from desktop to phone.
+- Moving the position slider to 0 updates the beam marker while the old figure remains labeled z = 450 mm and a pending notice appears. Show slice then displays z = 0 mm; the fixed Image remains z = 450 mm.
+- Observation options opens the profile. Escape closes it and restores focus to the options button. The normal page has no standalone profile link.
+- Wave settings reveals the full Fine/cache information. Show components hides/restores the SVG overlay. Switching to Near mask selects XZ and clears stale full-path symbols.
+- Cancellation makes Update wave usable again and shows a short notice. A real single-point-source, Preview near-mask calculation completed in 1.5 seconds, displaying only Mask. Clicking the midpoint selected z = 200.1 mm; Show this slice displayed that observation while fixed Image remained z = 450 mm.
+- An invalid 11 µm window with the default mask produced the visible wave error asking for a larger window. Reset restored Circular and the matching highest-Fine cache immediately.
+
+Responsive checks use desktop browser viewport emulation, not physical phone hardware. Component sizes are schematic; z positions are physical. No additional numerical accuracy is claimed by adding the overlay.
+
+
+## Compact wave plot height — 26 September 2026
+
+Reduced the wave canvas from 240 to 160 CSS pixels on desktop and mobile. Component symbols shrink vertically by the same ratio, with staggered desktop labels below the symbols. The canvas, component overlay and observation cursor retain matching heights. Physical coordinate ranges, wave data, numerical routines and the highest-Fine circular cache are unchanged.
+
+All 10 targeted wave-overlay and wave-display regressions passed. Existing overlay coverage now checks both 160- and 240-pixel heights and label clearance. Browser checks at emulated 320 × 568, 390 × 844 and desktop 1280 × 900 confirm no horizontal page overflow, readable symbols/labels, matching 160-pixel layers and working XZ/YZ switching. Clicking the plot midpoint at 320 pixels selected z = 235 mm correctly. The saved Fine calculation still loads at startup. No browser warnings or errors were observed. These checks use browser viewport simulation, not physical phones; the unchanged full numerical cache suite was not rerun.
+
+
+## Aligned diagrams, region labels and observation tools — 26 September 2026
+
+The desktop bench now draws in responsive coordinates, filling the available left column without horizontally stretching its component symbols. Wave intensity uses the same column, end insets and physical z domain; its controls occupy the right sidebar. Both diagrams label Illumination (source to mask) and Projection (mask to fixed image). The wave labels use displayed calculation geometry, and hide for unavailable or near-mask views.
+
+Mobile position controls have equal widths and 44-pixel heights, with compact plane names and a separate z-unit label. Display settings moves into a dialog reached through the main menu. Observation is a left-aligned square with its calculated-position metadata, enlargement and profile actions on the right. Desktop Fine focus is expanded; away from image/focus it is disabled and offers Return to image, preventing an unexpected jump. Mobile wave controls share a baseline, and the transverse ± labels are omitted. The numerical engine and highest-Fine circular cache are unchanged.
+
+**20/20 targeted tests passed** across path layout, compact bench, wave components, smooth wave display and fixed/independent views. New coverage verifies physical component coordinates at four desktop widths and extreme geometry, fixed region boundaries despite defocus, ray modes, no mutation and a movable marker independent of fixed components. Syntax and whitespace checks passed.
+
+Browser verification used the in-app browser at widths 320, 390, 430, 844 (landscape), 1280 and 1440. No page-level horizontal overflow was found. Mobile controls measured equal widths (90px at width 320; 112px at width 390) and at least 44px height. The wave canvas stays 160px high. Desktop component alignment was checked to subpixel display rounding.
+
+Verified settings dialog opening/closing and focus return, settings retention across desktop/mobile, independent observation at z = 200.001 mm, enlarged image and profile metadata matching that calculation, Escape dismissal, fixed Image Plane remaining at 450mm, and 0.5µm focus adjustment selecting z = 450.0005mm. Changing condenser focal length to 105mm moved mask/image references to 210/460mm and cleared the outdated wave; returning to Circular restored the Fine cache. XZ/YZ switching, shared-log display, component visibility and full/near selection also worked. No application warnings or errors were observed.
+
+These are browser-size simulations, not physical iPhone/Android tests. Interaction flows were exercised with keyboard and native select actions; automated pointer clicks in this in-app browser were unreliable and are not claimed as verified touch tests. The unchanged expensive numerical-cache suite was not rerun.

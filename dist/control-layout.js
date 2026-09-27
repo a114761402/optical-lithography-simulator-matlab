@@ -72,13 +72,27 @@ export function setupControlLayout(){
   const waveControls=main.querySelector('.wave-controls'),waveOptions=main.querySelector('.wave-options');
   const waveActionGroup=document.createElement('div');waveActionGroup.className='wave-action-group';main.querySelector('.wave-actions').before(waveActionGroup);waveActionGroup.append(main.querySelector('.wave-section-control'),main.querySelector('.wave-actions'));
   const waveOptionsBody=waveOptions.querySelector('.wave-options-body'),waveRegion=$('wave-scope').closest('label');
-  waveRegion.id='wave-region-setting';waveSettings.append(waveOptionsBody);
+  waveRegion.id='wave-region-setting';waveOptionsBody.prepend(waveRegion);
   const syncWaveAction=()=>{$('calculate-yz').textContent=$('wave-scope').value==='near'?'Compute near mask':'Compute full path';};
   $('wave-scope').addEventListener('change',syncWaveAction);syncWaveAction();
   const waveRegions=document.createElement('div');waveRegions.id='wave-regions';waveRegions.className='path-regions';waveRegions.setAttribute('aria-label','Wave illumination and projection regions');main.querySelector('.yz-wrap').before(waveRegions);
   const notes=document.createElement('details');notes.className='wave-notes';notes.innerHTML='<summary>Calculation details</summary>';
   for(const p of waveOptionsBody.querySelectorAll('p'))notes.append(p);
-  waveOptionsBody.append(notes);
+  const more=document.createElement('details');more.className='wave-more';more.innerHTML='<summary><span>More options</span></summary>';
+  for(const label of waveOptionsBody.querySelectorAll('.toggle-label'))more.append(label);
+  more.append(notes);waveOptionsBody.append(more);
+  const detail=$('wave-detail'),scale=$('wave-brightness');
+  detail.closest('label').firstChild.textContent='Calculation detail';
+  scale.closest('label').firstChild.textContent='Intensity scale';
+  scale.options[2].textContent='Logarithmic';
+  const detailHelp=document.createElement('p');detailHelp.className='wave-setting-help';detailHelp.textContent='Region or detail changes need Compute. Separate from slice High detail.';detail.closest('label').after(detailHelp);
+  const scaleHelp=document.createElement('p');scaleHelp.id='wave-scale-help';scaleHelp.className='wave-setting-help';scale.closest('label').after(scaleHelp);scale.setAttribute('aria-describedby',scaleHelp.id);
+  const updateScaleHelp=()=>{scaleHelp.textContent={local:'Each position has its own scale. Compare shape, not brightness.',shared:'One reference scale across the path. Compare relative intensity.','shared-log':'One logarithmic scale reveals weaker light.'}[scale.value]+' Display only; no recalculation.';};
+  scale.addEventListener('change',updateScaleHelp);updateScaleHelp();
+  const mobileWave=document.createElement('details');mobileWave.className='mobile-wave-options';mobileWave.innerHTML='<summary><span>Wave options</span></summary>';main.append(mobileWave);
+  const contact=document.querySelector('.site-contact');
+  waveControls.append(waveOptionsBody);waveSettings.querySelector('p').textContent='Region, calculation detail and intensity scale are beside the Wave intensity plot.';
+
   const focusHeading=document.createElement('div');focusHeading.className='focus-heading';focusHeading.innerHTML='<span>Fine tuning <small id="tuning-anchor"></small></span><button type="button" id="return-focus" class="quiet">Reset offset</button>';
   const fineContent=document.createElement('div');fineContent.className='fine-content';fineContent.append(focusHeading,$('focus-control'));focus.append(fineContent);
   const planeSelect=$('plane'),planeLabels=[...planeSelect.options].map(o=>o.textContent);
@@ -139,8 +153,8 @@ export function setupControlLayout(){
     for(const {node,home} of detailHomes)compact?referenceDetails.append(node):home.before(node);
     for(const {node,home,row} of windowHomes)compact?row.append(node):home.before(node);
     referenceDetails.append(referenceWindows);
-    sidebar.append(waveControls);waveControls.hidden=compact;
-    compact?waveSettings.querySelector('h3').after(waveRegion):waveControls.prepend(waveRegion);waveOptions.hidden=true;
+    compact?mobileWave.append(waveControls):sidebar.append(waveControls);
+    compact?wave.append(contact):sidebar.append(contact);mobileWave.hidden=!compact;waveControls.hidden=false;waveOptions.hidden=true;
     waveOptions.open=false;focus.open=compact?mobileFineOpen:true;shortenPlane();adaptPosition();
   }
   media.addEventListener('change',adapt);matchMedia('(max-width:350px)').addEventListener('change',adapt);adapt();

@@ -5,8 +5,8 @@ export function setupControlLayout(){
   $('bench-wrap').after(nav);
   const controls=$('observation-controls');controls.id='position-controls';nav.append(controls);
   controls.prepend(controls.querySelector('.screen-track'));
-  const notice=$('screen-status');notice.classList.add('state-notice');
-  $('observation-layout').after(notice,$('cancel-screen'));
+  const screenNotice=$('screen-status');screenNotice.classList.add('state-notice');
+  $('observation-layout').after(screenNotice,$('cancel-screen'));
   const focus=document.createElement('details');focus.id='focus-options';
   focus.innerHTML='<summary>Fine tuning <span id="focus-offset-label">0 µm</span></summary>';
   $('focus-control').before(focus);focus.append($('focus-control'));controls.append(controls.querySelector('.slice-bar'));
@@ -81,6 +81,28 @@ export function setupControlLayout(){
   function shortenPlane(){[...planeSelect.options].forEach((o,i)=>{o.textContent=media.matches&&o.selected?shortLabels[o.value]:planeLabels[i];});}
   function fullPlane(){[...planeSelect.options].forEach((o,i)=>{o.textContent=planeLabels[i];});}
   planeSelect.addEventListener('pointerdown',fullPlane);planeSelect.addEventListener('keydown',fullPlane);planeSelect.addEventListener('blur',shortenPlane);planeSelect.addEventListener('change',shortenPlane);
+  const advanced=document.createElement('details');advanced.id='standard-position-options';
+  advanced.innerHTML='<summary>Position settings <span id="standard-position-label">450 mm</span></summary>';controls.append(advanced);
+  const sliceBar=controls.querySelector('.slice-bar'),sliceControls=sliceBar.querySelector('.slice-controls');
+  const computeHome=document.createComment('slice action');$('show-slice').before(computeHome);
+  const action=document.createElement('div');action.className='slice-compute-action';action.append($('show-slice'));computeHome.after(action);
+  function detailToggle(id){const label=document.createElement('label');label.className='detail-toggle';label.title='Off: faster sampling. On: finer sampling. Existing high detail results are reused.';label.innerHTML=`<input id="${id}" type="checkbox" role="switch" data-high-detail><span>High detail</span>`;return label;}
+  action.append(detailToggle('slice-high-detail'));
+  const expertDetail=detailToggle('expert-high-detail');$('calculate').after(expertDetail);
+  const notice=document.createElement('p');notice.id='slice-compute-notice';notice.className='state-notice';notice.setAttribute('role','status');notice.hidden=true;controls.append(notice);
+  function adaptPosition(){
+    const standard=media.matches&&nav.dataset.view==='explore';advanced.hidden=!standard;action.hidden=media.matches&&!standard;
+    if(standard){
+      if(focus.parentElement!==advanced)advanced.append(focus,sliceBar);if(action.parentElement!==$('profile-menu'))$('profile-menu').prepend(action);action.after($('cancel-screen'),notice);
+    }else{
+      if(focus.parentElement!==controls)controls.append(focus,sliceBar);if(action.parentElement!==sliceControls)computeHome.after(action);
+      if(media.matches){$('calculate').closest('.calculation-actions').after($('cancel-screen'),notice);}
+      else{sliceBar.after($('cancel-screen'),notice);}
+    }
+    $('standard-position-label').textContent=$('slice-z').value?Number(Number($('slice-z').value).toFixed(3))+' mm':'';
+  }
+  document.addEventListener('position-view-change',adaptPosition);
+  document.addEventListener('observation-position-change',adaptPosition);
   const zLabel=$('slice-z').closest('label');zLabel.lastChild.textContent='';const unit=document.createElement('span');unit.className='z-unit';unit.textContent='mm';zLabel.append(unit);
   let phoneFocusOpen=false,adaptingFocus=false;
   focus.addEventListener('toggle',()=>{if(media.matches&&!adaptingFocus)phoneFocusOpen=focus.open;});
@@ -104,7 +126,7 @@ export function setupControlLayout(){
     referenceDetails.append(referenceWindows);
     sidebar.append(waveControls);waveControls.hidden=compact;
     compact?waveSettings.querySelector('h3').after(waveRegion):waveControls.prepend(waveRegion);waveOptions.hidden=true;
-    waveOptions.open=false;adaptingFocus=true;focus.open=compact?phoneFocusOpen:true;queueMicrotask(()=>adaptingFocus=false);shortenPlane();
+    waveOptions.open=false;adaptingFocus=true;focus.open=compact?phoneFocusOpen:true;queueMicrotask(()=>adaptingFocus=false);shortenPlane();adaptPosition();
   }
   media.addEventListener('change',adapt);adapt();
   // Programmatic changes of the position must update its compact label too.

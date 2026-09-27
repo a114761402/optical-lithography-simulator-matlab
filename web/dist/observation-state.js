@@ -67,5 +67,6 @@ export class SliceCache{
   constructor(limit=6){this.limit=limit;this.entries=new Map();}
   get(key){const value=this.entries.get(key);if(value){this.entries.delete(key);this.entries.set(key,value);}return value;}
   set(key,value){this.entries.delete(key);this.entries.set(key,value);while(this.entries.size>this.limit)this.entries.delete(this.entries.keys().next().value);}
+  values(){return [...this.entries.values()];}
   clear(){this.entries.clear();}
 }

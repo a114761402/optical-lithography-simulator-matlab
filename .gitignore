@@ -10,3 +10,6 @@ validation_artifacts/
 !docs/assets/*.png
 /outputs/*
 !/outputs/README.md
+
+# Local managed Sites checkout; web/ is the tracked source mirror.
+/optical-bench/

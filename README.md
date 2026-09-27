@@ -1,4 +1,4 @@
-# Optical Lithography Simulator · MATLAB
+# Optical Lithography Simulator · MATLAB & Browser
 
 Explore how illumination, a mask and a finite pupil form an optical image. Follow the wave field from the source to the image, inspect an XY slice, and see which mask details survive diffraction and imaging.
 
@@ -18,9 +18,15 @@ The figure is calculated from the startup settings: a 60 µm local pattern, 365 
 lithography_specular_gui
 ```
 
-Tested with **MATLAB R2026a on macOS**. Dependency analysis of the app entry point reports MATLAB only, with no additional toolbox requirement detected. MATLAB is required; this is not a browser app or a standalone executable. Other releases and operating systems have not been certified. No downloaded data or credentials are needed.
+Tested with **MATLAB R2026a on macOS**. Dependency analysis of the app entry point reports MATLAB only, with no additional toolbox requirement detected. This MATLAB edition requires MATLAB; the separate browser edition below does not. Other releases and operating systems have not been certified. No downloaded data or credentials are needed.
 
 The app starts at **Image, z = 450 mm**. The lower-right panel should show three bright lines. Select **Mask + 1 um** and **Show XY** to inspect near-mask diffraction. Click **Update YZ** for the full-path preview; automatic preview calculation is off initially.
+
+## Browser edition — no MATLAB needed
+
+The standalone website source, tests, and precomputed Fine fields are in [web/](web/README.md).
+
+From `web/`, run `python3 -m http.server 8765 --directory dist`, then open `http://127.0.0.1:8765`. Calculations run locally, with no API key. The interface supports desktop and mobile, four editable Key positions, five teaching presets, and XZ/YZ wave intensity. Each preset includes saved high-detail fields; source shape and projection aperture remain independent.
 
 ## What you can explore
 
@@ -41,6 +47,7 @@ optical-lithography-simulator-matlab/
 │   ├── config/                  Defaults, presets and settings checks
 │   ├── optics/                  Source, diffraction and imaging calculations
 │   └── ui/                      Plotting, editors and window helpers
+├── web/                         Standalone browser edition and its tests
 ├── tests/                       Numerical and display checks
 │   └── fixtures/                Mathematical benchmark settings
 ├── tools/                       Documentation figure generator

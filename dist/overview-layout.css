@@ -64,23 +64,39 @@ body:not(.phone-bench) .wave-sidebar{padding:0 20px 0 24px}
 .phone-bench.editing-key-positions #position-controls .slice-controls{grid-template-columns:minmax(84px,1fr) minmax(120px,1fr) 110px}
 @media(max-width:380px){.phone-bench.editing-key-positions #position-controls .slice-controls{grid-template-columns:minmax(90px,1fr) 110px}}
 
-/* Shared Wave options move as a single panel; all existing handlers stay attached. */
-.wave-controls .wave-options-body{display:grid;grid-template-columns:1fr;gap:16px;border:0;padding:0;margin:0}
-.wave-controls .wave-options-body>label{display:grid;gap:7px;font-size:.875rem}
-.wave-controls .wave-options-body select{width:100%;min-height:42px}
-.wave-setting-help{font-size:.75rem;line-height:1.5;color:var(--muted);margin:-8px 0 0}
-.wave-more{border-top:1px solid var(--line);padding-top:8px}
-.wave-more>summary,.mobile-wave-options>summary{cursor:pointer;min-height:44px;display:flex;align-items:center;justify-content:space-between;list-style:none;font-size:.875rem}
-.wave-more>summary:after,.mobile-wave-options>summary:after{content:'⌄';color:var(--muted)}
-.wave-more[open]>summary:after,.mobile-wave-options[open]>summary:after{content:'⌃'}
+/* Keep the plot controls light; detailed settings stay in the Settings dialog. */
+body .wave-section,body:not(.phone-bench) .wave-section{border-top:3px solid #9aadc3}
+body:not(.phone-bench) .wave-section{align-items:stretch}
+body:not(.phone-bench) .wave-sidebar{display:flex;flex-direction:column;justify-content:space-between}
+.wave-sidebar .wave-controls{display:block}
+.wave-sidebar #wave-region-setting{display:grid;gap:7px}
+.wave-title-group{display:flex;align-items:center;gap:22px;flex-wrap:wrap}
+.wave-title-group .eyebrow{display:none}
+.wave-title-group h2{white-space:nowrap}
+.wave-detail-toggle{white-space:nowrap;flex:none;min-height:44px}
+.wave-sidebar .site-contact,.wave-section>.site-contact{width:100%;max-width:none;margin:20px 0 0;padding:14px 0 0;border-top:1px solid var(--line);font-size:.8125rem;line-height:1.6;gap:4px 8px;display:flex;flex-wrap:wrap}
+.wave-sidebar .site-contact a{flex-basis:100%;width:fit-content}
+#global-wave-settings .wave-options-body{border:0;padding:0;gap:12px 16px}
+#global-wave-settings .wave-options-body>label{display:grid;gap:7px}
+#global-wave-settings .wave-options-body>p{grid-column:1/-1}
+#global-wave-settings .wave-setting-help{font-size:.75rem;line-height:1.5;color:var(--muted);margin:0}
+#global-wave-settings .wave-more{grid-column:1/-1;border-top:1px solid var(--line);padding-top:8px}
+.wave-more>summary{cursor:pointer;min-height:44px;display:flex;align-items:center;justify-content:space-between;list-style:none;font-size:.875rem}
+.wave-more>summary:after{content:'⌄';color:var(--muted)}
+.wave-more[open]>summary:after{content:'⌃'}
 .wave-more .toggle-label{display:flex;align-items:center;gap:8px;min-height:40px;font-size:.8125rem}
 .wave-more input{width:18px;height:18px}
 .wave-more .wave-notes{font-size:.8125rem;line-height:1.5}
-.wave-more .wave-notes>summary{min-height:40px;cursor:pointer;padding-top:10px}
-.wave-sidebar .wave-controls{display:block}
-.wave-sidebar .site-contact,.wave-section>.site-contact{width:100%;max-width:none;margin:20px 0 0;padding:16px 0 0;border-top:1px solid var(--line);font-size:.8125rem;line-height:1.6;gap:4px 8px;display:flex;flex-wrap:wrap}
-.wave-sidebar .site-contact a{flex-basis:100%;width:fit-content}
-.phone-bench .mobile-wave-options{margin:14px 0 0;border-top:1px solid var(--line)}
-.phone-bench .mobile-wave-options .wave-controls{display:block;margin:8px 0 16px}
-.phone-bench .wave-controls .wave-options-body{grid-template-columns:1fr}
-.phone-bench .wave-section>.site-contact{margin-top:16px}
+.wave-more .wave-notes>summary{min-height:40px;cursor:pointer}
+.phone-bench .wave-title-group{gap:10px;flex-wrap:nowrap}
+.phone-bench .wave-detail-toggle{font-size:.8125rem;gap:5px}
+@media(max-width:560px){
+ .phone-bench .wave-heading{flex-wrap:wrap!important;gap:6px}
+ .phone-bench .wave-heading>.wave-title-group{flex:1 0 100%!important;justify-content:space-between}
+ .phone-bench .wave-heading .wave-action-group{width:100%!important;justify-content:flex-end!important}
+}
+@media(min-width:781px) and (max-width:1100px){
+ body:not(.phone-bench) .wave-title-group{gap:10px}
+ body:not(.phone-bench) .wave-heading{flex-wrap:wrap!important}
+ body:not(.phone-bench) .wave-heading>.wave-title-group{flex-basis:100%!important;justify-content:space-between}
+}

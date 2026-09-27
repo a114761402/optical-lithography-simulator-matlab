@@ -89,9 +89,15 @@ export function setupControlLayout(){
   const scaleHelp=document.createElement('p');scaleHelp.id='wave-scale-help';scaleHelp.className='wave-setting-help';scale.closest('label').after(scaleHelp);scale.setAttribute('aria-describedby',scaleHelp.id);
   const updateScaleHelp=()=>{scaleHelp.textContent={local:'Each position has its own scale. Compare shape, not brightness.',shared:'One reference scale across the path. Compare relative intensity.','shared-log':'One logarithmic scale reveals weaker light.'}[scale.value]+' Display only; no recalculation.';};
   scale.addEventListener('change',updateScaleHelp);updateScaleHelp();
-  const mobileWave=document.createElement('details');mobileWave.className='mobile-wave-options';mobileWave.innerHTML='<summary><span>Wave options</span></summary>';main.append(mobileWave);
   const contact=document.querySelector('.site-contact');
-  waveControls.append(waveOptionsBody);waveSettings.querySelector('p').textContent='Region, calculation detail and intensity scale are beside the Wave intensity plot.';
+  waveSettings.append(waveOptionsBody);waveSettings.querySelector('p').textContent='High detail uses Fine sampling; off uses Preview. Changes take effect when you Compute.';
+  const waveDetail=document.createElement('label');waveDetail.className='detail-toggle wave-detail-toggle';waveDetail.title='Wave only. Off: Preview sampling. On: Fine sampling.';
+  waveDetail.innerHTML='<input id="wave-high-detail" type="checkbox" role="switch" aria-label="Wave high detail"><span>High detail</span>';
+  const waveHigh=waveDetail.querySelector('input');
+  const syncWaveDetail=()=>{waveHigh.checked=detail.value==='512';};
+  waveHigh.addEventListener('change',()=>{detail.value=waveHigh.checked?'512':'128';detail.dispatchEvent(new Event('change',{bubbles:true}));});
+  detail.addEventListener('change',syncWaveDetail);syncWaveDetail();
+  const waveTitleGroup=$('wave-title').parentElement;waveTitleGroup.classList.add('wave-title-group');waveTitleGroup.append(waveDetail);
 
   const focusHeading=document.createElement('div');focusHeading.className='focus-heading';focusHeading.innerHTML='<span>Fine tuning <small id="tuning-anchor"></small></span><button type="button" id="return-focus" class="quiet">Reset offset</button>';
   const fineContent=document.createElement('div');fineContent.className='fine-content';fineContent.append(focusHeading,$('focus-control'));focus.append(fineContent);
@@ -153,8 +159,9 @@ export function setupControlLayout(){
     for(const {node,home} of detailHomes)compact?referenceDetails.append(node):home.before(node);
     for(const {node,home,row} of windowHomes)compact?row.append(node):home.before(node);
     referenceDetails.append(referenceWindows);
-    compact?mobileWave.append(waveControls):sidebar.append(waveControls);
-    compact?wave.append(contact):sidebar.append(contact);mobileWave.hidden=!compact;waveControls.hidden=false;waveOptions.hidden=true;
+    sidebar.append(waveControls);
+    compact?waveOptionsBody.prepend(waveRegion):waveControls.prepend(waveRegion);
+    compact?wave.append(contact):sidebar.append(contact);waveControls.hidden=compact;waveOptions.hidden=true;
     waveOptions.open=false;focus.open=compact?mobileFineOpen:true;shortenPlane();adaptPosition();
   }
   media.addEventListener('change',adapt);matchMedia('(max-width:350px)').addEventListener('change',adapt);adapt();

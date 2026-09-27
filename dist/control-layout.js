@@ -89,7 +89,7 @@ export function setupControlLayout(){
   const scaleHelp=document.createElement('p');scaleHelp.id='wave-scale-help';scaleHelp.className='wave-setting-help';scale.closest('label').after(scaleHelp);scale.setAttribute('aria-describedby',scaleHelp.id);
   const updateScaleHelp=()=>{scaleHelp.textContent={local:'Each position has its own scale. Compare shape, not brightness.',shared:'One reference scale across the path. Compare relative intensity.','shared-log':'One logarithmic scale reveals weaker light.'}[scale.value]+' Display only; no recalculation.';};
   scale.addEventListener('change',updateScaleHelp);updateScaleHelp();
-  const contact=document.querySelector('.site-contact');
+  const contact=document.querySelector('.site-contact'),waveLegend=main.querySelector('.wave-footer');
   waveSettings.append(waveOptionsBody);waveSettings.querySelector('p').textContent='High detail uses Fine sampling; off uses Preview. Changes take effect when you Compute.';
   const waveDetail=document.createElement('label');waveDetail.className='detail-toggle wave-detail-toggle';waveDetail.title='Wave only. Off: Preview sampling. On: Fine sampling.';
   waveDetail.innerHTML='<input id="wave-high-detail" type="checkbox" role="switch" aria-label="Wave high detail"><span>High detail</span>';
@@ -161,6 +161,7 @@ export function setupControlLayout(){
     referenceDetails.append(referenceWindows);
     sidebar.append(waveControls);
     compact?waveOptionsBody.prepend(waveRegion):waveControls.prepend(waveRegion);
+    compact?main.append(waveLegend):sidebar.append(waveLegend);
     compact?wave.append(contact):sidebar.append(contact);waveControls.hidden=compact;waveOptions.hidden=true;
     waveOptions.open=false;focus.open=compact?mobileFineOpen:true;shortenPlane();adaptPosition();
   }

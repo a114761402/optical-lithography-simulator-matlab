@@ -7,10 +7,10 @@ The iPhone app uses the same simulator and mobile interface as the website. Calc
 1. Connect and unlock your iPhone. Tap **Trust** if the phone asks. On the phone, turn on **Settings → Privacy & Security → Developer Mode**, then restart and confirm.
 2. Open `ios/App/App.xcodeproj` in Xcode. In **Xcode → Settings → Accounts**, sign in with your own Apple Account. A free Personal Team is sufficient for testing on your own phone; App Store distribution needs Apple Developer Program membership.
 3. Click the blue **App** project in Xcode, select the **App** target, then **Signing & Capabilities**. Turn on **Automatically manage signing** and choose your team. If Xcode says the bundle identifier is already taken, replace `com.chuanglu.opticalbench` with an identifier unique to your team.
-4. Select your connected **iPhone 14 Pro** beside the Run button, then press **Run** (▶). Approve any trust or Developer Mode prompts on your iPhone.
+4. Select your connected **iPhone 14 Pro** beside the Run button, then press **Run** (▶). If the first launch is blocked, open **Settings → General → VPN & Device Management** on the iPhone and trust your Apple Account's developer app, then try again.
 5. After installation, test without Wi-Fi: change a preset, move an observation position, compute a slice and a full path, save an experiment, close and reopen the app, then share an image.
 
-If Xcode reports **No signing certificate**, first complete step 2 and choose your team again. If it reports **device unavailable**, unlock the iPhone and reconnect the cable. A free Personal Team installation may expire and need another Run from Xcode.
+If Xcode reports **No signing certificate**, first complete step 2 and choose your team again. If it reports **device unavailable**, unlock the iPhone and reconnect the cable. If signing fails with **resource fork or Finder information not allowed**, copy this project to a local folder outside iCloud Drive or synced Documents, run `npm run ios:sync` there, and open that copy in Xcode. A free Personal Team installation may expire and need another Run from Xcode.
 
 ## App Store preparation
 

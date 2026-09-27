@@ -10,7 +10,8 @@ export function setupControlLayout(){
   const focus=document.createElement('details');focus.id='focus-options';
   focus.innerHTML='<summary>Fine tuning</summary>';
   const fineButton=document.createElement('button');fineButton.id='fine-tuning-toggle';fineButton.type='button';fineButton.className='secondary';fineButton.setAttribute('aria-controls','focus-options');fineButton.setAttribute('aria-expanded','false');fineButton.innerHTML='<span>Fine tuning</span><span id="focus-offset-label"></span><span class="fine-chevron" aria-hidden="true">⌄</span>';
-  fineButton.onclick=()=>{focus.open=!focus.open;};focus.addEventListener('toggle',()=>fineButton.setAttribute('aria-expanded',String(focus.open)));
+  let mobileFineOpen=false;
+  fineButton.onclick=()=>{mobileFineOpen=!focus.open;focus.open=mobileFineOpen;};focus.addEventListener('toggle',()=>fineButton.setAttribute('aria-expanded',String(focus.open)));
   const rangeNotice=document.createElement('p');rangeNotice.id='path-range-notice';rangeNotice.className='muted';rangeNotice.hidden=true;$('bench-wrap').after(rangeNotice);
   $('focus-control').before(focus);focus.append($('focus-control'));controls.append(controls.querySelector('.slice-bar'));
   // Finished/calculation detail belongs in settings; only actionable status is
@@ -105,16 +106,20 @@ export function setupControlLayout(){
     if(standard){
       if(focus.parentElement!==advanced)advanced.append(sliceBar,focus);if(action.parentElement!==$('profile-menu'))$('profile-menu').prepend(action);action.after($('cancel-screen'),notice);
     }else{
-      if(focus.parentElement!==controls)controls.append(sliceBar,focus);if(action.parentElement!==sliceControls)computeHome.after(action);
+      if(focus.parentElement!==controls)controls.append(sliceBar,focus);
+      const actionHost=media.matches?sliceControls:document.querySelector('.observation-toolbar');
+      if(actionHost&&action.parentElement!==actionHost)actionHost.append(action);
+      if(!media.matches)focus.open=true;
       if(media.matches){$('calculate').closest('.calculation-actions').after($('cancel-screen'),notice);}
       else{sliceBar.after($('cancel-screen'),notice);}
     }
     $('standard-position-label').textContent=$('slice-z').value?'z = '+Number(Number($('slice-z').value).toFixed(3))+' mm':'';
   }
+  document.addEventListener('position-grid-updated',adaptPosition);
   document.addEventListener('position-view-change',adaptPosition);
   document.addEventListener('observation-position-change',adaptPosition);
   const zLabel=$('slice-z').closest('label');zLabel.lastChild.textContent='';const unit=document.createElement('span');unit.className='z-unit';unit.textContent='mm';zLabel.append(unit);
-  let focusInitialised=false;
+
   function adapt(){
     const compact=media.matches;
     if(displayDialog.open)displayDialog.close();
@@ -136,7 +141,7 @@ export function setupControlLayout(){
     referenceDetails.append(referenceWindows);
     sidebar.append(waveControls);waveControls.hidden=compact;
     compact?waveSettings.querySelector('h3').after(waveRegion):waveControls.prepend(waveRegion);waveOptions.hidden=true;
-    waveOptions.open=false;if(!focusInitialised){focus.open=!compact;focusInitialised=true;}shortenPlane();adaptPosition();
+    waveOptions.open=false;focus.open=compact?mobileFineOpen:true;shortenPlane();adaptPosition();
   }
   media.addEventListener('change',adapt);matchMedia('(max-width:350px)').addEventListener('change',adapt);adapt();
   // Programmatic changes of the position must update its compact label too.

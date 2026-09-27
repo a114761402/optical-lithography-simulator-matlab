@@ -16,9 +16,9 @@ test('Illumination ends at the mask and projection ends at the fixed image, incl
   }
 });
 test('Responsive desktop components use the same z mapping as the wave at all widths; inputs are unchanged',()=>{
-  for(const width of [680,800,1100,1400])for(const changes of settings){const p={...defaults,...changes},g=geometry(p),before=structuredClone(p),frame=pathFrame(width,g.image),drawing=render(width,p,g.image);
-    assert.equal(drawing.height,240);assert.doesNotMatch(drawing.svg,/NaN|Infinity/);
-    const matches=[...drawing.svg.matchAll(/data-component="([^"]+)"[^>]+transform="translate\(([^,]+),120\)"/g)];assert.equal(matches.length,7);
+  for(const height of [170,240])for(const width of [680,800,1100,1400])for(const changes of settings){const p={...defaults,...changes},g=geometry(p),before=structuredClone(p),frame=pathFrame(width,g.image),drawing=desktopBench({width,height,geometry:g,params:p,components,selected:'pupil',screen:g.image,pupilValue,mode:'principal',defs:'',lensDiagram:()=>'',maskDiagram:()=>'',pictures:{source:'',pupil:''}});
+    assert.equal(drawing.height,height);assert.doesNotMatch(drawing.svg,/NaN|Infinity/);
+    const matches=[...drawing.svg.matchAll(/data-component="([^"]+)"[^>]+transform="translate\(([^,]+),[0-9.]+\)"/g)];assert.equal(matches.length,7);
     for(const [,key,x]of matches){close(+x,frame.left+g[key]/g.image*(frame.right-frame.left));assert.ok(+x>=7&&+x<=width-7);}
     const overlay=waveComponentLayout(waveView({geometry:g,scope:'full',zMin:0,zMax:g.max}),frame.right-frame.left,160);
     for(const item of overlay)close(frame.left+item.x,frame.x(item.z));

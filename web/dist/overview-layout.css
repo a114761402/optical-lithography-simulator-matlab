@@ -1,0 +1,108 @@
+/* Compact comparison workspace; display size never changes calculation detail. */
+.zoom-position{display:none}
+body:not(.phone-bench){--preview-size:clamp(150px,calc(25dvh - 45px),200px)}
+body:not(.phone-bench) main{padding-top:12px;padding-bottom:0}
+body:not(.phone-bench) .app-header{height:56px;padding-block:4px}
+body:not(.phone-bench) #bench-workspace{margin-bottom:0}
+body:not(.phone-bench) .bench-toolbar{padding:8px 16px 4px;flex-wrap:nowrap}
+body:not(.phone-bench) #beam-regions{margin-top:3px;height:26px}
+body:not(.phone-bench) #bench:not(.compact-beam){height:190px}
+body:not(.phone-bench) #bench-wrap{min-height:0}
+body:not(.phone-bench) #bench-navigation{padding:0 16px 8px}
+body:not(.phone-bench) #reference-preset-row{min-height:24px;padding-top:0;font-size:.875rem}
+body:not(.phone-bench) #position-controls .screen-track input{height:28px;min-height:28px}
+body:not(.phone-bench) #position-controls .slice-bar{margin:0;padding:0;border:0}
+body:not(.phone-bench) #position-controls .slice-controls{grid-template-columns:minmax(130px,1fr) minmax(140px,1fr);gap:8px}
+body:not(.phone-bench) #fine-tuning-toggle{display:none}
+body:not(.phone-bench) #position-controls :is(select,.z-input){min-height:36px;height:36px}
+body:not(.phone-bench) #position-controls .z-input input{height:34px;min-height:34px}
+body:not(.phone-bench) #focus-options{display:block;padding-top:4px}
+body:not(.phone-bench) #focus-options .fine-content{grid-template-columns:auto minmax(100px,1fr) auto auto;gap:8px}
+body:not(.phone-bench) #focus-options .focus-heading>span{display:block!important;grid-column:1;grid-row:1;white-space:nowrap;font-size:.875rem;font-weight:500}
+body:not(.phone-bench) #tuning-anchor{display:none}
+body:not(.phone-bench) #focus-options #focus-control .control>input{grid-column:2;height:36px;min-height:36px}
+body:not(.phone-bench) #focus-options #focus-control .control>label{grid-column:3;min-height:36px}
+body:not(.phone-bench) #focus-options #return-focus{grid-column:4;min-height:36px}
+body:not(.phone-bench) #focus-control .number-field{width:112px;flex-basis:112px}
+body:not(.phone-bench) #observation-panel{padding:10px 0 0;margin:0}
+body:not(.phone-bench) #observation-panel .observation-heading{flex-wrap:nowrap;gap:12px;min-height:44px;margin-bottom:4px;align-items:center}
+body:not(.phone-bench) #observation-title{font-size:1.25rem;margin:0;white-space:nowrap}
+body:not(.phone-bench) .observation-toolbar{flex-wrap:nowrap;gap:8px}
+body:not(.phone-bench) .observation-toolbar>.slice-compute-action{display:flex;gap:10px;margin-left:8px;flex:none}
+body:not(.phone-bench) .observation-toolbar .detail-toggle{order:-1;min-height:40px}
+body:not(.phone-bench) .observation-toolbar :is(button,#reference-positions){min-height:40px;height:40px;padding:6px 10px}
+body:not(.phone-bench) .observation-toolbar #show-slice{width:auto;min-width:160px}
+body:not(.phone-bench) #observation-grid[data-count]{grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:0}
+body:not(.phone-bench) #observation-grid[data-count='0']{display:none}
+body:not(.phone-bench) .slice-item{width:min(100%,calc(var(--preview-size) + 16px));justify-self:center}
+body:not(.phone-bench) .slice-panel{grid-template-rows:28px auto;padding:7px;gap:0}
+body:not(.phone-bench) #observation-grid .slice-heading{height:28px;min-height:28px;margin:0;grid-template-rows:24px;line-height:24px;font-size:.875rem}
+body:not(.phone-bench) .slice-panel canvas{width:100%;height:auto;aspect-ratio:1}
+body:not(.phone-bench) .zoom-position{display:grid;place-items:center;position:absolute;bottom:12px;right:12px;width:32px;height:32px;min-height:32px;padding:0;border:1px solid #94b4d1;background:#17344ddd;color:white;border-radius:5px;font-size:1.1rem}
+body:not(.phone-bench) .zoom-position:hover{background:#155fdf}
+body:not(.phone-bench) .zoom-position:disabled{opacity:.4}
+body:not(.phone-bench) .wave-section{margin-top:10px;padding:10px 0 0;border-top-width:1px}
+body:not(.phone-bench) .wave-heading{padding:0 16px 6px;min-height:40px;margin:0}
+body:not(.phone-bench) .wave-heading h2{font-size:1.25rem}
+body:not(.phone-bench) .wave-action-group :is(#calculate-yz,button){min-height:36px;height:36px}
+body:not(.phone-bench) #wave-regions{height:25px;margin-bottom:2px}
+body:not(.phone-bench) #yz-canvas{height:clamp(110px,14dvh,140px)}
+body:not(.phone-bench) #yz-labels{height:24px}
+body:not(.phone-bench) .wave-footer{margin-top:0;height:18px}
+body:not(.phone-bench) .wave-sidebar{padding:0 16px}
+body:not(.phone-bench) .site-contact{padding:6px 0 8px;line-height:20px;margin-top:4px}
+/* Preserve three explicit columns while editing on phones. */
+.phone-bench.editing-key-positions #position-controls .slice-controls{grid-template-columns:minmax(84px,1fr) minmax(100px,1fr) auto}
+.phone-bench.editing-key-positions #position-controls #fine-tuning-toggle{grid-column:3;grid-row:1}
+.phone-bench.editing-key-positions #position-controls #plane{grid-column:1;grid-row:1}
+.phone-bench.editing-key-positions #position-controls .z-input{grid-column:2;grid-row:1}
+@media(max-width:380px){
+ .phone-bench.editing-key-positions #position-controls .slice-controls{grid-template-columns:minmax(90px,1fr) auto}
+ .phone-bench.editing-key-positions #position-controls #fine-tuning-toggle{grid-column:2;grid-row:1}
+ .phone-bench.editing-key-positions #position-controls .z-input{grid-column:1/-1;grid-row:2}
+}
+@media(min-width:781px) and (max-width:1050px){
+ body:not(.phone-bench) .observation-heading{flex-wrap:wrap!important}
+ body:not(.phone-bench) .observation-toolbar{flex-wrap:wrap}
+ body:not(.phone-bench) .observation-toolbar>.slice-compute-action{margin-left:0}
+}
+/* Height-aware default overview, without page scaling. */
+body:not(.phone-bench){--preview-size:clamp(140px,calc(35dvh - 180px),190px)}
+body:not(.phone-bench) .app-header{height:52px}
+body:not(.phone-bench) main{padding-top:8px}
+body:not(.phone-bench) .bench-toolbar{padding-block:4px 0}
+body:not(.phone-bench) #bench:not(.compact-beam){height:170px}
+body:not(.phone-bench) #bench-wrap{padding-block:2px}
+body:not(.phone-bench) #beam-regions{height:24px}
+body:not(.phone-bench) #view-workspace{margin-top:0;padding-top:0;gap:0}
+body:not(.phone-bench) #observation-panel{padding-top:4px}
+body:not(.phone-bench) #observation-panel .observation-heading{min-height:40px;margin-bottom:2px}
+body:not(.phone-bench) .slice-panel{padding:3px;grid-template-rows:26px auto}
+body:not(.phone-bench) .slice-item{width:min(100%,calc(var(--preview-size) + 8px))}
+body:not(.phone-bench) .zoom-position{bottom:8px;right:8px}
+body:not(.phone-bench) .remove-position{top:0}
+body:not(.phone-bench) .wave-section{margin-top:6px;padding-top:6px}
+body:not(.phone-bench) .wave-heading{padding-bottom:4px;min-height:36px}
+body:not(.phone-bench) .wave-action-group{min-height:36px}
+body:not(.phone-bench) .wave-action-group .section-buttons{min-height:36px}
+body:not(.phone-bench) .wave-action-group #calculate-yz{min-height:36px;height:36px}
+body:not(.phone-bench) #wave-regions{height:22px}
+body:not(.phone-bench) #yz-canvas{height:clamp(100px,12dvh,130px)}
+body:not(.phone-bench) #yz-labels{height:22px}
+@media(min-width:1200px){
+ body:not(.phone-bench) #position-controls{display:grid;grid-template-columns:minmax(280px,.85fr) minmax(440px,1.15fr);column-gap:16px;align-items:center}
+ body:not(.phone-bench) #position-controls .screen-track{grid-column:1/-1}
+ body:not(.phone-bench) #position-controls .slice-bar{grid-column:1;grid-row:2}
+ body:not(.phone-bench) #position-controls #focus-options{grid-column:2;grid-row:2;padding:0}
+ body:not(.phone-bench) #position-controls #slice-compute-notice,body:not(.phone-bench) #position-controls #cancel-screen{grid-column:1/-1}
+}
+/* Give labels room even when the square previews are small. */
+body:not(.phone-bench) .slice-item{width:min(100%,max(190px,calc(var(--preview-size) + 8px)))}
+body:not(.phone-bench) .slice-panel{justify-items:center}
+body:not(.phone-bench) .slice-panel canvas{width:min(100%,var(--preview-size))}
+body:not(.phone-bench) #observation-grid .slice-heading{width:100%}
+body:not(.phone-bench) #observation-grid .slice-heading>span:first-of-type{padding-right:0}
+body:not(.phone-bench) .zoom-position{right:max(8px,calc((100% - var(--preview-size))/2 + 4px))}
+.phone-bench #fine-tuning-toggle{width:110px;max-width:110px;flex:none}
+.phone-bench.editing-key-positions #position-controls .slice-controls{grid-template-columns:minmax(84px,1fr) minmax(120px,1fr) 110px}
+@media(max-width:380px){.phone-bench.editing-key-positions #position-controls .slice-controls{grid-template-columns:minmax(90px,1fr) 110px}}

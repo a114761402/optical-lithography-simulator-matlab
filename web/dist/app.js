@@ -8,7 +8,7 @@ import {renderWavePixels} from './wave-display.js?v=20260927-positions3';
 import {QUALITY,waveParameters} from './quality.js?v=20260927-positions3';
 import {waveCacheKey} from './cache.js?v=20260927-positions3';
 import {setupViewSwitch} from './view-switch.js?v=20260927-positions3';
-import {setupControlLayout} from './control-layout.js?v=20260927-overview';
+import {setupControlLayout} from './control-layout.js?v=relaxed-20260927-overview';
 import {waveComponentSVG} from './wave-components.js?v=20260927-overview';
 import {compactBench} from './compact-bench.js?v=20260927-position-fit';
 import {regionMarkup,waveView} from './path-layout.js?v=20260927-position-fit';
@@ -139,7 +139,7 @@ function drawBench(){
   const host=$('bench'),restoreFocus=document.activeElement?.hasAttribute('data-observation-screen'),width=Math.max(1,$('bench-wrap').clientWidth-16),mode=benchEditor.compact?'many':rayMode;
   $('beam-regions').innerHTML=regionMarkup(geometry(p));
   if(benchEditor.compact){const drawing=compactBench({width,geometry:geometry(p),params:p,components,selected,screen:activePlane()?currentZ():null,pupilValue,mode,observations:viewTabs.keyView?markedPositions(planes.map(panel=>({id:panel.id,z:observationZ(panel,geometry(p))})),activeId,4):[],activeId});host.setAttribute('viewBox',`0 0 ${width} ${drawing.height}`);host.classList.add('compact-beam');host.innerHTML=drawing.svg;bindBench();return;}
-  const drawing=desktopBench({width,height:170,geometry:geometry(p),params:p,components,selected,screen:activePlane()?currentZ():null,pupilValue,mode,defs,lensDiagram,maskDiagram,observations:markedPositions(planes.map(panel=>({id:panel.id,z:observationZ(panel,geometry(p))})),activeId,8),activeId,pictures:{source:benchPattern('source'),pupil:benchPattern('pupil'),image:fixedImagePicture()}});
+  const drawing=desktopBench({width,height:240,geometry:geometry(p),params:p,components,selected,screen:activePlane()?currentZ():null,pupilValue,mode,defs,lensDiagram,maskDiagram,observations:markedPositions(planes.map(panel=>({id:panel.id,z:observationZ(panel,geometry(p))})),activeId,8),activeId,pictures:{source:benchPattern('source'),pupil:benchPattern('pupil'),image:fixedImagePicture()}});
   host.setAttribute('viewBox',`0 0 ${width} ${drawing.height}`);host.classList.remove('compact-beam');host.innerHTML=drawing.svg;
 
   bindBench();if(restoreFocus)host.querySelector('[data-observation-screen]')?.focus({preventScroll:true});

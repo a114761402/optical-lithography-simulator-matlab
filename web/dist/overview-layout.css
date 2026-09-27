@@ -67,7 +67,7 @@ body:not(.phone-bench) .wave-sidebar{padding:0 20px 0 24px}
 /* Keep the plot controls light; detailed settings stay in the Settings dialog. */
 body .wave-section,body:not(.phone-bench) .wave-section{border-top:3px solid #9aadc3}
 body:not(.phone-bench) .wave-section{align-items:stretch}
-body:not(.phone-bench) .wave-sidebar{display:flex;flex-direction:column;justify-content:space-between}
+body:not(.phone-bench) .wave-sidebar{display:flex;flex-direction:column;justify-content:flex-start}
 .wave-sidebar .wave-controls{display:block}
 .wave-sidebar #wave-region-setting{display:grid;gap:7px}
 .wave-title-group{display:flex;align-items:center;gap:22px;flex-wrap:wrap}
@@ -100,3 +100,7 @@ body:not(.phone-bench) .wave-sidebar{display:flex;flex-direction:column;justify-
  body:not(.phone-bench) .wave-heading{flex-wrap:wrap!important}
  body:not(.phone-bench) .wave-heading>.wave-title-group{flex-basis:100%!important;justify-content:space-between}
 }
+
+.wave-sidebar .wave-footer{margin:18px 0 0;justify-content:flex-start}
+.wave-sidebar .colour-key{margin:0;gap:8px}
+.wave-sidebar .colour-key span{flex-basis:100%;line-height:1.5}

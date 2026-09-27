@@ -60,7 +60,7 @@
     </section>
     </div>
     <section class="wave-section" aria-labelledby="wave-title">
-      <div class="wave-heading"><div><p class="eyebrow">04 / FOLLOW THE WAVE</p><h2 id="wave-title">Wave intensity</h2></div><div class="wave-actions"><button class="primary" id="calculate-yz">Compute full path</button><button class="secondary" id="cancel-wave" hidden>Cancel wave path</button></div></div>
+      <div class="wave-heading"><div><p class="eyebrow">04 / FOLLOW THE WAVE</p><h2 id="wave-title">Intensity</h2></div><div class="wave-actions"><button class="primary" id="calculate-yz">Compute path</button><button class="secondary" id="cancel-wave" hidden>Cancel wave path</button></div></div>
       <div class="wave-controls">
         <label>Region<select id="wave-scope"><option value="full">Full optical path</option><option value="near">Near mask · 0–200 µm</option></select></label>
         <div class="wave-section-control"><span class="control-label">Cross-section</span><div class="section-buttons" role="group" aria-label="Wave cross-section"><button type="button" data-wave-section="xz" aria-pressed="true" aria-label="Horizontal XZ section">XZ</button><button type="button" data-wave-section="yz" aria-pressed="false" aria-label="Vertical YZ section">YZ</button></div><select id="wave-section" aria-label="Cross-section" hidden><option value="xz">Horizontal XZ · y = 0</option><option value="yz">Vertical YZ · x = 0</option></select></div>
@@ -84,6 +84,6 @@
   <dialog id="paint-dialog"><div class="dialog-header"><h2 id="paint-title">Edit transmission</h2><button class="quiet" id="close-paint">Close ×</button></div><p id="paint-description">Paint the pattern. White transmits; black blocks.</p><div class="paint-tools"><button id="paint-white" class="secondary" aria-pressed="true">Transmit</button><button id="paint-black" class="quiet" aria-pressed="false">Block</button><button id="paint-clear" class="quiet">Clear</button><button id="paint-fill" class="quiet">Fill</button></div><canvas id="paint-canvas" width="384" height="384" aria-label="Paint a custom source or aperture pattern"></canvas><p class="muted">Drag to paint. Keyboard: arrow keys move, Space paints.</p><button id="paint-apply" class="primary">Apply pattern</button></dialog>
   <link rel="stylesheet" href="preset-layout.css?v=20260927-overview">
   <link rel="stylesheet" href="compact-workspace.css?v=20260927-position-fit">
-  <link rel="stylesheet" href="overview-layout.css?v=20260927-touch-explore">
-  <script type="module" src="app.js?v=20260927-touch-explore"></script>
+  <link rel="stylesheet" href="overview-layout.css?v=20260927-fine-mobile">
+  <script type="module" src="app.js?v=20260927-fine-mobile"></script>
 </body></html>

@@ -73,7 +73,7 @@ export function setupControlLayout(){
   const waveActionGroup=document.createElement('div');waveActionGroup.className='wave-action-group';main.querySelector('.wave-actions').before(waveActionGroup);waveActionGroup.append(main.querySelector('.wave-section-control'),main.querySelector('.wave-actions'));
   const waveOptionsBody=waveOptions.querySelector('.wave-options-body'),waveRegion=$('wave-scope').closest('label');
   waveRegion.id='wave-region-setting';waveOptionsBody.prepend(waveRegion);
-  const syncWaveAction=()=>{$('calculate-yz').textContent=$('wave-scope').value==='near'?'Compute near mask':'Compute full path';};
+  const syncWaveAction=()=>{$('calculate-yz').textContent=$('wave-scope').value==='near'?'Compute near mask':'Compute path';};
   $('wave-scope').addEventListener('change',syncWaveAction);syncWaveAction();
   const waveRegions=document.createElement('div');waveRegions.id='wave-regions';waveRegions.className='path-regions';waveRegions.setAttribute('aria-label','Wave illumination and projection regions');main.querySelector('.yz-wrap').before(waveRegions);
   const notes=document.createElement('details');notes.className='wave-notes';notes.innerHTML='<summary>Calculation details</summary>';
@@ -139,15 +139,20 @@ export function setupControlLayout(){
       if(focus.parentElement!==controls)controls.append(sliceBar,focus);
       const actionHost=media.matches?sliceControls:document.querySelector('.observation-toolbar');
       if(actionHost&&action.parentElement!==actionHost)actionHost.append(action);
-      if(!media.matches){sliceBar.before(focus);focus.open=true;}else{sliceBar.after(focus);}
+      if(!media.matches){if(focus.nextElementSibling!==sliceBar)sliceBar.before(focus);focus.open=true;}
+      else if(sliceBar.nextElementSibling!==focus){sliceBar.after(focus);}
       if(media.matches){$('calculate').closest('.calculation-actions').after($('cancel-screen'),notice);}
       else{sliceBar.after($('cancel-screen'),notice);}
     }
+    syncPositionLabel();
+  }
+  function syncPositionLabel(){
     $('standard-position-label').textContent=$('slice-z').value?'z = '+Number(Number($('slice-z').value).toFixed(3))+' mm':'';
   }
   document.addEventListener('position-grid-updated',adaptPosition);
   document.addEventListener('position-view-change',adaptPosition);
-  document.addEventListener('observation-position-change',adaptPosition);
+  // Value changes must not reparent a native range during an active drag.
+  document.addEventListener('observation-position-change',syncPositionLabel);
   const zLabel=$('slice-z').closest('label');zLabel.lastChild.textContent='';const unit=document.createElement('span');unit.className='z-unit';unit.textContent='mm';zLabel.append(unit);
 
   function adapt(){

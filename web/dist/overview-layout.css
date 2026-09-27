@@ -146,3 +146,9 @@ body:not(.phone-bench) #focus-options{padding-bottom:0}
 body:not(.phone-bench) #reference-preset-row .slice-controls{font-weight:400}
 #bench.compact-beam{touch-action:pan-y pinch-zoom}
 body:not(.phone-bench) #active-observation.no-active-position{display:none}
+
+/* Slightly wider phone content, with controls that fit without shrinking targets. */
+.phone-bench main,.phone-bench .app-header{padding-inline:8px}
+.phone-bench .wave-heading .wave-action-group{max-width:100%;flex-wrap:wrap;align-items:center}
+.phone-bench .wave-heading .wave-actions{flex:0 1 auto;width:auto;min-width:0}
+.phone-bench .wave-heading #calculate-yz{width:auto;min-width:0;white-space:nowrap;padding-inline:12px}

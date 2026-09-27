@@ -18,7 +18,15 @@ body:not(.phone-bench) .workspace-heading{gap:10px}
 #global-wave-settings .wave-options-body .toggle-label{display:flex;align-items:center;gap:8px;min-height:44px}
 #global-wave-settings .wave-options-body input{width:18px;height:18px}
 #about-settings #model-button{min-height:44px;border:1px solid var(--line);background:white;color:var(--ink)}
+.settings-privacy{border-top:1px solid var(--line);margin:20px 0 0;padding-top:14px;font-size:.875rem}
+.settings-privacy a{color:var(--blue)}
+.ios-experiments{padding-top:16px}
+.ios-experiments>p:first-child{font-size:.875rem;font-weight:600;margin:0 0 8px}
+.ios-experiments>div{display:flex;flex-wrap:wrap;gap:8px}
+.ios-experiments button{min-height:44px;flex:1 1 170px}
+#ios-experiment-status{min-height:1.5em;font-size:.875rem;color:var(--muted);margin:8px 0 0}
 .phone-bench #display-dialog-controls>section{padding-top:0}
+html.ios-native body.phone-bench .app-header{height:calc(56px + env(safe-area-inset-top));padding-top:calc(6px + env(safe-area-inset-top))}
 .phone-bench #display-dialog-controls #view-display-controls{grid-template-columns:1fr}
 .phone-bench #position-controls .screen-track input{display:block}
 .phone-bench #focus-options{margin-top:0}

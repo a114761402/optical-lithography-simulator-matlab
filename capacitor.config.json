@@ -1,0 +1,9 @@
+{
+  "appId": "com.chuanglu.opticalbench",
+  "appName": "Optical Bench",
+  "webDir": "ios-web",
+  "ios": {
+    "preferredContentMode": "mobile",
+    "scrollEnabled": true
+  }
+}

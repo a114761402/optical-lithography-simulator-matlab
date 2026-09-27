@@ -355,8 +355,9 @@ function preset(name){
 }
 
 $('preset').onchange=()=>preset($('preset').value);
-$('reset').onclick=()=>{
+$('reset').onclick=async()=>{
   cancel(false);
+  if(window.OpticalBenchNative?.clearAutosave)await window.OpticalBenchNative.clearAutosave();
   // A fresh page also clears edited patterns, removed planes, workers, and
   // dialog state. Clear browser-restored form values before that fresh start.
   for(const select of document.querySelectorAll('select'))select.selectedIndex=Math.max(0,[...select.options].findIndex(option=>option.defaultSelected));
@@ -400,6 +401,50 @@ function panelState(panel){
   if(panel.error)return 'Try again';
   return sameSlice(panel.result,screenParams(),observationZ(panel,geometry(p)))?(panel.result.params.gridSize<512?'Fast':''):'Needs update';
 }
+
+// The native app stores only a small experiment description, never the large
+// numerical arrays. Restored pictures must be recalculated or loaded from a
+// matching bundled preset before they can be called current.
+function experimentSnapshot(){
+  const value=id=>$(id).value;
+  return {version:1,params:p,selected,rayMode,positions:planes.map(({id,plane,base,offset})=>({id,plane,base,offset})),activeId,keyView:viewTabs.keyView,
+    detail:{standard:details.standard,expert:details.expert},
+    display:{brightness:value('brightness'),sourceView:value('source-view'),maskView:value('mask-view'),pupilView:value('pupil-view'),smooth:$('smooth-intensity').checked},
+    wave:{scope:value('wave-scope'),detail:value('wave-detail'),section:value('wave-section'),brightness:value('wave-brightness'),elements:$('wave-elements-toggle').checked,window:$('wave-window-toggle').checked}};
+}
+function restoreExperiment(saved){
+  if(saved?.version!==1||!saved.params||!Array.isArray(saved.positions)||saved.positions.length<1||saved.positions.length>16)return false;
+  const next={...presetParams('default')};
+  for(const key of Object.keys(next))if(Object.hasOwn(saved.params,key))next[key]=saved.params[key];
+  try{validate({...next,...QUALITY.fine});}catch{return false;}
+  const names=new Set(),g=geometry(next),allowed=new Set([...Object.keys(PLANE_NAMES)]),positions=[];
+  for(const item of saved.positions){
+    if(!item||typeof item.id!=='string'||!/^([A-Z]|A[A-Z])$/.test(item.id)||names.has(item.id)||!allowed.has(item.plane)||!Number.isFinite(item.base)||!Number.isFinite(item.offset))return false;
+    names.add(item.id);const panel=createPlane(item.id,item.plane,Math.max(0,Math.min(g.max,item.base)));
+    tuneObservation(panel,g,item.offset);positions.push(panel);
+  }
+  cancel(false);p=next;selected=components.some(component=>component[0]===saved.selected)?saved.selected:'pupil';
+  planes=positions;activeId=names.has(saved.activeId)?saved.activeId:positions[0].id;lastPosition=observationZ(activePlane(),g);removedPlane=null;previousLayout=null;
+  revision++;presetTicket++;waveRequest++;waveLoading=false;result=null;screenResult=null;screenRevision=-1;yzResult=null;fixedImageSaved=null;sliceCache.clear();
+  details.standard=!!saved.detail?.standard;details.expert=saved.detail?.expert!==false;
+  const select=(id,choice)=>{const node=$(id);if([...node.options].some(option=>option.value===choice))node.value=choice;};
+  select('brightness',saved.display?.brightness);select('source-view',saved.display?.sourceView);select('mask-view',saved.display?.maskView);select('pupil-view',saved.display?.pupilView);
+  $('smooth-intensity').checked=saved.display?.smooth!==false;
+  select('wave-scope',saved.wave?.scope);select('wave-detail',saved.wave?.detail);select('wave-section',saved.wave?.section);select('wave-brightness',saved.wave?.brightness);
+  $('wave-elements-toggle').checked=saved.wave?.elements!==false;$('wave-window-toggle').checked=!!saved.wave?.window;
+  rayMode=['principal','many','none'].includes(saved.rayMode)?saved.rayMode:'principal';
+  for(const button of document.querySelectorAll('[data-rays]')){button.classList.toggle('active',button.dataset.rays===rayMode);button.setAttribute('aria-pressed',String(button.dataset.rays===rayMode));}
+  $('preset').value=matchingPreset(p)?.id||'';
+  observationUI.removed(null);observationUI.render();
+  if(benchEditor.compact&&saved.keyView)$('view-fixed').click();else if(benchEditor.compact)$('view-explore').click();
+  renderInspector();renderFocus();syncDetailControls();drawBench();syncScreen();drawScreen();drawYZ();setBusy();updatePresetInfo();
+  const presetId=matchingPreset(p)?.id;
+  if(presetId){restorePresetSlices(presetId);restoreDefaultWave();}
+  else status('Experiment restored · compute to update images.');
+  return true;
+}
+window.OpticalBenchSession={snapshot:experimentSnapshot,restore:restoreExperiment};
+window.dispatchEvent(new Event('optical-bench-ready'));
 function screenMoved(){
   if(!$('observation-grid'))return;
   $('reference-positions').setAttribute('aria-pressed',String(atReferencePositions(planes)));

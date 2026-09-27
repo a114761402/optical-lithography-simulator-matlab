@@ -91,3 +91,64 @@ body:not(.phone-bench) .inspector input[type=range]{display:block}
 body:not(.phone-bench) .inspector .control{margin-bottom:6px}
 #observation-grid .slice-heading,.phone-bench #mobile-key-grid-host .slice-heading{height:30px;min-height:30px}
 #observation-grid .slice-heading .slice-state{top:36px;left:5px;z-index:1}
+
+/* Value and unit share one border and one focus/disabled state. */
+:is(#component-inspector,#focus-control) .number-field{display:flex;align-items:center;gap:4px;width:7.25rem;min-width:0;max-width:100%;flex:0 0 7.25rem;margin-left:auto;padding:0 8px;border:1px solid var(--line);border-radius:5px;background:#fff;box-sizing:border-box}
+:is(#component-inspector,#focus-control) .number-field input{flex:1;min-width:0;width:0;max-width:100%;height:34px;min-height:34px;padding:5px 0;border:0;border-radius:0;box-shadow:none;background:transparent;text-align:right;font-size:.875rem;appearance:textfield}
+:is(#component-inspector,#focus-control) .number-field input::-webkit-inner-spin-button{appearance:none}
+.number-field .field-unit{flex:none;font-size:.8125rem;color:var(--muted);white-space:nowrap;line-height:1}
+:is(#component-inspector,#focus-control) .number-field:focus-within{outline:2px solid var(--blue);outline-offset:2px}
+:is(#component-inspector,#focus-control) .number-field input:focus{outline:0}
+:is(#component-inspector,#focus-control) .number-field:has(input:disabled){background:#f5f7fa;opacity:.6}
+:is(#component-inspector,#focus-control) .number-field:has(input[aria-invalid=true]){border-color:#b53131}
+#component-controls .parameter-name{flex:1;min-width:0;overflow-wrap:anywhere}
+#component-controls .control>label:has(.number-field){flex-wrap:nowrap;align-items:center;gap:8px}
+body:not(.phone-bench) #focus-options .focus-heading{padding-right:126px}
+#position-controls .z-input:focus-within{outline:2px solid var(--blue);outline-offset:2px}
+#position-controls .z-input input:focus{outline:0}
+#position-controls .z-input:has(input:disabled){background:#f5f7fa;opacity:.6}
+
+/* Mobile sheet: aligned fields with touch space, without a redundant toolbar. */
+.phone-bench .bench-toolbar{display:none}
+#component-dialog .component-grid{gap:6px;padding:8px 14px}
+#component-dialog .inspector{padding:4px 14px max(14px,env(safe-area-inset-bottom))}
+#component-dialog #component-preview{height:58px;min-height:58px;margin:0 0 8px;gap:10px;padding:4px}
+#component-dialog #component-preview svg{height:50px;max-width:90px;flex:0 1 90px}
+#component-dialog #component-preview:has(.aperture-legend){height:72px;min-height:72px}
+#component-dialog .aperture-legend{font-size:.875rem}
+#component-dialog #component-controls .control{margin:0 0 4px}
+#component-dialog #component-controls .control>label{margin:0;min-height:44px;line-height:1.3}
+#component-dialog #component-controls .control:has(select)>label{min-height:28px}
+#component-dialog #component-controls select{min-height:44px;font-size:1rem}
+.phone-bench :is(#component-inspector,#focus-control) .number-field{width:7.25rem;flex-basis:7.25rem}
+.phone-bench :is(#component-inspector,#focus-control) .number-field input{height:42px;min-height:42px;font-size:1rem}
+#component-dialog #component-controls input[type=range]{display:block;height:44px;min-height:44px;margin:0}
+#component-dialog .component-help{margin-top:4px;padding-top:4px}
+#component-dialog .component-help summary{min-height:44px;font-size:.875rem}
+.phone-bench #position-controls .z-input{display:flex;align-items:center;gap:4px;padding:0 6px}
+.phone-bench #position-controls .z-input>span:first-child{position:static;font-size:.875rem}
+.phone-bench #position-controls .z-input>span:first-child:after{content:none}
+.phone-bench #position-controls .z-input .z-unit{display:inline;flex:none;font-size:.8125rem}
+.phone-bench #position-controls .z-input input{flex:1;width:0;height:44px;padding:0;font-size:1rem}
+.reset-help{font-size:.875rem;line-height:1.5}
+
+/* One shared XZ/YZ selector directly before the calculation action. */
+.wave-heading .wave-action-group{display:flex;align-items:flex-start;justify-content:flex-end;gap:10px;min-width:0;margin-left:auto}
+.wave-action-group .wave-section-control{display:flex;align-items:center;gap:8px;flex:none}
+.wave-action-group .control-label{display:none}
+.wave-action-group .section-buttons{padding:2px}
+.wave-action-group .section-buttons button{min-width:44px;min-height:40px;padding:6px 10px}
+body:not(.phone-bench) .wave-action-group .wave-actions{display:flex;flex-direction:column;align-items:stretch;gap:8px;flex:none}
+body:not(.phone-bench) .wave-action-group #calculate-yz{min-height:44px}
+.phone-bench .wave-heading{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:0 0 10px;margin-inline:0}
+.phone-bench .wave-heading>div:first-child{margin:0;flex:1 0 100%;grid-column:auto}
+.phone-bench .wave-heading .wave-action-group{display:flex;justify-content:space-between;width:100%;margin:0;gap:8px}
+.phone-bench .wave-heading .wave-actions{display:flex;flex-direction:column;width:auto;min-width:0;flex:0 1 150px;align-items:stretch}
+.phone-bench .wave-action-group .section-buttons button{width:auto;min-width:44px;min-height:44px;padding:6px 10px}
+.phone-bench .wave-action-group #calculate-yz{height:48px;min-height:48px}
+.phone-bench .wave-action-group #cancel-wave{min-height:44px}
+@media(min-width:781px) and (max-width:1100px) and (min-height:601px){
+  body:not(.phone-bench) .wave-heading{flex-wrap:wrap;gap:10px}
+  body:not(.phone-bench) .wave-heading>div:first-child{flex-basis:100%}
+  body:not(.phone-bench) .wave-action-group{width:100%;justify-content:space-between}
+}

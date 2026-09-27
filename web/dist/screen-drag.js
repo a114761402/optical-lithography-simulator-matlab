@@ -1,5 +1,5 @@
-import {pathFrame} from './path-layout.js?v=20260927-illumination2';
-import {snapPosition} from './observation-state.js?v=20260927-illumination2';
+import {pathFrame} from './path-layout.js?v=20260927-positions3';
+import {snapPosition} from './observation-state.js?v=20260927-positions3';
 export function setupScreenDrag(svg,{geometry,currentZ,onMove,onSelect,onStart,compact}){
   let drag=null;
   const enabled=()=>!compact()&&!svg.classList.contains('compact-beam');
@@ -21,6 +21,6 @@ export function setupScreenDrag(svg,{geometry,currentZ,onMove,onSelect,onStart,c
   svg.addEventListener('keydown',e=>{
     const marker=e.target.closest('[data-observation]');if(marker&&['Enter',' '].includes(e.key)){e.preventDefault();onStart();onSelect(marker.dataset.observation);return;}
     if(!enabled()||!e.target.closest('[data-observation-screen]')||!['ArrowLeft','ArrowRight','Home','End'].includes(e.key))return;
-    e.preventDefault();onStart();const g=geometry(),step=e.shiftKey?.0005:1;onMove(e.key==='Home'?0:e.key==='End'?g.max:currentZ()+(e.key==='ArrowLeft'?-step:step),'custom');
+    e.preventDefault();onStart();const g=geometry(),step=e.shiftKey?.001:1;onMove(e.key==='Home'?0:e.key==='End'?g.max:currentZ()+(e.key==='ArrowLeft'?-step:step),'custom');
   });
 }

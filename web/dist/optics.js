@@ -1,4 +1,4 @@
-import {radialIlluminationImage} from './radial-illumination.js?v=20260927-illumination2';
+import {radialIlluminationImage} from './radial-illumination.js?v=20260927-positions3';
 // SI units internally. Ideal scalar model, ported from src/optics in the MATLAB project.
 export const defaults={wavelengthNm:365,sourceType:'Circular',sourceOuter:.3,sourceInner:.2,quadSeparation:.3,pointSourceU:0,pointSourceV:0,sourceEmissionNA:.05,condenserAperture:1,condenserFocalMm:100,maskType:'1D Grating',maskSizeUm:60,maskInnerRatio:.45,gratingPitchUm:20,gratingDuty:.5,fieldSizeUm:80,lensType:'Circular',lensInner:.35,projNA:.15,reduction:4,f1Mm:100,defocusUm:0,gridSize:256,sourceBins:13,sourceGridSize:201,propagationPadding:2};
 const PI=Math.PI,TAU=2*PI;

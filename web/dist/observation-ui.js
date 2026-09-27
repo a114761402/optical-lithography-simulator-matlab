@@ -5,7 +5,7 @@ export function setupObservationUI(getPlanes,{onSelect,onRemove,onAdd,onUndo,onR
   const preset=document.createElement('div');preset.id='reference-preset-row';preset.innerHTML='<span>Explore any position</span><button type="button" id="reference-positions" class="secondary" title="Restore Pupil, Mask, Aperture and Image positions">Default positions</button>';
   $('position-controls').before(preset);$('reference-positions').onclick=onReference;
   const toolbar=document.createElement('div');toolbar.className='observation-toolbar';
-  toolbar.innerHTML='<button id="add-position" class="secondary" type="button">+ Add position</button><span id="removed-position" role="status"></span><button id="undo-position" class="quiet" type="button" hidden>Undo</button>';
+  toolbar.innerHTML='<button id="add-position" class="secondary" type="button" aria-label="Add position group" title="Add four comparison positions">＋</button><span id="removed-position" role="status"></span><button id="undo-position" class="quiet" type="button" hidden>Undo</button>';
   toolbar.prepend($('reference-positions'));
   $('observation-title').closest('.observation-heading').append(toolbar);$('add-position').onclick=onAdd;$('undo-position').onclick=onUndo;
   const empty=document.createElement('p');empty.id='observation-empty';empty.textContent='Add a position to explore the light.';grid.after(empty);
@@ -24,7 +24,7 @@ export function setupObservationUI(getPlanes,{onSelect,onRemove,onAdd,onUndo,onR
           button.innerHTML=`<span class="slice-heading"><b>${panel.id}</b><span id="slice-label-${panel.id}"></span><span class="slice-state" id="slice-state-${panel.id}"></span></span><canvas id="slice-canvas-${panel.id}" width="320" height="320" aria-label="Observation ${panel.id} intensity"></canvas><span class="slice-caption"><span id="slice-position-${panel.id}"></span><span id="slice-target-${panel.id}" class="slice-target"></span><span id="slice-axis-${panel.id}"></span></span>`;
           button.onclick=()=>onSelect(panel.id);
           button.onkeydown=e=>{
-            if(e.key==='Delete'||e.key==='Backspace'){e.preventDefault();onRemove(panel.id);return;}
+            if((e.key==='Delete'||e.key==='Backspace')&&!button.disabled){e.preventDefault();onRemove(panel.id);return;}
             if(!['ArrowLeft','ArrowRight'].includes(e.key))return;
             e.preventDefault();const list=getPlanes(),index=list.findIndex(p=>p.id===panel.id),next=list[(index+(e.key==='ArrowRight'?1:list.length-1))%list.length];
             onSelect(next.id);$(`slice-panel-${next.id}`).focus();
@@ -34,10 +34,10 @@ export function setupObservationUI(getPlanes,{onSelect,onRemove,onAdd,onUndo,onR
         }
         grid.append(item);
       }
-      grid.dataset.count=planes.length;$('observation-panel').dataset.count=planes.length;$('add-position').hidden=planes.length===4;empty.hidden=planes.length>0;
-      $('observation-layout').hidden=planes.length===0;
+      grid.dataset.count=planes.length;$('observation-panel').dataset.count=planes.length;empty.hidden=planes.length>0;
+      $('observation-layout').hidden=planes.length===0;document.dispatchEvent(new Event('position-grid-updated'));
     },
     removed(id){this.notice(id?`Removed ${id}`:'');},
-    notice(text){$('removed-position').textContent=text;$('undo-position').hidden=!text;}
+    notice(text){$('removed-position').textContent=text;$('undo-position').hidden=!text;const mobile=document.getElementById('undo-mobile-position');if(mobile)mobile.hidden=!text;}
   };
 }

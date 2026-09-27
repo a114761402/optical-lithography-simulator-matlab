@@ -1,5 +1,5 @@
-import {densePupil,enhancePupil} from './dense-pupil.js?v=20260927-illumination2';
-import {compute,geometry} from './optics.js?v=20260927-illumination2';
+import {densePupil,enhancePupil} from './dense-pupil.js?v=20260927-positions3';
+import {compute,geometry} from './optics.js?v=20260927-positions3';
 // Defocus selects the movable screen; the image reference stays at the ideal focus.
 export function computeScreen(params,z,progress=()=>{}) {
   if(Math.abs(z-geometry(params).pupil)<1e-8){

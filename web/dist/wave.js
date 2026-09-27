@@ -1,5 +1,5 @@
-import {lctCenterCuts} from './wave-cuts.js?v=20260927-illumination2';
-import {defaults,geometry,validate,makeMask,sourceSamples,gaussianBeam,coherent,propagateSame,lct,slicePlan,illuminationIntensity,intensity,maximum,compute} from './optics.js?v=20260927-illumination2';
+import {lctCenterCuts} from './wave-cuts.js?v=20260927-positions3';
+import {defaults,geometry,validate,makeMask,sourceSamples,gaussianBeam,coherent,propagateSame,lct,slicePlan,illuminationIntensity,intensity,maximum,compute} from './optics.js?v=20260927-positions3';
 
 // Interpolate at the physical origin, which need not be the middle pixel.
 export function sampleLine(axis, values, at) {
@@ -28,14 +28,33 @@ export function pathPlanes(p,scope='full') {
   for(const z of [g.condenser,g.mask,g.lens1,g.pupil,g.lens2,g.image,g.screen]) {
     a.push(z);for(const d of [.001,.02,.2,1])a.push(z-d,z+d);
   }
+  // Resolve the rapidly changing diffraction/focus region locally. Elsewhere
+  // keep the original spacing. These are physical calculations, not blur.
+  for(const anchor of [g.mask,g.image])for(let d=.5;d<=Math.min(25,g.f2);d*=1.35){
+    a.push(anchor+d);if(anchor===g.image)a.push(anchor-d);
+  }
   return [...new Set(a.filter(z=>z>=0&&z<=g.max))].sort((a,b)=>a-b);
+}
+// Expand only the cheap output cuts, keeping the original transverse spacing.
+// The previous calculation window clipped visible tails at about 4% of peak.
+// This does not increase the 2-D propagation grid or source sample count.
+export function wavePlan(p,z){
+  const plan=slicePlan(p,z);
+  if(plan.type==='lct'){
+    const old=plan.axis,n=old.length,step=old[1]-old[0];
+    const inputStep=p.fieldSizeUm*1e-6/p.gridSize/(plan.before?1:p.reduction);
+    const nyquist=p.wavelengthNm*1e-9*Math.abs(plan.B)/(2*inputStep);
+    const padding=Math.max(0,Math.min(n,Math.floor((nyquist-Math.max(Math.abs(old[0]),Math.abs(old.at(-1))))/step)));
+    plan.axis=Float64Array.from({length:n+2*padding},(_,i)=>old[0]+(i-padding)*step);
+  }
+  return plan;
 }
 // One coherent relay per emitter; retain only the two physical central cuts.
 // Spatial grid stays at the selected detail. Source quadrature is explicit.
 export function computeWave(params,scope='full',progress=()=>{},planes=null) {
   const p={...defaults,...params};validate(p);const g=geometry(p),zs=planes||pathPlanes(p,scope);
   if(!zs.length||zs.some(z=>!Number.isFinite(z)||z<0||z>g.max))throw Error('Wave positions must lie within the bench.');
-  const n=p.gridSize,dx=p.fieldSizeUm*1e-6/n,lambda=p.wavelengthNm*1e-9,mask=makeMask(p),beam=gaussianBeam(p,g.mask),samples=sourceSamples(p),columns=zs.map(z=>({z,plan:slicePlan(p,z)}));
+  const n=p.gridSize,dx=p.fieldSizeUm*1e-6/n,lambda=p.wavelengthNm*1e-9,mask=makeMask(p),beam=gaussianBeam(p,g.mask),samples=sourceSamples(p),columns=zs.map(z=>({z,plan:wavePlan(p,z)}));
   // Use the same fixed source/mask-incident/pupil/image reference as XY results.
   const reference=compute(p,g.screen),sharedPeak=reference.sharedPeak,propagationCache={operators:new Map(),spectra:new WeakMap()};
   for(const col of columns){if(col.plan.type==='illumination'){col.x=col.plan.axis;col.y=col.plan.axisY||col.x;Object.assign(col,centerCuts(illuminationIntensity(p,col.plan.beam,col.x,col.y),col.x,col.y));}}

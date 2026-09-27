@@ -20,7 +20,7 @@ test('Near-mask path includes 61 physical planes from 0 to 200 micrometres',()=>
  for(const z of [g.condenser,g.mask,g.lens1,g.pupil,g.lens2,g.image])assert.ok(pathPlanes(defaults).includes(z));
 });
 test('Wave results use the requested grid and agree with corresponding XY centre cuts',()=>{
- const p={...defaults,gridSize:128,sourceBins:5,sourceType:'Point'},zs=[200.001,350,400,410,450];const w=computeWave(p,'full',()=>{},zs);assert.equal(w.params.gridSize,128);for(const col of w.columns){const r=compute(p,col.z),cut=centerCuts(r.screenRaw,r.screenAxis,r.screenAxisY);assert.ok(relative(col.xz,cut.xz)<1e-12);assert.ok(relative(col.yz,cut.yz)<1e-12);}
+ const p={...defaults,gridSize:128,sourceBins:5,sourceType:'Point'},zs=[200.001,350,400,410,450];const w=computeWave(p,'full',()=>{},zs);assert.equal(w.params.gridSize,128);for(const col of w.columns){const r=compute(p,col.z),cut=centerCuts(r.screenRaw,r.screenAxis,r.screenAxisY);for(const key of ['xz','yz'])assert.ok(relative(Float64Array.from(r.screenAxis,v=>sampleLine(col.x,col[key],v)),cut[key])<1e-10);}
 });
 test('Closed condenser and empty custom source yield zero wave fields',()=>{
  for(const extra of [{condenserAperture:0},{sourceType:'Freeform',customSource:Array(1024).fill(0)}]){const w=computeWave({...defaults,sourceType:'Point',gridSize:128,...extra},'near',()=>{},[200,200.05]);for(const col of w.columns){assert.equal(maximum(col.xz),0);assert.equal(maximum(col.yz),0);}}
@@ -28,7 +28,7 @@ test('Closed condenser and empty custom source yield zero wave fields',()=>{
 const fixtures=JSON.parse(readFileSync(new URL('./matlab-wave-reference.json',import.meta.url),'utf8'));
 for(const c of fixtures)test(`MATLAB XZ/YZ parity: ${c.name}`,()=>{
  const p={...defaults,...c.params,f1Mm:c.params.projectionFocalMm/2,sourceBins:Math.ceil(Math.sqrt(c.params.maxSourceSamples))},w=computeWave(p,'full',()=>{},c.columns.map(col=>col.z));let worst=0;
- for(let i=0;i<c.columns.length;i++){const actual=w.columns[i],expected=c.columns[i];for(const key of ['x','y'])assert.ok(relative(actual[key],expected[key])<1e-9,`${key} axis at ${actual.z}`);for(const key of ['xz','yz']){const err=relative(actual[key],expected[key]);worst=Math.max(worst,err);assert.ok(err<1e-6,`${key} at ${actual.z}, error ${err}`);}}
+ for(let i=0;i<c.columns.length;i++){const actual=w.columns[i],expected=c.columns[i];for(const key of ['xz','yz']){const axis=key==='xz'?'x':'y',resampled=Float64Array.from(expected[axis],v=>sampleLine(actual[axis],actual[key],v));const err=relative(resampled,expected[key]);worst=Math.max(worst,err);assert.ok(err<1e-6,`${key} at ${actual.z}, error ${err}`);}}
  assert.ok(Math.abs(w.sharedPeak/c.sharedPeak-1)<1e-6,`XYZ reference ${w.sharedPeak/c.sharedPeak}`);console.log(`${c.name}: worst relative cut error ${worst}`);
 });
 

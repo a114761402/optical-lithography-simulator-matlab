@@ -1,4 +1,4 @@
-import {RAY_BLUE,RAY_YELLOW} from './light-palette.js?v=20260927-illumination2';
+import {RAY_BLUE,RAY_YELLOW} from './light-palette.js?v=20260927-positions3';
 // A screen-sized schematic. z coordinates keep their physical scale; component
 // heights and ray heights are illustrative, just as in the large bench view.
 export function compactBench({width,geometry:g,params:p,components,selected,screen,pupilValue,mode='many',observations=[],activeId=null}){
@@ -28,7 +28,8 @@ export function compactBench({width,geometry:g,params:p,components,selected,scre
   });
   const at=Math.max(left,Math.min(right,X(screen)));
   if(screen!==null)svg+=`<g aria-label="Selected observation plane"><title>Observation screen · z = ${number(screen)} mm</title><path d="M${at} 39V117" stroke="#155fdf" stroke-width="1.1" stroke-dasharray="3 3"/><path d="M${at-3} 36h6l-3 5Z" fill="#155fdf"/></g>`;
-  const ordered=observations.map(o=>({...o,labelX:X(o.z)})).sort((a,b)=>a.z-b.z);
+  for(const o of observations.filter(o=>o.muted))svg+=`<path data-position-tick="${o.id}" d="M${X(o.z)} 135v5" stroke="#b9c9d8"/>`;
+  const ordered=observations.filter(o=>!o.muted).map(o=>({...o,labelX:X(o.z)})).sort((a,b)=>a.z-b.z);
   for(let i=1;i<ordered.length;i++)ordered[i].labelX=Math.max(ordered[i].labelX,ordered[i-1].labelX+23);
   if(ordered.length){ordered.at(-1).labelX=Math.min(right-2,ordered.at(-1).labelX);for(let i=ordered.length-2;i>=0;i--)ordered[i].labelX=Math.min(ordered[i].labelX,ordered[i+1].labelX-23);}
   for(const o of ordered){const active=o.id===activeId;svg+=`<g class="compact-position-marker" data-position-marker="${o.id}" aria-label="Position ${o.id} at ${number(o.z)} mm"><path d="M${X(o.z)} 113L${o.labelX} 119" fill="none" stroke="#9badbc"/><rect x="${o.labelX-9}" y="118" width="18" height="18" rx="3" fill="${active?'#155fdf':'#e6edf5'}"/><text x="${o.labelX}" y="131" text-anchor="middle" font-size="12" font-weight="600" fill="${active?'white':'#4e657b'}">${o.id}</text></g>`;}

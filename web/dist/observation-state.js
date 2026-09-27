@@ -1,11 +1,31 @@
-import {slicePlan,maximum} from './optics.js?v=20260927-illumination2';
+import {slicePlan,maximum} from './optics.js?v=20260927-positions3';
 const clamp=(v,lo,hi)=>Math.min(hi,Math.max(lo,v));
 export const PLANE_NAMES={source:'Pupil plane',condenser:'Condenser exit',mask:'Mask exit',near:'Mask + 1 µm',lens1:'Lens 1',pupil:'Aperture plane',lens2:'Lens 2',image:'Image plane',custom:'Custom position'};
 let nextInstance=0;
 export function createPlane(id,plane='custom',base=0){return {id,instance:++nextInstance,plane,base,offset:0,generation:0,result:null,resultKey:null,pending:false,error:''};}
 export function createPlanes(){return ['source','mask','pupil','image'].map((plane,i)=>createPlane('ABCD'[i],plane));}
 export function restorePlane(panel){return {...panel,instance:++nextInstance,generation:panel.generation+1,pending:false,progress:null,error:''};}
-export function availablePlaneId(planes){return [...'ABCD'].find(id=>!planes.some(panel=>panel.id===id));}
+export function availablePlaneId(planes){
+  const used=new Set(planes.map(p=>p.id));
+  for(let i=0;;i++){let n=i+1,id='';while(n){n--;id=String.fromCharCode(65+n%26)+id;n=Math.floor(n/26);}if(!used.has(id))return id;}
+}
+// Clone state, sharing immutable calculated arrays but never identity or edits.
+export function appendPositionGroup(planes,count){
+  const source=planes.slice(-count),added=[];
+  for(let i=0;i<count;i++){
+    const id=availablePlaneId([...planes,...added]),previous=source[i%source.length];
+    const panel=previous?{...restorePlane(previous),id}:createPlane(id,'image');added.push(panel);
+  }
+  planes.push(...added);return added;
+}
+export const quantizePosition=value=>Math.round(value*1000)/1000;
+export const formatPosition=value=>Number(value.toFixed(3)).toString();
+// Limit labels to a coherent group; retain every other position as a faint tick.
+export function markedPositions(planes,activeId,count){
+  if(planes.length<=count)return planes;
+  const index=Math.max(0,planes.findIndex(p=>p.id===activeId)),start=Math.floor(index/count)*count;
+  return planes.map((p,i)=>({...p,muted:i<start||i>=start+count}));
+}
 export class SliceBatch{
   constructor(panels){this.states=new Map(panels.map(panel=>[panel.instance,'queued']));}
   settle(instance,state='done'){if(this.states.has(instance))this.states.set(instance,state);}

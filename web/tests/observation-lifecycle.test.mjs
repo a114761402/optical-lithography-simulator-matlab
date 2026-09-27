@@ -11,7 +11,7 @@ test('Deleting and reusing a letter cannot accept the old calculation, including
  assert.equal(restored.base,202);assert.equal(restored.pending,false);
 });
 test('Deleting any combination retains stable letters and permits empty/add state',()=>{
- const planes=createPlanes();assert.equal(availablePlaneId(planes),undefined);planes.splice(1,1);assert.deepEqual(planes.map(p=>p.id),['A','C','D']);assert.equal(availablePlaneId(planes),'B');planes.length=0;assert.equal(availablePlaneId(planes),'A');
+ const planes=createPlanes();assert.equal(availablePlaneId(planes),'E');planes.splice(1,1);assert.deepEqual(planes.map(p=>p.id),['A','C','D']);assert.equal(availablePlaneId(planes),'B');planes.length=0;assert.equal(availablePlaneId(planes),'A');
 });
 test('Batch tracks all retained views; cancellations, failures and deletion cannot keep it busy',()=>{
  const planes=createPlanes(),batch=new SliceBatch(planes);assert.equal(batch.remaining,4);batch.settle(planes[0].instance);batch.settle(planes[1].instance,'error');batch.drop(planes[2].instance);batch.settle(planes[2].instance);assert.equal(batch.total,3);assert.equal(batch.completed,2);assert.equal(batch.active,true);batch.settle(planes[3].instance,'cancelled');assert.equal(batch.active,false);

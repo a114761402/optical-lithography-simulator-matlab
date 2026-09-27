@@ -1,5 +1,5 @@
 import {bestSlice} from './quality-policy.js?v=20260927-detail1';
-import {createPlanes,restorePlane,observationZ,sliceKey} from './observation-state.js?v=20260927-detail1';
+import {createPlanes,restorePlane,observationZ,sliceKey} from './observation-state.js?v=20260927-position-fit';
 
 // New identities prevent in-flight work for the replaced layout from attaching.
 export function restorePositions(saved=null){return saved?saved.map(restorePlane):createPlanes();}

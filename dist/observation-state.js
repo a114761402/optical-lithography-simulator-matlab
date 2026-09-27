@@ -48,12 +48,12 @@ export function tuneObservation(panel,g,offset){
 export function sliceKey(params,z){const p={...params,defocusUm:0};return 'slice-v1:'+JSON.stringify(Object.keys(p).sort().map(key=>[key,p[key]]))+':'+Number(z.toFixed(9));}
 export function sliceRequest(panel,g,params){return {panelId:panel.id,instance:panel.instance,generation:panel.generation,z:observationZ(panel,g),key:sliceKey(params,observationZ(panel,g))};}
 export function acceptsSlice(panel,request,g,params){return !!panel&&panel.instance===request.instance&&panel.id===request.panelId&&panel.generation===request.generation&&request.key===sliceKey(params,observationZ(panel,g));}
-export function snapPosition(z,g,pixelWidth,{bypass=false,previous=null}={}){
+export function snapPosition(z,g,pixelWidth,{bypass=false,previous=null,displayMax=g.max}={}){
   z=clamp(z,0,g.max);if(bypass||pixelWidth<=0)return {z,plane:'custom'};
   const keys=['source','condenser','mask','lens1','pupil','lens2','image'];
-  if(previous&&keys.includes(previous)&&Math.abs(z-g[previous])*pixelWidth/g.max<=12)return {z:g[previous],plane:previous};
+  if(previous&&keys.includes(previous)&&Math.abs(z-g[previous])*pixelWidth/displayMax<=12)return {z:g[previous],plane:previous};
   const key=keys.reduce((best,k)=>Math.abs(z-g[k])<Math.abs(z-g[best])?k:best,keys[0]);
-  return Math.abs(z-g[key])*pixelWidth/g.max<=8?{z:g[key],plane:key}:{z,plane:'custom'};
+  return Math.abs(z-g[key])*pixelWidth/displayMax<=8?{z:g[key],plane:key}:{z,plane:'custom'};
 }
 // Keep only XY data needed by a screen; full relay fields belong to reference views.
 export function screenSnapshot(r){const {params,geometry,z,label,screenRaw,screenAxis,screenAxisY,screenHalf,sharedPeak,dark,samples}=r;return {params,geometry,z,label:displayPlaneLabel(label),screenRaw,screenAxis,screenAxisY,screenHalf,sharedPeak,dark,samples};}

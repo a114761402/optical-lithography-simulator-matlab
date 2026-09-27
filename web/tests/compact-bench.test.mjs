@@ -12,7 +12,7 @@ test('The whole compact bench fits narrow screens and preserves physical z ratio
     assert.equal(height,164);assert.ok(!/NaN|Infinity/.test(svg));
     const locations=[...svg.matchAll(/data-component="([^"]+)"[^>]+transform="translate\(([^,]+),79\)"/g)];
     assert.equal(locations.length,7);
-    for(const [,key,x]of locations){near((Number(x)-18)/(width-36),g[key]/g.max);assert.ok(Number(x)>=18&&Number(x)<=width-18);}
+    for(const [,key,x]of locations){near((Number(x)-7)/(width-14),g[key]/g.image);assert.ok(Number(x)>=7&&Number(x)<=width-7);}
     assert.deepEqual(params,before);
   }
 });

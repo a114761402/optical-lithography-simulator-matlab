@@ -8,7 +8,10 @@ export function setupControlLayout(){
   const screenNotice=$('screen-status');screenNotice.classList.add('state-notice');
   $('observation-layout').after(screenNotice,$('cancel-screen'));
   const focus=document.createElement('details');focus.id='focus-options';
-  focus.innerHTML='<summary>Fine tuning <span id="focus-offset-label">0 µm</span></summary>';
+  focus.innerHTML='<summary>Fine tuning</summary>';
+  const fineButton=document.createElement('button');fineButton.id='fine-tuning-toggle';fineButton.type='button';fineButton.className='secondary';fineButton.setAttribute('aria-controls','focus-options');fineButton.setAttribute('aria-expanded','false');fineButton.innerHTML='<span>Fine tuning</span><span id="focus-offset-label"></span><span class="fine-chevron" aria-hidden="true">⌄</span>';
+  fineButton.onclick=()=>{focus.open=!focus.open;};focus.addEventListener('toggle',()=>fineButton.setAttribute('aria-expanded',String(focus.open)));
+  const rangeNotice=document.createElement('p');rangeNotice.id='path-range-notice';rangeNotice.className='muted';rangeNotice.hidden=true;$('bench-wrap').after(rangeNotice);
   $('focus-control').before(focus);focus.append($('focus-control'));controls.append(controls.querySelector('.slice-bar'));
   // Finished/calculation detail belongs in settings; only actionable status is
   // repeated outside them. The original complete text remains accessible.
@@ -39,7 +42,7 @@ export function setupControlLayout(){
   const profileOption=document.createElement('label');profileOption.id='desktop-profile-option';profileOption.innerHTML='<input type="checkbox" id="enable-intensity-profile" autocomplete="off"> Enable intensity profile';sliceSettings.append(profileOption);
   const profileToggle=profileOption.querySelector('input');profileToggle.checked=false;
   profileToggle.addEventListener('change',()=>document.body.classList.toggle('profile-enabled',profileToggle.checked));
-  const waveSettings=document.createElement('section');waveSettings.id='global-wave-settings';waveSettings.innerHTML='<h3>Wave settings</h3>';
+  const waveSettings=document.createElement('section');waveSettings.id='global-wave-settings';waveSettings.innerHTML='<h3>Wave settings</h3><p class="muted">Wave detail controls the full-path view. High detail beside Compute controls observation slices separately.</p>';
   const aboutSettings=document.createElement('section');aboutSettings.id='about-settings';aboutSettings.innerHTML='<h3>About</h3>';
   const modelButton=$('model-button'),modelHome=document.createComment('mobile about');modelButton.after(modelHome);
   // Relocate the actual controls, so desktop and phone always share values.
@@ -76,7 +79,7 @@ export function setupControlLayout(){
   for(const p of waveOptionsBody.querySelectorAll('p'))notes.append(p);
   waveOptionsBody.append(notes);
   const focusHeading=document.createElement('div');focusHeading.className='focus-heading';focusHeading.innerHTML='<span>Fine tuning <small id="tuning-anchor"></small></span><button type="button" id="return-focus" class="quiet">Reset offset</button>';
-  focus.prepend(focusHeading);
+  const fineContent=document.createElement('div');fineContent.className='fine-content';fineContent.append(focusHeading,$('focus-control'));focus.append(fineContent);
   const planeSelect=$('plane'),planeLabels=[...planeSelect.options].map(o=>o.textContent);
   const shortLabels={'':'Select a position',image:'Image',mask:'Mask',near:'Mask + 1 µm',source:'Pupil',condenser:'Condenser',lens1:'Lens 1',pupil:'Aperture',lens2:'Lens 2',custom:'Custom'};
   function shortenPlane(){[...planeSelect.options].forEach((o,i)=>{o.textContent=media.matches&&o.selected?shortLabels[o.value]:planeLabels[i];});}
@@ -89,6 +92,7 @@ export function setupControlLayout(){
   positionButton.onclick=()=>{advanced.open=!advanced.open;positionButton.setAttribute('aria-expanded',String(advanced.open));};
   advanced.addEventListener('toggle',()=>positionButton.setAttribute('aria-expanded',String(advanced.open)));
   const sliceBar=controls.querySelector('.slice-bar'),sliceControls=sliceBar.querySelector('.slice-controls');
+  sliceControls.insertBefore(fineButton,$('show-slice'));sliceBar.after(focus);
   const computeHome=document.createComment('slice action');$('show-slice').before(computeHome);
   const action=document.createElement('div');action.className='slice-compute-action';action.append($('show-slice'));computeHome.after(action);
   function detailToggle(id){const label=document.createElement('label');label.className='detail-toggle';label.title='Off: faster sampling. On: finer sampling. Existing high detail results are reused.';label.innerHTML=`<input id="${id}" type="checkbox" role="switch" data-high-detail><span>High detail</span>`;return label;}
@@ -99,9 +103,9 @@ export function setupControlLayout(){
     if(expertDetail.previousElementSibling!==$('reset-key-positions'))$('calculate').before(expertDetail);
     const standard=media.matches&&nav.dataset.view==='explore';advanced.hidden=!standard;positionButton.hidden=!standard;action.hidden=media.matches&&!standard;
     if(standard){
-      if(focus.parentElement!==advanced)advanced.append(focus,sliceBar);if(action.parentElement!==$('profile-menu'))$('profile-menu').prepend(action);action.after($('cancel-screen'),notice);
+      if(focus.parentElement!==advanced)advanced.append(sliceBar,focus);if(action.parentElement!==$('profile-menu'))$('profile-menu').prepend(action);action.after($('cancel-screen'),notice);
     }else{
-      if(focus.parentElement!==controls)controls.append(focus,sliceBar);if(action.parentElement!==sliceControls)computeHome.after(action);
+      if(focus.parentElement!==controls)controls.append(sliceBar,focus);if(action.parentElement!==sliceControls)computeHome.after(action);
       if(media.matches){$('calculate').closest('.calculation-actions').after($('cancel-screen'),notice);}
       else{sliceBar.after($('cancel-screen'),notice);}
     }
@@ -110,8 +114,7 @@ export function setupControlLayout(){
   document.addEventListener('position-view-change',adaptPosition);
   document.addEventListener('observation-position-change',adaptPosition);
   const zLabel=$('slice-z').closest('label');zLabel.lastChild.textContent='';const unit=document.createElement('span');unit.className='z-unit';unit.textContent='mm';zLabel.append(unit);
-  let phoneFocusOpen=false,adaptingFocus=false;
-  focus.addEventListener('toggle',()=>{if(media.matches&&!adaptingFocus)phoneFocusOpen=focus.open;});
+  let focusInitialised=false;
   function adapt(){
     const compact=media.matches;
     if(displayDialog.open)displayDialog.close();
@@ -133,7 +136,7 @@ export function setupControlLayout(){
     referenceDetails.append(referenceWindows);
     sidebar.append(waveControls);waveControls.hidden=compact;
     compact?waveSettings.querySelector('h3').after(waveRegion):waveControls.prepend(waveRegion);waveOptions.hidden=true;
-    waveOptions.open=false;adaptingFocus=true;focus.open=compact?phoneFocusOpen:true;queueMicrotask(()=>adaptingFocus=false);shortenPlane();adaptPosition();
+    waveOptions.open=false;if(!focusInitialised){focus.open=!compact;focusInitialised=true;}shortenPlane();adaptPosition();
   }
   media.addEventListener('change',adapt);matchMedia('(max-width:350px)').addEventListener('change',adapt);adapt();
   // Programmatic changes of the position must update its compact label too.

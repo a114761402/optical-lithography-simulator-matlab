@@ -8,16 +8,16 @@ import {renderWavePixels} from './wave-display.js?v=20260927-positions3';
 import {QUALITY,waveParameters} from './quality.js?v=20260927-positions3';
 import {waveCacheKey} from './cache.js?v=20260927-positions3';
 import {setupViewSwitch} from './view-switch.js?v=20260927-positions3';
-import {setupControlLayout} from './control-layout.js?v=20260927-mobile-align';
-import {waveComponentSVG} from './wave-components.js?v=20260927-positions3';
-import {compactBench} from './compact-bench.js?v=20260927-mobile-align';
-import {regionMarkup} from './path-layout.js?v=20260927-positions3';
-import {desktopBench} from './desktop-bench.js?v=20260927-mobile-align';
+import {setupControlLayout} from './control-layout.js?v=20260927-position-fit';
+import {waveComponentSVG} from './wave-components.js?v=20260927-position-fit';
+import {compactBench} from './compact-bench.js?v=20260927-position-fit';
+import {regionMarkup,waveView} from './path-layout.js?v=20260927-position-fit';
+import {desktopBench} from './desktop-bench.js?v=20260927-position-fit';
 import {setupBenchEditor} from './bench-editor.js?v=20260927-mobile-align';
 import {palette,lightRegion,RAY_BLUE,RAY_YELLOW} from './light-palette.js?v=20260927-positions3';
-import {createPlane,restorePlane,appendPositionGroup,markedPositions,quantizePosition,SliceBatch,createPlanes,PLANE_NAMES,tuningBase,observationZ,setObservation,tuneObservation,sliceKey,sliceRequest,acceptsSlice,screenSnapshot,referenceScreens,SliceCache} from './observation-state.js?v=20260927-detail1';
+import {createPlane,restorePlane,appendPositionGroup,markedPositions,quantizePosition,SliceBatch,createPlanes,PLANE_NAMES,tuningBase,observationZ,setObservation,tuneObservation,sliceKey,sliceRequest,acceptsSlice,screenSnapshot,referenceScreens,SliceCache} from './observation-state.js?v=20260927-position-fit';
 import {setupObservationUI} from './observation-ui.js?v=20260927-positions3';
-import {setupScreenDrag} from './screen-drag.js?v=20260927-detail1';
+import {setupScreenDrag} from './screen-drag.js?v=20260927-position-fit';
 import {setupSliceShare} from './slice-share.js?v=20260927-controls1';
 import {SerialJobs} from './serial-jobs.js?v=20260927-positions3';
 import {restorePositions,hydratePositions,atReferencePositions,referenceDisplayMode} from './reference-positions.js?v=20260927-detail1';
@@ -151,6 +151,7 @@ function syncFocus(){
   $('focus-options').hidden=false;$('focus-control').hidden=false;$('return-focus').disabled=!panel||offset===0;
   $('focus-offset-label').textContent=offset===0?'':`${offset>0?'+':''}${fmt(offset)} µm`;
   $('tuning-anchor').textContent=panel?`· from ${fmt(base,3)} mm`:'';
+  $('fine-tuning-toggle').title=panel?`Fine tuning from ${fmt(base,3)} mm. Reset offset returns to this position.`:'Select an image to edit its position';$('fine-tuning-toggle').disabled=!panel;
   for(const id of ['tuning-number','tuning-range']){const input=$(id);if(input){input.disabled=!panel;input.min=Math.ceil(Math.max(-100,-base*1000));input.max=Math.floor(Math.min(100,(g.max-base)*1000));input.value=fmt(offset,0);}}
 }
 
@@ -158,7 +159,7 @@ function syncScreen(){
   fieldEdits.z=false;fieldEdits.offset=false;
   if($('go-fixed-image'))$('go-fixed-image').disabled=!activePlane();
   syncFocus();const g=geometry(p),panel=activePlane(),at=currentZ();for(const id of ['plane','slice-z','screen-slider'])$(id).disabled=!panel;
-  if(!panel){$('plane').value='';$('slice-z').value='';$('slice-z').placeholder='—';$('screen-slider').value=at;document.dispatchEvent(new Event('observation-position-change'));$('active-observation').textContent=planes.length?'Select an image to edit its position':'Add a position to start';syncWaveCursor();return;}$('plane').value=panel.offset!==0?'custom':panel.plane;$('slice-z').value=fmt(at,3);$('slice-z').max=Math.ceil(g.max*1000)/1000;$('screen-slider').max=g.max;$('screen-slider').value=at;
+  if(!panel){$('plane').value='';$('slice-z').value='';$('slice-z').placeholder='—';$('screen-slider').value=at;document.dispatchEvent(new Event('observation-position-change'));$('active-observation').textContent=planes.length?'Select an image to edit its position':'Add a position to start';syncWaveCursor();return;}$('plane').value=panel.offset!==0?'custom':panel.plane;$('slice-z').value=fmt(at,3);$('slice-z').max=Math.ceil(g.max*1000)/1000;$('screen-slider').max=g.image;$('screen-slider').value=at;
   const label=PLANE_NAMES[panel.plane];$('screen-location').textContent=`${label} · z = ${fmt(at,3)} mm`;
   $('active-observation').innerHTML=`Editing <b>${panel.id}</b> ${panel.offset===0?label:'Custom position'}`;
   document.dispatchEvent(new Event('observation-position-change'));syncWaveCursor();
@@ -243,7 +244,7 @@ function removeObservation(id){
 function addObservation(){
   commitPositionFields();previousLayout={planes:planes.map(panel=>({...panel})),activeId,lastPosition};removedPlane=null;
   const added=appendPositionGroup(planes,benchEditor.compact?2:4);observationUI.render();
-  if(benchEditor.compact){$('focus-options').open=false;viewTabs.setEditing(true);}
+  if(benchEditor.compact){viewTabs.setEditing(true);}
   activeId=added[0].id;refreshObservations();observationUI.notice('Added '+added.map(p=>p.id).join('–'));
   $('slice-panel-'+activeId).focus({preventScroll:true});$('slice-panel-'+activeId).scrollIntoView({block:'nearest',behavior:'smooth'});
 }
@@ -316,12 +317,12 @@ function calculate(kind='image',override=null,target=activePlane(),batchTicket=n
 function drawYZ(){
   const c=$('yz-canvas'),width=Math.max(1,c.clientWidth),height=c.clientHeight||240,ratio=Math.min(devicePixelRatio||1,2);c.width=Math.round(width*ratio);c.height=Math.round(height*ratio);const ctx=c.getContext('2d');ctx.setTransform(ratio,0,0,ratio,0,0);ctx.fillStyle='#071624';ctx.fillRect(0,0,width,height);$('yz-labels').replaceChildren();$('wave-components').replaceChildren();$('wave-regions').replaceChildren();$('wave-regions').hidden=!yzResult||yzResult.scope==='near';syncWaveCursor();
   if(!yzResult){c.setAttribute('aria-label','Wave intensity — not calculated for these settings');$('wave-scale').textContent=$('wave-brightness').value.includes('log')?'−120 → 0 dB · XYZ reference':$('wave-brightness').value==='local'?'0 → 1 · normalized per z':'0 → 1 · XYZ reference';if(activeJob!=='yz')$('wave-status').textContent=waveLoading?'Loading the saved Fine calculation…':`Optics changed or new view selected · click ${$('calculate-yz').textContent}`;ctx.fillStyle='#687f94';ctx.font='15px system-ui';ctx.textAlign='center';ctx.fillText(waveLoading?'Loading saved Fine wave…':`Click ${$('calculate-yz').textContent} for this view.`,width/2,height/2);$('yz-note').textContent='XZ: horizontal cut at y = 0. YZ: vertical cut at x = 0. Dark outside the calculation window is canvas background; enable Show calculation window in Settings to see the bounds.';return;}
-  const r=yzResult,section=$('wave-section').value,mode=$('wave-brightness').value,near=r.scope==='near',half=near?r.params.fieldSizeUm*.5e-6:Math.max(r.params.condenserFocalMm*.001*r.params.sourceEmissionNA*1.4,r.geometry.f1*.001*r.params.projNA/r.params.reduction*1.4),w=width,h=height,img=ctx.createImageData(c.width,c.height),cols=r.columns;
+  const r=waveView(yzResult),section=$('wave-section').value,mode=$('wave-brightness').value,near=r.scope==='near',half=near?r.params.fieldSizeUm*.5e-6:Math.max(r.params.condenserFocalMm*.001*r.params.sourceEmissionNA*1.4,r.geometry.f1*.001*r.params.projNA/r.params.reduction*1.4),w=width,h=height,img=ctx.createImageData(c.width,c.height),cols=r.columns;
   img.data.set(renderWavePixels(r,{width:c.width,height:c.height,half,section,mode,palette:t=>palette(t,'blue'),illuminationPalette:t=>palette(t,'warm'),showWindow:$('wave-window-toggle').checked}));
   ctx.putImageData(img,0,0);drawWaveMarkers(r,width,height);
   $('wave-regions').hidden=near;if(!near)$('wave-regions').innerHTML=regionMarkup(r.geometry);
   $('yz-labels').classList.toggle('full-path',!near);const labels=near?[[r.zMin,'0'],[(r.zMin+r.zMax)/2,'100 µm'],[r.zMax,'200 µm after mask']]:[0,100,200,300,400,r.zMax].filter((v,i,a)=>a.indexOf(v)===i&&v<=r.zMax).map(v=>[v,`${fmt(v)}${v===r.zMax?' mm':''}`]);$('yz-labels').innerHTML=labels.map(([at,name])=>`<span style="left:${(at-r.zMin)/(r.zMax-r.zMin)*100}%">${name}</span>`).join('');
-  $('yz-note').textContent=`${r.params.gridSize} × ${r.params.gridSize} mask grid · ${r.samples} emitter${r.samples===1?'':'s'} · ${cols.length} z planes. Display interpolated between calculated planes; grey is outside the calculation window. ${mode==='local'?'Each column is normalized; brightness cannot be compared along z.':'Fixed XYZ reference; intensities above it are clipped.'}`;
+  $('yz-note').textContent=`${r.params.gridSize} × ${r.params.gridSize} mask grid · ${r.samples} emitter${r.samples===1?'':'s'} · ${cols.length} z planes. Display interpolated between calculated planes; Dark outside the calculation window is background; enable Show calculation window in Settings to see its bounds. ${mode==='local'?'Each column is normalized; brightness cannot be compared along z.':'Fixed XYZ reference; intensities above it are clipped.'}`;
   $('wave-scale').textContent=mode.includes('log')?'−120 → 0 dB · XYZ reference':mode==='local'?'0 → 1 · normalized per z':'0 → 1 · XYZ reference';
   syncWaveCursor();c.setAttribute('aria-label',`${section.toUpperCase()} wave intensity, ${near?'0 to 200 micrometres after mask':'full optical path'}`);
 }
@@ -361,10 +362,10 @@ $('reset').onclick=()=>{
   for(const details of document.querySelectorAll('details'))details.open=false;
   window.scrollTo(0,0);window.location.reload();
 };
-$('yz-canvas').onclick=e=>{if(!yzResult)return;const r=e.target.getBoundingClientRect();selectWavePosition(yzResult.zMin+(e.clientX-r.left)/r.width*(yzResult.zMax-yzResult.zMin));};
+$('yz-canvas').onclick=e=>{if(!yzResult)return;const r=e.target.getBoundingClientRect(),view=waveView(yzResult);selectWavePosition(view.zMin+(e.clientX-r.left)/r.width*(view.zMax-view.zMin));};
 window.addEventListener('resize',()=>requestAnimationFrame(()=>{drawBench();drawYZ();drawScreen();if($('profile-dialog').open)drawProfile();}));
 $('component-picker').onchange=()=>{selected=$('component-picker').value;renderInspector();drawBench();};
-$('yz-canvas').onkeydown=e=>{if(!yzResult)return;if(['ArrowLeft','ArrowRight','Home','End'].includes(e.key)){e.preventDefault();const step=(yzResult.zMax-yzResult.zMin)/(e.shiftKey?1000:100);selectWavePosition(e.key==='Home'?yzResult.zMin:e.key==='End'?yzResult.zMax:Math.min(yzResult.zMax,Math.max(yzResult.zMin,currentZ()+(e.key==='ArrowRight'?step:-step))));}};
+$('yz-canvas').onkeydown=e=>{if(!yzResult)return;if(['ArrowLeft','ArrowRight','Home','End'].includes(e.key)){e.preventDefault();const view=waveView(yzResult),step=(view.zMax-view.zMin)/(e.shiftKey?1000:100);selectWavePosition(e.key==='Home'?view.zMin:e.key==='End'?view.zMax:Math.min(view.zMax,Math.max(view.zMin,currentZ()+(e.key==='ArrowRight'?step:-step))));}};
 setupScreenDrag($('bench'),{geometry:()=>geometry(p),currentZ,onMove:setPosition,onSelect:selectObservation,onStart:()=>viewTabs.showObservation(),compact:()=>benchEditor.compact});
 function syncDetailControls(){
   for(const toggle of document.querySelectorAll('[data-high-detail]'))toggle.checked=details.get(compactMedia.matches,viewTabs.keyView);
@@ -387,7 +388,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.querySele
 benchEditor.start();renderInspector();renderFocus();viewTabs.adapt();drawBench();syncScreen();drawYZ();updatePresetInfo();restoreDefaultWave();restorePresetSlices('default');
 
 function renderFocus(){
-  $('focus-control').innerHTML='<div class="control"><label for="tuning-number"><span class="sr-only">Fine tuning offset</span><span class="number-field"><input id="tuning-number" aria-label="Fine tuning offset in micrometres" type="number" inputmode="decimal" min="-100" max="100" step="1" value="0"><span class="field-unit" aria-hidden="true">µm</span></span></label><input id="tuning-range" aria-label="Fine tuning" type="range" min="-100" max="100" step="1" value="0"></div>';
+  $('focus-control').innerHTML='<div class="control"><label for="tuning-number"><span class="sr-only">Fine tuning offset</span><span class="number-field"><span aria-hidden="true">Δz</span><input id="tuning-number" aria-label="Fine tuning offset in micrometres" type="number" inputmode="decimal" min="-100" max="100" step="1" value="0"><span class="field-unit" aria-hidden="true">µm</span></span></label><input id="tuning-range" aria-label="Fine tuning" type="range" min="-100" max="100" step="1" value="0"></div>';
   $('tuning-number').oninput=()=>fieldEdits.offset=true;$('tuning-range').oninput=()=>setFineOffset(Number($('tuning-range').value));$('tuning-number').onchange=()=>{if($('tuning-number').value.trim()===''){syncFocus();return;}setFineOffset(Number($('tuning-number').value));};syncFocus();
 }
 function panelState(panel){
@@ -438,10 +439,13 @@ function drawObservationZoom(){
 
 
 function syncWaveCursor(){
-  const cursor=$('wave-cursor'),at=currentZ();cursor.hidden=!activePlane()||!yzResult||at<yzResult.zMin||at>yzResult.zMax;
+  const cursor=$('wave-cursor'),at=currentZ(),view=yzResult?waveView(yzResult):null;
+  const notice=$('path-range-notice');notice.hidden=!activePlane()||at<=geometry(p).image;notice.textContent=notice.hidden?'':`Observation z = ${fmt(at,3)} mm · beyond Image, outside the main diagram.`;
+  cursor.hidden=!activePlane()||!view||at<view.zMin||at>view.zMax;
+  $('wave-components').classList.toggle('screen-at-image',!cursor.hidden&&Math.abs(at-view.geometry.image)<1e-8);
   if(cursor.hidden)return;
   const atImage=Math.abs(at-yzResult.geometry.image)<1e-8;cursor.querySelector('span').textContent=atImage?`${benchEditor.compact?'Screen':activeId} · Image`:(benchEditor.compact?'Screen':activeId);cursor.style.height=`${$('yz-canvas').clientHeight}px`;
-  const percent=100*(at-yzResult.zMin)/(yzResult.zMax-yzResult.zMin);cursor.style.left=`${percent}%`;cursor.classList.toggle('at-right',percent>80);
+  const percent=100*(at-view.zMin)/(view.zMax-view.zMin);cursor.style.left=`${percent}%`;cursor.classList.toggle('at-right',percent>80);
 
 }
 function selectWavePosition(at){if(!activePlane())return;setPosition(at);syncWaveCursor();}

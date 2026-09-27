@@ -265,3 +265,65 @@ body:not(.phone-bench) #position-controls .slice-controls{grid-template-columns:
 .phone-bench #fixed-panel #edit-key-positions{grid-column:1;grid-row:1}
 .phone-bench #fixed-panel #reset-key-positions{grid-column:2;grid-row:1}
 @media(min-width:500px){.phone-bench #fixed-panel .calculation-actions>.detail-toggle{flex-direction:row;justify-content:flex-end;gap:6px}}
+
+/* Shared physical frame: 8px bench padding + 7px drawing inset. */
+:root{--diagram-inset:15px}
+.phone-bench{--phone-path-inset:16px}
+#path-range-notice{margin:0 16px 8px;font-size:.875rem}
+#wave-components.screen-at-image [data-wave-label="image"]{display:none}
+.site-contact,.phone-bench .site-contact{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;padding:14px 0 20px;border-top:1px solid var(--line);font-size:.875rem;line-height:1.5}
+.site-contact .contact-heading,.phone-bench .contact-heading{display:inline}
+.site-contact a,.phone-bench .site-contact a{margin:0;white-space:nowrap}
+.wave-section,.phone-bench .wave-section{border-bottom:0;margin-bottom:0;padding-bottom:8px}
+main{padding-bottom:10px}
+.phone-bench:not(.editing-key-positions) #mobile-key-grid-host .slice-heading>span:first-of-type{padding-right:0}
+@media(min-width:560px){
+ .phone-bench .observation-layout,.phone-bench .observation-heading{max-width:580px}
+}
+/* One position row, one explicit fine-tuning button; never an isolated +. */
+#fine-tuning-toggle{display:flex;align-items:center;justify-content:center;gap:5px;min-height:44px;padding:6px 9px;white-space:nowrap;font-size:.875rem;position:relative}
+#fine-tuning-toggle #focus-offset-label:not(:empty){font-size:.75rem;color:var(--blue)}
+#fine-tuning-toggle:has(#focus-offset-label:not(:empty)){flex-wrap:wrap;column-gap:5px;row-gap:0}
+#fine-tuning-toggle[aria-expanded="true"] .fine-chevron{transform:rotate(180deg)}
+#fine-tuning-toggle:disabled{opacity:.5;cursor:default}
+#position-controls .slice-controls,.phone-bench #position-controls .slice-controls,.phone-bench #standard-position-options .slice-controls{display:grid;grid-template-columns:minmax(90px,1fr) minmax(100px,1fr) auto;max-width:none;gap:8px;align-items:center}
+#position-controls .slice-controls:has(.slice-compute-action:not([hidden])){grid-template-columns:minmax(90px,1fr) minmax(100px,1fr) auto}
+body:not(.phone-bench) .slice-compute-action{grid-column:1/-1;justify-self:end;display:flex;align-items:center;gap:10px}
+#position-controls .slice-controls select,.phone-bench #standard-position-options .slice-controls select{width:100%;max-width:none;min-width:0;font-size:.875rem;padding:6px 20px 6px 8px}
+#position-controls .z-input,.phone-bench #position-controls .z-input,.phone-bench #standard-position-options .z-input{display:flex;align-items:center;gap:5px;min-width:0;padding:0 8px;min-height:44px}
+.phone-bench #position-controls .z-input>span:first-child{position:static;font-size:.875rem;line-height:normal}
+.phone-bench #position-controls .z-input>span:first-child:after{content:none}
+.phone-bench #position-controls .z-input .z-unit{display:inline}
+#position-controls .z-input input,.phone-bench #position-controls .z-input input,.phone-bench #standard-position-options .z-input input{flex:1;min-width:0;width:0;padding:0;height:42px;font-size:1rem}
+#focus-options>summary,.phone-bench #focus-options>summary,.phone-bench.editing-key-positions #focus-options>summary{display:none!important}
+#focus-options:not([open]){display:none}
+#focus-options[open]{display:grid;grid-template-columns:minmax(80px,1fr) auto auto;align-items:center;gap:8px;padding-top:8px}
+#focus-options .focus-heading,.phone-bench #focus-options[open] .focus-heading,.phone-bench.editing-key-positions #focus-options .focus-heading{display:contents!important}
+#focus-options .focus-heading>span{display:none!important}
+#focus-options #return-focus,.phone-bench #focus-options[open] #return-focus{grid-column:3;grid-row:1;pointer-events:auto;min-height:44px;padding:4px 6px;font-size:.875rem;white-space:nowrap}
+#focus-options #focus-control,.phone-bench #focus-options[open] #focus-control,#focus-control .control,body:not(.phone-bench) #focus-control .control{display:contents!important}
+#focus-control .control>label,body:not(.phone-bench) #focus-control .control>label{position:static;grid-column:2;grid-row:1;height:auto;margin:0}
+#focus-control .control>input,body:not(.phone-bench) #focus-control .control>input{grid-column:1;grid-row:1;width:100%;min-height:44px;height:44px;margin:0}
+#focus-control .number-field{width:8rem;flex-basis:8rem}
+@media(max-width:380px){
+ .phone-bench #position-controls .slice-controls,.phone-bench #standard-position-options .slice-controls{grid-template-columns:minmax(90px,1fr) auto}
+ .phone-bench #fine-tuning-toggle{grid-column:2;grid-row:1}
+ .phone-bench .slice-controls .z-input{grid-column:1/-1;grid-row:2}
+}
+@media(max-width:480px){
+ #focus-options[open]{grid-template-columns:1fr auto;gap:4px 8px}
+ #focus-options #focus-control .control>input{grid-column:1/-1;grid-row:1}
+ #focus-options #focus-control .control>label{grid-column:1;grid-row:2;justify-self:start}
+ #focus-options #return-focus,.phone-bench #focus-options[open] #return-focus{grid-column:2;grid-row:2}
+}
+
+#focus-options[open]{display:block;padding-top:8px}
+#focus-options:before,#focus-options:after{content:none!important}
+#focus-options .fine-content{display:grid;grid-template-columns:minmax(80px,1fr) auto auto;align-items:center;gap:8px}
+.site-contact{margin:0 4%}
+@media(max-width:480px){#focus-options .fine-content{grid-template-columns:1fr auto;gap:4px 8px}}
+/* End-plane symbols may extend into the outer padding without being clipped. */
+#bench{overflow:visible}
+
+.phone-bench main{padding-bottom:8px}
+#focus-options>summary:after{content:none!important}

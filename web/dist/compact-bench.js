@@ -1,8 +1,9 @@
+import {pathFrame} from './path-layout.js?v=20260927-position-fit';
 import {RAY_BLUE,RAY_YELLOW} from './light-palette.js?v=20260927-positions3';
 // A screen-sized schematic. z coordinates keep their physical scale; component
 // heights and ray heights are illustrative, just as in the large bench view.
 export function compactBench({width,geometry:g,params:p,components,selected,screen,pupilValue,mode='many',observations=[],activeId=null}){
-  const height=164,left=18,right=width-18,X=z=>left+z/g.max*(right-left),cy=79;
+  const height=164,{left,right,x:X}=pathFrame(width,g.image),cy=79;
   const positions=components.map(([key])=>X(g[key]));
   const number=n=>Number(n.toFixed(3));
   let svg=`<path d="M${left} ${cy}H${right}" stroke="#bccbd8" stroke-dasharray="3 4"/><path d="M${left} 139H${right}" stroke="#d5dfe7"/>`;
@@ -26,8 +27,9 @@ export function compactBench({width,geometry:g,params:p,components,selected,scre
     // All seven names remain in the component editor with 44px touch targets.
     if(['source','mask','image'].includes(key))svg+=`<text x="${x}" y="25" text-anchor="${key==='source'?'start':key==='image'?'end':'middle'}" fill="#50677b" font-size="12">${name}</text>`;
   });
-  const at=Math.max(left,Math.min(right,X(screen)));
-  if(screen!==null)svg+=`<g aria-label="Selected observation plane"><title>Observation screen · z = ${number(screen)} mm</title><path d="M${at} 39V117" stroke="#155fdf" stroke-width="1.1" stroke-dasharray="3 3"/><path d="M${at-3} 36h6l-3 5Z" fill="#155fdf"/></g>`;
+  observations=observations.filter(o=>o.z>=0&&o.z<=g.image);
+  const at=X(screen);
+  if(screen!==null&&screen>=0&&screen<=g.image)svg+=`<g aria-label="Selected observation plane"><title>Observation screen · z = ${number(screen)} mm</title><path d="M${at} 39V117" stroke="#155fdf" stroke-width="1.1" stroke-dasharray="3 3"/><path d="M${at-3} 36h6l-3 5Z" fill="#155fdf"/></g>`;
   for(const o of observations.filter(o=>o.muted))svg+=`<path data-position-tick="${o.id}" d="M${X(o.z)} 135v5" stroke="#b9c9d8"/>`;
   const ordered=observations.filter(o=>!o.muted).map(o=>({...o,labelX:X(o.z)})).sort((a,b)=>a.z-b.z);
   for(let i=1;i<ordered.length;i++)ordered[i].labelX=Math.max(ordered[i].labelX,ordered[i-1].labelX+23);

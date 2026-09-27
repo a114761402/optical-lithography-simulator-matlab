@@ -1,3 +1,19 @@
+# Current verification — 27 September 2026
+
+**87/87 tests pass** (`npm test`, 90.6 seconds on this Mac). This includes fresh Fine comparisons against the original wave cache, MATLAB parity fixtures, independent DFT/Gaussian checks, numerical guards, observation lifecycle/queue tests, and new preset/dense-pupil checks. No MATLAB code was changed.
+
+New checks verify all five shipped presets contain four valid Fine XY fields and complete XZ/YZ columns, match their parameter/version keys, and reject mismatches. The generation manifest matches the current engine hash. Dense pupil evaluation agrees with an independently padded FFT at matching coordinates (maximum relative error below 1e-8). Fast dense wave cuts agree with the full dense pupil below 1e-9, including off-axis source weights and annular blocking. Display interpolation is bounded, nonnegative, exact at stored samples, and does not mutate raw arrays. Coincident A–D markers remain below the beam without focal-label conflicts.
+
+Browser checks in the Codex in-app browser used actual CSS widths of 320, 390, 995, and 1319 pixels, plus an 844 × 390 landscape phone layout. No page-level horizontal overflow was found. The 995-pixel desktop has four equal 412-pixel square images in two columns. Portrait mobile has equal square images in two columns; landscape mobile shows four equal squares across the available width. These are emulated sizes, not physical iPhone/Android certification.
+
+Verified flows: initial Fine cached fields; all five presets including rapid switching; desktop select/deselect by Escape and clicking the Key positions heading/blank area; Delete and default-position restoration; a real C-position calculation at Lens 1 while the other results remain unchanged; mobile Edit with disabled controls before tile selection; independent B-position editing and cached batch calculation; local Reset retaining the dipole preset; top Reset restoring Default/Explore with Fine tuning collapsed; Send preview; optional profile; smoothing toggle; Settings; and resizing between desktop and phone without duplicated controls. No application warnings/errors were observed in the browser logs. Native sharing was opened but no email was sent. Existing snapping/state tests pass; direct hardware touch/drag was not newly certified.
+
+A point-source Fine benchmark measured about 268 ms for the original full XY routine plus 134 ms for the dense pupil on this Mac. Multi-source work scales with emitter count and remains slower; this is not a guaranteed speed for phones. Default presets avoid that computation by loading their precomputed fields. The new pupil spacing is about 32.23 µm across the 8.25 mm default window, versus 228.13 µm previously. Interpolation is a display improvement, not an additional physical accuracy claim.
+
+The sections below are historical verification records and may describe earlier UI labels/layouts.
+
+---
+
 ## 2026-09-27 — reference preset and compact wave controls
 
 Desktop uses one Explore workspace with Reference positions and one-step Undo. The preset restores A Source / B Mask / C Aperture plane / D Image Plane, follows current geometry, resets offsets, retains optical parameters and reuses matching slice caches. Restored and added cards share a single identity sequence; replaced workers cannot attach to them. All four default views display intensity. Source distribution and Mask/Aperture openings remain available in Settings for exact, current reference planes; opening modes are labelled and switch back to intensity when moved. Enlarged views follow the selected display mode; intensity profiles are disabled for opening/distribution displays.

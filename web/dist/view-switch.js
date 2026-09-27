@@ -10,10 +10,13 @@ export function setupViewSwitch(){
   workspace.insertBefore(panels[0],panels[1]);
   controls.forEach(control=>display.append(control));
   panels.forEach((panel,i)=>{panel.setAttribute('role','tabpanel');panel.setAttribute('aria-labelledby',tabs[i].id);panel.removeAttribute('aria-label');panel.tabIndex=0;});
-  let selected=0,phoneSelected=0,start=null,ignoreClickUntil=0;
+  let selected=0,phoneSelected=0,editing=false,start=null,ignoreClickUntil=0;
   function select(index,{focus=false}={}){
     if(media.matches)phoneSelected=index;else index=0;
-    selected=index;workspace.dataset.view=index?'fixed':'explore';byId('bench-navigation').dataset.view=workspace.dataset.view;byId('position-controls').hidden=index!==0;
+    selected=index;workspace.dataset.view=index?'fixed':'explore';byId('bench-navigation').dataset.view=workspace.dataset.view;byId('position-controls').hidden=index!==0&&!editing;
+    document.body.classList.toggle('editing-key-positions',media.matches&&index===1&&editing);
+    const grid=byId('observation-grid');if(grid){if(media.matches&&index===1)byId('mobile-key-grid-host').append(grid);else byId('observation-layout').before(grid);}
+    document.dispatchEvent(new CustomEvent('position-view-change',{detail:{key:media.matches&&index===1,editing}}));
     tabs.forEach((tab,i)=>{tab.setAttribute('aria-selected',String(i===index));tab.tabIndex=i===index?0:-1;panels[i].hidden=i!==index;});
     if(focus)tabs[index].focus({preventScroll:true});
   }
@@ -39,5 +42,5 @@ export function setupViewSwitch(){
   });
   bar.addEventListener('pointercancel',()=>{start=null;});
   media.addEventListener('change',adapt);adapt();
-  return {showObservation(){select(0);}};
+  return {showObservation(){select(0);},get keyView(){return media.matches&&selected===1;},get editing(){return editing;},setEditing(value){editing=value;select(selected);},adapt};
 }

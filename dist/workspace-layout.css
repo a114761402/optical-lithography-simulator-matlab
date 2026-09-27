@@ -1,0 +1,127 @@
+/* Shared diagram columns make z positions line up on wide screens. */
+:root{--inspector-width:300px;--diagram-inset:26px}
+#bench-workspace,.wave-section{grid-template-columns:minmax(0,1fr) var(--inspector-width)}
+#bench-wrap{display:block}
+#bench:not(.compact-beam){height:240px;max-height:none}
+#bench .component-label{font-size:13px;letter-spacing:0}
+#bench .component-index{font-size:11px}
+.path-regions{overflow:visible;white-space:nowrap;margin-inline:var(--diagram-inset)}
+.path-regions>span{font-size:.75rem}
+.focus-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:36px;font-size:.875rem;color:var(--ink);margin-top:8px}
+.focus-heading small{font-size:.75rem;color:var(--muted)}
+#focus-options>summary{display:none}
+#focus-control .control{margin:0}
+#focus-control .control>label{font-size:.8125rem;min-height:32px;margin:0}
+#focus-control .control input[type=range]{height:28px;margin:0}
+#focus-control .number-field{min-width:0}
+#focus-control:has(input:disabled){opacity:.55}
+#return-focus{padding:6px 0;font-size:.8125rem;color:var(--blue)}
+.display-menu-button{display:none}
+#display-dialog{width:min(480px,calc(100% - 24px));max-height:85dvh;padding:20px}
+#display-dialog-controls #view-display-controls{display:grid;gap:18px}
+#display-dialog-controls label{display:grid;gap:8px;font-size:1rem;color:var(--muted)}
+#display-dialog-controls select{width:100%;min-height:44px;font-size:1rem}
+#display-dialog-controls .brightness-help{font-size:.875rem;line-height:1.5;margin:0}
+#display-dialog .dialog-header h2{font-size:1.375rem}
+#display-dialog .muted{font-size:.875rem;line-height:1.5}
+/* The calculated view and its own actions form a compact left-aligned unit. */
+.tabbed-views .observation-section{padding:18px 26px 20px;border:0;border-radius:0;background:transparent;margin:0}
+.observation-heading,.phone-bench .observation-heading{margin-bottom:14px}
+.observation-heading .muted{display:none}
+.observation-layout,.compact-views .observation-layout{display:grid;grid-template-columns:minmax(0,280px) minmax(130px,220px);align-items:start;gap:24px;margin:0}
+.observation-field,.compact-views .observation-field{grid-column:1;grid-row:1;width:100%;max-width:280px;margin:0;order:0}
+.observation-field canvas,.compact-views .observation-field canvas{width:100%;max-width:none}
+.observation-field .plot-directions{margin:7px 0 0;font-size:.75rem}
+.observation-tools{min-width:0;padding-top:4px}
+.observation-meta{display:grid;gap:7px;font-size:.875rem;line-height:1.4;color:var(--muted);overflow-wrap:anywhere}
+.observation-meta strong{color:var(--ink);font-weight:550}
+.observation-meta #observation-axis{text-align:left;margin:0;font-size:.75rem}
+.observation-actions{display:grid;justify-items:start;gap:8px;margin-top:18px}
+.observation-actions button{min-height:44px;padding:9px 12px;font-size:.875rem;white-space:normal;text-align:left}
+.observation-actions .quiet{padding-inline:0;color:var(--blue)}
+#screen-status{margin:10px 0 0;max-width:540px}
+#observation-zoom-dialog{width:min(820px,calc(100% - 24px));max-height:94dvh;padding:18px;overflow:auto}
+#observation-zoom-dialog h2{font-size:1.25rem}
+#observation-zoom-position{font-size:.875rem;color:var(--muted)}
+#observation-zoom-canvas{display:block;width:min(100%,70dvh);height:auto;aspect-ratio:1;margin:auto;border-radius:5px;background:#091929}
+/* The wave occupies the same left column as the bench; controls use the right. */
+.wave-section{display:grid;gap:0;padding:22px 0 20px;border:1px solid transparent;border-top-color:var(--line);border-bottom-color:var(--line)}
+.wave-main{min-width:0}
+.wave-heading{padding:0 24px 18px;align-items:center;flex-wrap:nowrap}
+.wave-heading .eyebrow{display:none}
+.wave-heading h2{font-size:1.5rem;margin:0}
+.wave-heading .wave-actions{flex-wrap:wrap;justify-content:flex-end}
+.wave-main>.yz-wrap,.wave-main>.wave-selection,.wave-main>.wave-footer,.wave-main>#wave-notice{margin-inline:var(--diagram-inset)}
+.wave-main .path-regions{margin-bottom:5px}
+.wave-main .yz-wrap{margin-top:0}
+.wave-main .wave-footer{display:flex;flex-direction:row;justify-content:flex-end;margin-top:4px}
+.colour-key{display:flex;align-items:center;gap:8px;flex-wrap:wrap;width:auto;max-width:100%}
+.colour-key i{width:90px;flex:none}
+.colour-key span{font-size:.75rem}
+.wave-main .colour-key{margin:0}
+.wave-sidebar{min-width:0;border-left:1px solid var(--line);padding:0 20px 0 23px}
+.wave-controls{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0;align-items:end}
+.wave-controls>label,.wave-section-control{grid-column:1/-1}
+.wave-controls>label{min-width:0}
+.wave-controls label,.wave-controls .control-label{font-size:.8125rem;line-height:1.3}
+.wave-controls select{min-height:44px;width:100%;max-width:none;font-size:.875rem}
+.wave-section-control{gap:6px}
+.wave-section-control>.control-label{margin:0}
+.section-buttons{padding:0;gap:0;min-height:44px}
+.section-buttons button{flex:1;min-height:44px;font-size:.875rem}
+.wave-options,.wave-options-body{display:contents}
+.wave-options>summary{display:none}
+.wave-options-body>label{min-width:0}
+.wave-options-body .toggle-label{grid-column:1/-1;min-height:36px;margin:0;gap:8px}
+.wave-options-body .wave-notes{grid-column:1/-1;min-width:0}
+.wave-notes>summary{display:flex;align-items:center;padding:0!important;min-height:36px;font-size:.8125rem;color:var(--muted);text-align:left}
+.wave-notes p{font-size:.8125rem;line-height:1.5;margin:8px 0}
+.wave-notes[open]>summary:after{content:none}
+.wave-notes:not([open])>summary:after{content:none}
+#yz-labels span{font-size:.75rem}
+/* Compact controls retain one shared state when they move into sheets. */
+.phone-bench{--action-gap:6px;--action-inset:9px;--action-height:46px}
+.phone-bench #position-controls .slice-controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--action-gap);align-items:stretch}
+.phone-bench #position-controls .slice-controls select{grid-column:auto;width:100%;max-width:none;min-width:0;min-height:44px;font-size:.875rem;padding-inline:6px 18px;text-overflow:ellipsis}
+.phone-bench #position-controls .z-input{display:block;position:relative;padding:0 6px;min-width:0;min-height:44px}
+.phone-bench #position-controls .z-input>span:first-child{position:absolute;top:3px;left:6px;font-size:.75rem;line-height:1;pointer-events:none}
+.phone-bench #position-controls .z-input>span:first-child:after{content:' (mm)'}
+.phone-bench #position-controls .z-input .z-unit{display:none}
+.phone-bench #position-controls .z-input input{width:100%;min-width:0;height:44px;min-height:44px;padding:13px 0 0;font-size:1rem;appearance:textfield}
+.phone-bench #position-controls .z-input input::-webkit-inner-spin-button{appearance:none}
+.phone-bench #position-controls .primary{padding:6px;font-size:.875rem;white-space:normal;min-width:0;min-height:var(--action-height)}
+.phone-bench .focus-heading{display:none}
+.phone-bench #focus-options>summary{display:flex}
+.phone-bench #focus-control .control input[type=range]{height:44px}
+.phone-bench .display-menu-button{display:block}
+.phone-bench .view-display-options{display:none}
+.phone-bench .tabbed-views{padding-top:18px}
+.phone-bench .tabbed-views .observation-section{padding:0;margin:0}
+.phone-bench .observation-layout{grid-template-columns:minmax(0,1fr) 104px;gap:14px;max-width:480px}
+.phone-bench .observation-field{max-width:none}
+.phone-bench .observation-heading h2{font-size:1.125rem}
+.phone-bench .observation-meta{font-size:.8125rem;gap:6px}
+.phone-bench .observation-actions{gap:4px;margin-top:10px;justify-items:stretch}
+.phone-bench .observation-actions button{font-size:.875rem;text-align:center;padding:6px;min-height:44px}
+.phone-bench .observation-field .plot-directions{display:none}
+.phone-bench .wave-section{display:block;padding:18px 0 14px;margin-top:22px;border-inline:0}
+.phone-bench .wave-heading{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));padding:0 0 14px;margin-inline:var(--action-inset);gap:var(--action-gap)}
+/* Match the position row's inset (8px padding + 1px bench border) and thirds. */
+.phone-bench .wave-heading>div:first-child{grid-column:1/3;margin-inline-start:calc(-1 * var(--action-inset));min-width:0}
+.phone-bench .wave-heading .wave-actions{display:grid;grid-template-columns:minmax(0,1fr);grid-column:3;min-width:0;width:100%;gap:var(--action-gap)}
+.phone-bench .wave-heading h2{font-size:1.25rem}
+.phone-bench .wave-heading button{width:100%;min-width:0;min-height:var(--action-height);font-size:.875rem;padding:6px;white-space:normal}
+.phone-bench .wave-controls{grid-template-columns:minmax(0,1fr) 96px 44px;gap:8px;margin:0 0 16px;align-items:end}
+.phone-bench .wave-controls>label,.phone-bench .wave-section-control{grid-column:auto;min-width:0}
+.phone-bench .wave-controls label,.phone-bench .wave-controls .control-label{font-size:.75rem;line-height:1.3}
+.phone-bench .wave-controls select{height:44px;font-size:.875rem;padding-inline:6px 20px}
+.phone-bench .wave-options>summary{display:flex;grid-column:3;grid-row:1;min-height:44px;height:44px;width:44px;justify-content:center;padding:0}
+.phone-bench .wave-options>summary span{display:none}
+.phone-bench .wave-options-body{display:grid;grid-template-columns:1fr 1fr;grid-column:1/-1;gap:12px;border-block:1px solid var(--line);padding:12px 0}
+.phone-bench .wave-main>.yz-wrap,.phone-bench .wave-main>.wave-selection,.phone-bench .wave-main>.wave-footer,.phone-bench .wave-main>#wave-notice,.phone-bench .wave-main>.path-regions{margin-inline:0}
+.phone-bench .wave-sidebar{display:none}
+.phone-bench .wave-main .wave-footer{justify-content:flex-start;margin-top:6px}
+.phone-bench .wave-main .colour-key{margin:0;gap:7px}
+.phone-bench #yz-labels span{font-size:.6875rem}
+@media(max-width:360px){.phone-bench .observation-layout{grid-template-columns:minmax(0,1fr) 92px;gap:10px}.phone-bench .wave-controls{grid-template-columns:minmax(0,1fr) 88px 44px;gap:6px}.phone-bench .wave-controls label,.phone-bench .wave-controls .control-label{font-size:.75rem}.phone-bench .section-buttons button{padding:4px}.phone-bench .wave-heading h2{font-size:1.125rem}}
+@media(max-width:300px){.phone-bench #position-controls .slice-controls{grid-template-columns:1fr}.phone-bench .observation-layout{grid-template-columns:1fr}.phone-bench .observation-actions{grid-template-columns:1fr 1fr}.phone-bench .wave-controls{grid-template-columns:1fr 1fr}.phone-bench .wave-controls>label{grid-column:1/-1}.phone-bench .wave-options>summary{grid-column:2;grid-row:2}.phone-bench .wave-heading{grid-template-columns:1fr}.phone-bench .wave-heading>div:first-child,.phone-bench .wave-heading .wave-actions{grid-column:1}}

@@ -369,3 +369,9 @@ These are desktop browser viewport simulations, not physical iOS/Android touch o
 - Both beam diagrams use thin aperture blades, blue when selected, without a filled selection rectangle. Transparent hit targets and annular obstruction are preserved.
 - Browser checks at 320×740, 611×836 and 1176×836: no horizontal overflow; long micrometre position labels fit, disclosure opens and mobile aperture still opens its editor. No browser warnings/errors. Seven existing compact/path tests passed; solver unchanged.
 - Screenshots: .sites-runtime/aperture-phone.png and .sites-runtime/aperture-desktop.png.
+
+## 2026-09-27 — Expert detail in heading
+
+- Mobile Expert High detail moved to the Key positions heading, before Add. Edit/Reset/Compute retains its full action row; no separate detail row.
+- Checked 320, 390, 611 and 1228px widths, no horizontal overflow. Toggle persists across mode/viewport changes; add-to-six and Undo checked. Heading keyboard order matches visual order. Desktop action remains unchanged.
+- Two detail policy tests passed; browser logs contain no warnings/errors. Screenshot: .sites-runtime/detail-heading-phone.png.

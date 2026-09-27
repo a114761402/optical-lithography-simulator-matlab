@@ -237,3 +237,11 @@ body:not(.phone-bench) #position-controls .slice-controls{grid-template-columns:
 #bench [data-component="pupil"] .selection{display:none}
 #bench [data-component="pupil"].selected .aperture-blade{stroke:var(--blue)}
 #bench [data-component="pupil"]:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+
+/* Precision belongs to the comparison heading, leaving the action row intact. */
+.phone-bench #fixed-panel .results-heading>div:first-child{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:10px;width:100%;min-width:0}
+.phone-bench #reference-title{grid-column:1;grid-row:1;padding-right:0;line-height:1.15}
+.phone-bench #fixed-panel .results-heading>div:first-child>.detail-toggle{grid-column:2;grid-row:1;white-space:nowrap;min-height:44px;gap:6px}
+.phone-bench #mobile-position-actions{grid-column:3;grid-row:1;position:static;align-items:center;gap:4px;flex-direction:column}
+.phone-bench #undo-mobile-position{order:1}
+@media(max-width:350px){.phone-bench #fixed-panel .results-heading>div:first-child{gap:6px}}

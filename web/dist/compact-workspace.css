@@ -245,3 +245,23 @@ body:not(.phone-bench) #position-controls .slice-controls{grid-template-columns:
 .phone-bench #mobile-position-actions{grid-column:3;grid-row:1;position:static;align-items:center;gap:4px;flex-direction:column}
 .phone-bench #undo-mobile-position{order:1}
 @media(max-width:350px){.phone-bench #fixed-panel .results-heading>div:first-child{gap:6px}}
+
+/* Match the observation tool edge, and share the bench's physical z span. */
+.phone-bench .observation-heading{max-width:480px;justify-content:space-between;gap:8px}
+.phone-bench .observation-heading>div{flex:1 1 auto}
+.phone-bench #standard-position-toggle{min-height:36px;padding:4px 8px;margin-left:auto}
+.phone-bench{--phone-path-inset:27px}
+.phone-bench .wave-main>.yz-wrap,.phone-bench .wave-main>#wave-regions{margin-inline:var(--phone-path-inset)}
+.phone-bench .wave-footer{display:none}
+.contact-heading{display:none}
+.phone-bench .site-contact{display:grid;gap:6px;margin:0 12px;padding:18px 0 24px;border-top:1px solid var(--line);font-size:.875rem}
+.phone-bench .site-contact .contact-heading{display:block;color:var(--ink);font-weight:600}
+.phone-bench .site-contact a{margin:0;justify-self:start}
+.phone-bench #fixed-panel .results-heading>div:first-child{grid-template-columns:minmax(0,1fr) auto}
+.phone-bench #mobile-position-actions{grid-column:2;flex-direction:row}
+.phone-bench #fixed-panel .calculation-actions{display:grid;grid-template-columns:auto auto minmax(68px,1fr) minmax(96px,1.5fr);align-items:center;gap:6px}
+.phone-bench #fixed-panel .calculation-actions>.detail-toggle{grid-column:3;grid-row:1;flex-direction:column-reverse;justify-content:center;gap:2px;min-height:44px;font-size:.875rem;white-space:nowrap}
+.phone-bench #fixed-panel #calculate{grid-column:4;grid-row:1;justify-self:end;max-width:160px;width:100%;min-width:0;white-space:normal;line-height:1.15;font-size:.875rem;padding:6px}
+.phone-bench #fixed-panel #edit-key-positions{grid-column:1;grid-row:1}
+.phone-bench #fixed-panel #reset-key-positions{grid-column:2;grid-row:1}
+@media(min-width:500px){.phone-bench #fixed-panel .calculation-actions>.detail-toggle{flex-direction:row;justify-content:flex-end;gap:6px}}

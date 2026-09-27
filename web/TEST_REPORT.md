@@ -375,3 +375,12 @@ These are desktop browser viewport simulations, not physical iOS/Android touch o
 - Mobile Expert High detail moved to the Key positions heading, before Add. Edit/Reset/Compute retains its full action row; no separate detail row.
 - Checked 320, 390, 611 and 1228px widths, no horizontal overflow. Toggle persists across mode/viewport changes; add-to-six and Undo checked. Heading keyboard order matches visual order. Desktop action remains unchanged.
 - Two detail policy tests passed; browser logs contain no warnings/errors. Screenshot: .sites-runtime/detail-heading-phone.png.
+
+## 2026-09-27 — Mobile alignment, precision action and Contact
+
+- Standard position trigger is 36px high, right-aligned with Compute within the same 480px maximum observation width.
+- Full-path wave plot and region strip share the compact bench's 27px physical-domain inset. At 413px viewport, source/mask/image screen x positions match exactly (39, 175.1702, 345.3830px). Position/Compute right edges both 386px.
+- Expert precision moved immediately before Compute all slices; four compact action columns preserve Edit/Reset. Below 500px the detail label and switch stack internally; the compute label may wrap.
+- Mobile wave legend hidden; bottom Contact shows Chuang Lu and the existing mailto address. Desktop legend retained.
+- Verified 320, 413, 611 and 1228px layouts with no horizontal overflow; position disclosure and quality preference checked. Six existing path/quality tests passed; no browser errors/warnings. No physics changes.
+- Screenshots: .sites-runtime/mobile-actions-final.png and .sites-runtime/mobile-standard-final.png.

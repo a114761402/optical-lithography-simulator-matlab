@@ -81,6 +81,13 @@ export function setupControlLayout(){
   const more=document.createElement('details');more.className='wave-more';more.innerHTML='<summary><span>More options</span></summary>';
   for(const label of waveOptionsBody.querySelectorAll('.toggle-label'))more.append(label);
   more.append(notes);waveOptionsBody.append(more);
+  const componentOption=document.createElement('label');componentOption.className='detail-toggle desktop-wave-components';
+  componentOption.innerHTML='<input id="desktop-wave-elements" type="checkbox" role="switch"><span>Show components</span>';
+  const componentSwitch=componentOption.querySelector('input'),componentsToggle=$('wave-elements-toggle');
+  componentSwitch.checked=componentsToggle.checked;
+  componentSwitch.addEventListener('change',()=>{componentsToggle.checked=componentSwitch.checked;componentsToggle.dispatchEvent(new Event('change',{bubbles:true}));});
+  componentsToggle.addEventListener('change',()=>{componentSwitch.checked=componentsToggle.checked;});
+  waveControls.append(componentOption);
   const detail=$('wave-detail'),scale=$('wave-brightness');
   detail.closest('label').firstChild.textContent='Calculation detail';
   scale.closest('label').firstChild.textContent='Intensity scale';
@@ -129,7 +136,7 @@ export function setupControlLayout(){
       if(focus.parentElement!==controls)controls.append(sliceBar,focus);
       const actionHost=media.matches?sliceControls:document.querySelector('.observation-toolbar');
       if(actionHost&&action.parentElement!==actionHost)actionHost.append(action);
-      if(!media.matches)focus.open=true;
+      if(!media.matches){sliceBar.before(focus);focus.open=true;}else{sliceBar.after(focus);}
       if(media.matches){$('calculate').closest('.calculation-actions').after($('cancel-screen'),notice);}
       else{sliceBar.after($('cancel-screen'),notice);}
     }

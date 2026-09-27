@@ -104,3 +104,13 @@ body:not(.phone-bench) .wave-sidebar{display:flex;flex-direction:column;justify-
 .wave-sidebar .wave-footer{margin:18px 0 0;justify-content:flex-start}
 .wave-sidebar .colour-key{margin:0;gap:8px}
 .wave-sidebar .colour-key span{flex-basis:100%;line-height:1.5}
+
+/* Align the sidebar information with the bottom of the wave image, above its ruler. */
+body:not(.phone-bench) .wave-section{--wave-ruler-height:27px}
+body:not(.phone-bench) #yz-labels{height:var(--wave-ruler-height)}
+body:not(.phone-bench) .wave-sidebar{padding-bottom:var(--wave-ruler-height)}
+body:not(.phone-bench) .wave-sidebar .wave-footer{margin-top:auto;padding-top:18px}
+.wave-action-group>.wave-detail-toggle{margin-inline:4px!important}
+@media(max-width:560px){
+ .phone-bench .wave-action-group>.wave-detail-toggle{flex-direction:column-reverse;justify-content:center;gap:3px;min-width:70px;margin-inline:0!important;font-size:.75rem}
+}

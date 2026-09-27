@@ -97,7 +97,7 @@ export function setupControlLayout(){
   const syncWaveDetail=()=>{waveHigh.checked=detail.value==='512';};
   waveHigh.addEventListener('change',()=>{detail.value=waveHigh.checked?'512':'128';detail.dispatchEvent(new Event('change',{bubbles:true}));});
   detail.addEventListener('change',syncWaveDetail);syncWaveDetail();
-  const waveTitleGroup=$('wave-title').parentElement;waveTitleGroup.classList.add('wave-title-group');waveTitleGroup.append(waveDetail);
+  const waveTitleGroup=$('wave-title').parentElement;waveTitleGroup.classList.add('wave-title-group');waveActionGroup.insertBefore(waveDetail,main.querySelector('.wave-actions'));
 
   const focusHeading=document.createElement('div');focusHeading.className='focus-heading';focusHeading.innerHTML='<span>Fine tuning <small id="tuning-anchor"></small></span><button type="button" id="return-focus" class="quiet">Reset offset</button>';
   const fineContent=document.createElement('div');fineContent.className='fine-content';fineContent.append(focusHeading,$('focus-control'));focus.append(fineContent);

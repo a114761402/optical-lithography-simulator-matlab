@@ -10,7 +10,7 @@ export async function shareSliceFile(file,navigatorLike=navigator){
 export function setupSliceShare(){
   const $=id=>document.getElementById(id),dialog=$('send-dialog');let file=null,url=null,ticket=0,returnFocus=null;
   function clear(){ticket++;file=null;if(url)URL.revokeObjectURL(url);url=null;}
-  $('close-send').onclick=()=>dialog.close();dialog.addEventListener('close',()=>{clear();(returnFocus?.isConnected?returnFocus:$('open-observation-zoom')).focus({preventScroll:true});});
+  $('close-send').onclick=()=>dialog.close();dialog.addEventListener('close',()=>{clear();const target=typeof returnFocus==='function'?returnFocus():returnFocus;(target?.isConnected?target:$('open-observation-zoom')).focus({preventScroll:true});});
   $('save-slice').onclick=()=>{if(!file||!url)return;const a=document.createElement('a');a.href=url;a.download=file.name;document.body.append(a);a.click();a.remove();$('send-status').textContent='PNG ready to save. Check your browser downloads.';};
   $('share-slice').onclick=async()=>{
     if(!file)return;$('share-slice').disabled=true;

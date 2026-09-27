@@ -7,17 +7,17 @@ import {renderWavePixels} from './wave-display.js?v=20260927-positions3';
 import {QUALITY,waveParameters} from './quality.js?v=20260927-positions3';
 import {waveCacheKey} from './cache.js?v=20260927-positions3';
 import {setupViewSwitch} from './view-switch.js?v=20260927-positions3';
-import {setupControlLayout} from './control-layout.js?v=20260927-positions3';
+import {setupControlLayout} from './control-layout.js?v=20260927-controls1';
 import {waveComponentSVG} from './wave-components.js?v=20260927-positions3';
 import {compactBench} from './compact-bench.js?v=20260927-positions3';
 import {regionMarkup} from './path-layout.js?v=20260927-positions3';
 import {desktopBench} from './desktop-bench.js?v=20260927-positions3';
-import {setupBenchEditor} from './bench-editor.js?v=20260927-positions3';
+import {setupBenchEditor} from './bench-editor.js?v=20260927-controls1';
 import {palette,lightRegion,RAY_BLUE,RAY_YELLOW} from './light-palette.js?v=20260927-positions3';
 import {createPlane,restorePlane,appendPositionGroup,markedPositions,quantizePosition,SliceBatch,createPlanes,PLANE_NAMES,tuningBase,observationZ,setObservation,tuneObservation,sliceKey,sliceRequest,acceptsSlice,screenSnapshot,referenceScreens,SliceCache} from './observation-state.js?v=20260927-positions3';
 import {setupObservationUI} from './observation-ui.js?v=20260927-positions3';
 import {setupScreenDrag} from './screen-drag.js?v=20260927-positions3';
-import {setupSliceShare} from './slice-share.js?v=20260927-positions3';
+import {setupSliceShare} from './slice-share.js?v=20260927-controls1';
 import {SerialJobs} from './serial-jobs.js?v=20260927-positions3';
 import {restorePositions,hydratePositions,atReferencePositions,referenceDisplayMode} from './reference-positions.js?v=20260927-positions3';
 const $=id=>document.getElementById(id),NS='http://www.w3.org/2000/svg';
@@ -36,7 +36,7 @@ let waveRequest=0,waveLoading=true,presetTicket=0;
 $('quality').value='fine';
 const keyHost=document.createElement('div');keyHost.id='mobile-key-grid-host';document.querySelector('#fixed-panel .results-heading').after(keyHost);
 const keyActions=document.querySelector('#fixed-panel .calculation-actions');
-for(const [id,label,action] of [['edit-key-positions','Edit',()=>{viewTabs.setEditing(!viewTabs.editing);activeId=null;refreshObservations();if(viewTabs.editing){$('bench-navigation').scrollIntoView({block:'start',behavior:'smooth'});}}],['reset-key-positions','Reset',useReferencePositions]]){const b=document.createElement('button');b.id=id;b.textContent=label;b.className='secondary';b.onclick=action;keyActions.insertBefore(b,$('calculate'));}
+for(const [id,label,action] of [['edit-key-positions','Edit',()=>{viewTabs.setEditing(!viewTabs.editing);activeId=null;refreshObservations();if(viewTabs.editing){$('bench-navigation').scrollIntoView({block:'start',behavior:'smooth'});}}],['reset-key-positions','Reset',useReferencePositions]]){const b=document.createElement('button');b.id=id;b.textContent=label;b.className='secondary';b.onclick=action;if(id==='reset-key-positions'){b.title='Restore default positions only';b.setAttribute('aria-label','Reset key positions');}keyActions.insertBefore(b,$('calculate'));}
 const presetInfo=document.createElement('section');presetInfo.id='preset-info';$('display-dialog-controls').prepend(presetInfo);
 const smoothing=document.createElement('label');smoothing.id='smoothing-option';smoothing.innerHTML='<input type="checkbox" id="smooth-intensity" checked> Smooth intensity display';$('slice-settings').append(smoothing);$('smooth-intensity').onchange=()=>{drawResults();drawScreen();drawBench();renderInspectorPreview();};
 
@@ -76,7 +76,7 @@ function loadActiveScreen(){screenResult=activePlane()?.result||null;screenRevis
 function selectObservation(id){if(viewTabs.keyView&&!viewTabs.editing)return;if(!planes.some(panel=>panel.id===id))return;activeId=id;loadActiveScreen();syncScreen();drawBench();drawScreen();setBusy();}
 function markChanged(){revision++;presetTicket++;updatePresetInfo();waveRequest++;waveLoading=false;$('preset').value='';if(result)status('Settings changed — displayed fields are from the previous calculation.');else status('Ready to calculate.');cancel(false);sliceCache.clear();fixedImageSaved=null;for(const panel of planes){panel.generation++;tuneObservation(panel,geometry(p),panel.offset);}yzResult=null;$('yz-note').textContent='Each column is normalized; brightness cannot be compared along z.';drawYZ();drawBench();syncScreen();renderInspectorPreview();drawScreen();restoreDefaultWave();}
 
-function inputControl(key,label,min,max,step,unit=''){const wrap=document.createElement('div');wrap.className='control';const labelEl=document.createElement('label');labelEl.htmlFor=`${key}-range`;labelEl.textContent=label;const nf=document.createElement('span');nf.className='number-field';const num=document.createElement('input');num.type='number';num.inputMode='decimal';num.min=min;num.max=max;num.step=step;num.value=p[key];num.id=`${key}-number`;num.setAttribute('aria-label',`${label}${unit?' in '+unit:''}`);nf.append(num,document.createTextNode(unit));labelEl.append(nf);const range=document.createElement('input');range.type='range';range.id=`${key}-range`;range.min=min;range.max=max;range.step=step;range.value=p[key];range.setAttribute('aria-label',label);function change(v){if(v.trim()==='')return;const value=Math.min(max,Math.max(min,Number(v)));if(!Number.isFinite(value))return;range.value=value;num.value=value;p[key]=value;if(key==='maskSizeUm'){p.fieldSizeUm=Math.max(p.fieldSizeUm,Math.ceil(value*4/3/10)*10);const el=$('fieldSizeUm-number');if(el){el.value=p.fieldSizeUm;$('fieldSizeUm-range').value=p.fieldSizeUm;}}if(key==='sourceOuter'&&p.sourceInner>=p.sourceOuter)p.sourceInner=p.sourceOuter*.65;markChanged();if(selected==='mask')$('component-note').textContent=`The 50.8 mm plate is illustrative. Only the ${fmt(p.fieldSizeUm)} µm local window is calculated; everything outside it is blocked.`;}range.addEventListener('input',()=>change(range.value));num.addEventListener('change',()=>{if(num.value.trim()==='')num.value=p[key];else change(num.value);});wrap.append(labelEl,range);return wrap;}
+function inputControl(key,label,min,max,step,unit=''){const wrap=document.createElement('div');wrap.className='control';const labelEl=document.createElement('label');labelEl.htmlFor=`${key}-number`;const name=document.createElement('span');name.className='parameter-name';name.textContent=label;labelEl.append(name);const nf=document.createElement('span');nf.className='number-field';const num=document.createElement('input');num.type='number';num.inputMode='decimal';num.min=min;num.max=max;num.step=step;num.value=p[key];num.id=`${key}-number`;num.setAttribute('aria-label',`${label}${unit?' in '+unit:''}`);nf.append(num);if(unit){const suffix=document.createElement('span');suffix.className='field-unit';suffix.textContent=unit;suffix.setAttribute('aria-hidden','true');nf.append(suffix);}labelEl.append(nf);const range=document.createElement('input');range.type='range';range.id=`${key}-range`;range.min=min;range.max=max;range.step=step;range.value=p[key];range.setAttribute('aria-label',label);function change(v){if(v.trim()==='')return;const value=Math.min(max,Math.max(min,Number(v)));if(!Number.isFinite(value))return;range.value=value;num.value=value;p[key]=value;if(key==='maskSizeUm'){p.fieldSizeUm=Math.max(p.fieldSizeUm,Math.ceil(value*4/3/10)*10);const el=$('fieldSizeUm-number');if(el){el.value=p.fieldSizeUm;$('fieldSizeUm-range').value=p.fieldSizeUm;}}if(key==='sourceOuter'&&p.sourceInner>=p.sourceOuter)p.sourceInner=p.sourceOuter*.65;markChanged();if(selected==='mask')$('component-note').textContent=`The 50.8 mm plate is illustrative. Only the ${fmt(p.fieldSizeUm)} µm local window is calculated; everything outside it is blocked.`;}range.addEventListener('input',()=>change(range.value));num.addEventListener('change',()=>{if(num.value.trim()==='')num.value=p[key];else change(num.value);});wrap.append(labelEl,range);return wrap;}
 function selectControl(key,label,options){const wrap=document.createElement('div');wrap.className='control';const l=document.createElement('label');l.htmlFor=key;l.textContent=label;const s=document.createElement('select');s.id=key;for(const value of options){const o=document.createElement('option');o.value=value;o.textContent=value;s.append(o);}s.value=p[key];s.addEventListener('change',()=>{p[key]=s.value;if(s.value==='Freeform')ensurePaint(key==='sourceType'?'source':'pupil');markChanged();renderInspector();});wrap.append(l,s);return wrap;}
 function renderInspector(){$('component-inspector').scrollTop=0;$('component-picker').value=selected;const c=components.find(c=>c[0]===selected),index=components.indexOf(c);$('component-number').textContent=`0${index+1} / ${(selected==='pupil'?'Projection aperture':c[1]).toUpperCase()}`;$('component-description').textContent=c[3];const controls=$('component-controls');controls.replaceChildren();const add=(...a)=>controls.append(inputControl(...a));const sel=(...a)=>controls.append(selectControl(...a));let note='';
   switch(selected){
@@ -114,7 +114,7 @@ function renderImageControls(host){
   select.onchange=()=>{imageZoom=Number(select.value);renderInspectorPreview();};label.append(select);
   const actions=document.createElement('div');actions.className='fixed-image-actions';
   const go=document.createElement('button');go.id='go-fixed-image';go.className='secondary';go.textContent='Use image plane';go.disabled=!activePlane();go.title='Move the selected observation to the fixed image plane';go.onclick=()=>setPosition(geometry(p).image,'image');
-  const save=document.createElement('button');save.id='save-fixed-image';save.className='secondary';save.textContent='Save image';save.disabled=!fixedImageResult();save.onclick=()=>{const canvas=fixedImageCanvas(960,imageZoom);if(canvas){benchEditor.close();sliceShare.open(canvas,geometry(p).image,document.body.classList.contains('phone-bench')?$('component-summary'):save);}};
+  const save=document.createElement('button');save.id='save-fixed-image';save.className='secondary';save.textContent='Save image';save.disabled=!fixedImageResult();save.onclick=()=>{const canvas=fixedImageCanvas(960,imageZoom);if(canvas){benchEditor.close();sliceShare.open(canvas,geometry(p).image,document.body.classList.contains('phone-bench')?benchEditor.returnTarget:save);}};
   const status=document.createElement('p');status.id='fixed-image-status';status.className='control-hint';status.setAttribute('role','status');
   actions.append(go,save);host.append(meta,label,actions,status);
 }
@@ -133,7 +133,7 @@ function drawBench(){
   bindBench();if(restoreFocus)host.querySelector('[data-observation-screen]')?.focus({preventScroll:true});
 }
 function bindBench(){
-  for(const el of $('bench').querySelectorAll('[data-component],[data-label]')){const action=()=>{selected=el.dataset.component||el.dataset.label;renderInspector();drawBench();benchEditor.open();};el.addEventListener('click',action);el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();action();}});}
+  for(const el of $('bench').querySelectorAll('[data-component],[data-label]')){const action=()=>{selected=el.dataset.component||el.dataset.label;renderInspector();drawBench();benchEditor.open(selected);};el.addEventListener('click',action);el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();action();}});}
 }
 function syncFocus(){
   const panel=activePlane(),g=geometry(p),base=panel?tuningBase(panel,g):0,offset=panel?.offset||0;
@@ -147,7 +147,7 @@ function syncScreen(){
   fieldEdits.z=false;fieldEdits.offset=false;
   if($('go-fixed-image'))$('go-fixed-image').disabled=!activePlane();
   syncFocus();const g=geometry(p),panel=activePlane(),at=currentZ();for(const id of ['plane','slice-z','screen-slider'])$(id).disabled=!panel;
-  if(!panel){$('slice-z').value=fmt(at,3);$('screen-slider').value=at;$('active-observation').textContent=planes.length?'Select an image to edit its position':'Add a position to start';syncWaveCursor();return;}$('plane').value=panel.offset!==0?'custom':panel.plane;$('slice-z').value=fmt(at,3);$('slice-z').max=Math.ceil(g.max*1000)/1000;$('screen-slider').max=g.max;$('screen-slider').value=at;
+  if(!panel){$('plane').value='';$('slice-z').value='';$('slice-z').placeholder='—';$('screen-slider').value=at;document.dispatchEvent(new Event('observation-position-change'));$('active-observation').textContent=planes.length?'Select an image to edit its position':'Add a position to start';syncWaveCursor();return;}$('plane').value=panel.offset!==0?'custom':panel.plane;$('slice-z').value=fmt(at,3);$('slice-z').max=Math.ceil(g.max*1000)/1000;$('screen-slider').max=g.max;$('screen-slider').value=at;
   const label=PLANE_NAMES[panel.plane];$('screen-location').textContent=`${label} · z = ${fmt(at,3)} mm`;
   $('active-observation').innerHTML=`Editing <b>${panel.id}</b> ${panel.offset===0?label:'Custom position'}`;
   document.dispatchEvent(new Event('observation-position-change'));syncWaveCursor();
@@ -358,7 +358,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.querySele
 benchEditor.start();renderInspector();renderFocus();viewTabs.adapt();drawBench();syncScreen();drawYZ();updatePresetInfo();restoreDefaultWave();restorePresetSlices('default');
 
 function renderFocus(){
-  $('focus-control').innerHTML='<div class="control"><label for="tuning-number"><span class="sr-only">Fine tuning offset</span><span class="number-field"><input id="tuning-number" aria-label="Fine tuning offset in micrometres" type="number" inputmode="decimal" min="-100" max="100" step="1" value="0">µm</span></label><input id="tuning-range" aria-label="Fine tuning" type="range" min="-100" max="100" step="1" value="0"></div>';
+  $('focus-control').innerHTML='<div class="control"><label for="tuning-number"><span class="sr-only">Fine tuning offset</span><span class="number-field"><input id="tuning-number" aria-label="Fine tuning offset in micrometres" type="number" inputmode="decimal" min="-100" max="100" step="1" value="0"><span class="field-unit" aria-hidden="true">µm</span></span></label><input id="tuning-range" aria-label="Fine tuning" type="range" min="-100" max="100" step="1" value="0"></div>';
   $('tuning-number').oninput=()=>fieldEdits.offset=true;$('tuning-range').oninput=()=>setFineOffset(Number($('tuning-range').value));$('tuning-number').onchange=()=>{if($('tuning-number').value.trim()===''){syncFocus();return;}setFineOffset(Number($('tuning-number').value));};syncFocus();
 }
 function panelState(panel){

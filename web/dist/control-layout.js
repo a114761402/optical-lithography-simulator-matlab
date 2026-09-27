@@ -10,7 +10,6 @@ export function setupControlLayout(){
   const focus=document.createElement('details');focus.id='focus-options';
   focus.innerHTML='<summary>Fine tuning <span id="focus-offset-label">0 µm</span></summary>';
   $('focus-control').before(focus);focus.append($('focus-control'));controls.append(controls.querySelector('.slice-bar'));
-  document.querySelector('.bench-toolbar').prepend($('component-summary'));
   // Finished/calculation detail belongs in settings; only actionable status is
   // repeated outside them. The original complete text remains accessible.
   const waveStatus=$('wave-status'),brief=$('wave-notice');
@@ -27,6 +26,8 @@ export function setupControlLayout(){
   $('profile-dialog').addEventListener('close',()=>$('open-profile').focus({preventScroll:true}));
   const raySettings=document.createElement('section');raySettings.id='ray-settings';raySettings.innerHTML='<h3>Beam path</h3>';
   const rays=document.querySelector('[aria-label="Ray display"]');raySettings.append(rays);$('display-dialog-controls').prepend(raySettings);
+  const componentSettings=document.createElement('section');componentSettings.id='component-settings';componentSettings.innerHTML='<h3>Components</h3><button type="button" id="open-components" class="secondary" aria-haspopup="dialog" aria-controls="component-dialog">Edit components</button>';raySettings.after(componentSettings);
+  const resetHelp=document.createElement('p');resetHelp.className='muted reset-help';resetHelp.textContent='Top Reset restores the default optical setup and positions. Reset in Expert Mode restores positions only.';$('display-dialog-controls').append(resetHelp);$('reset').title='Restore all default settings';$('reset').setAttribute('aria-label','Reset all settings');
   const presetLabel=document.querySelector('.preset-label'),presetHome=document.createComment('preset home');presetLabel.after(presetHome);
   // The same controls move between the desktop layout and mobile dialogs.
   const media=matchMedia('(max-width:780px), (max-width:1000px) and (max-height:600px)');
@@ -55,15 +56,16 @@ export function setupControlLayout(){
     const node=$(id),home=document.createComment(id+' home'),row=document.createElement('div'),label=document.createElement('strong');node.after(home);label.textContent=name;row.append(label);referenceWindows.append(row);return {node,home,row};
   });
   sliceSettings.append(referenceOptions,referenceDetails);
-  $('display-dialog-controls').append(sliceSettings,waveSettings,aboutSettings);
+  $('display-dialog-controls').append(sliceSettings,waveSettings,aboutSettings,resetHelp);
   function openSettings(){ $('app-menu').open=false;displayDialog.showModal(); }
   $('open-display-settings').onclick=openSettings;$('desktop-settings').onclick=openSettings;
   $('close-display-settings').onclick=()=>displayDialog.close();
-  displayDialog.addEventListener('close',()=>{(media.matches?$('app-menu').querySelector('summary'):$('desktop-settings')).focus({preventScroll:true});});
+  displayDialog.addEventListener('close',()=>{if(document.querySelector('dialog[open]'))return;(media.matches?$('app-menu').querySelector('summary'):$('desktop-settings')).focus({preventScroll:true});});
   const wave=document.querySelector('.wave-section'),main=document.createElement('div'),sidebar=document.createElement('aside');
   main.className='wave-main';sidebar.className='wave-sidebar';sidebar.setAttribute('aria-label','Wave controls');
   main.append(...wave.children);wave.append(main,sidebar);
   const waveControls=main.querySelector('.wave-controls'),waveOptions=main.querySelector('.wave-options');
+  const waveActionGroup=document.createElement('div');waveActionGroup.className='wave-action-group';main.querySelector('.wave-actions').before(waveActionGroup);waveActionGroup.append(main.querySelector('.wave-section-control'),main.querySelector('.wave-actions'));
   const waveOptionsBody=waveOptions.querySelector('.wave-options-body'),waveRegion=$('wave-scope').closest('label');
   waveRegion.id='wave-region-setting';waveSettings.append(waveOptionsBody);
   const syncWaveAction=()=>{$('calculate-yz').textContent=$('wave-scope').value==='near'?'Compute near mask':'Compute full path';};
@@ -75,7 +77,7 @@ export function setupControlLayout(){
   const focusHeading=document.createElement('div');focusHeading.className='focus-heading';focusHeading.innerHTML='<span>Fine tuning <small id="tuning-anchor"></small></span><button type="button" id="return-focus" class="quiet">Reset offset</button>';
   focus.prepend(focusHeading);
   const planeSelect=$('plane'),planeLabels=[...planeSelect.options].map(o=>o.textContent);
-  const shortLabels={image:'Image',mask:'Mask',near:'Mask + 1 µm',source:'Pupil',condenser:'Condenser',lens1:'Lens 1',pupil:'Aperture',lens2:'Lens 2',custom:'Custom'};
+  const shortLabels={'':'Select a position',image:'Image',mask:'Mask',near:'Mask + 1 µm',source:'Pupil',condenser:'Condenser',lens1:'Lens 1',pupil:'Aperture',lens2:'Lens 2',custom:'Custom'};
   function shortenPlane(){[...planeSelect.options].forEach((o,i)=>{o.textContent=media.matches&&o.selected?shortLabels[o.value]:planeLabels[i];});}
   function fullPlane(){[...planeSelect.options].forEach((o,i)=>{o.textContent=planeLabels[i];});}
   planeSelect.addEventListener('pointerdown',fullPlane);planeSelect.addEventListener('keydown',fullPlane);planeSelect.addEventListener('blur',shortenPlane);planeSelect.addEventListener('change',shortenPlane);
@@ -96,11 +98,11 @@ export function setupControlLayout(){
     if(compact)document.querySelector('.header-actions').prepend($('reset'));
     else document.querySelector('.bench-toolbar').prepend(presetLabel,$('reset'));
     if(compact)presetHome.before(presetLabel);
-    raySettings.hidden=compact;
+    raySettings.hidden=compact;componentSettings.hidden=!compact;
     for(const {node,home} of detailHomes)compact?referenceDetails.append(node):home.before(node);
     for(const {node,home,row} of windowHomes)compact?row.append(node):home.before(node);
     referenceDetails.append(referenceWindows);
-    compact?main.querySelector('.wave-heading').after(waveControls):sidebar.append(waveControls);
+    sidebar.append(waveControls);waveControls.hidden=compact;
     compact?waveSettings.querySelector('h3').after(waveRegion):waveControls.prepend(waveRegion);waveOptions.hidden=true;
     waveOptions.open=false;adaptingFocus=true;focus.open=compact?phoneFocusOpen:true;queueMicrotask(()=>adaptingFocus=false);shortenPlane();
   }

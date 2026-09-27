@@ -320,3 +320,19 @@ Browser verification used the in-app browser at widths 320, 390, 430, 844 (lands
 Verified settings dialog opening/closing and focus return, settings retention across desktop/mobile, independent observation at z = 200.001 mm, enlarged image and profile metadata matching that calculation, Escape dismissal, fixed Image Plane remaining at 450mm, and 0.5µm focus adjustment selecting z = 450.0005mm. Changing condenser focal length to 105mm moved mask/image references to 210/460mm and cleared the outdated wave; returning to Circular restored the Fine cache. XZ/YZ switching, shared-log display, component visibility and full/near selection also worked. No application warnings or errors were observed.
 
 These are browser-size simulations, not physical iPhone/Android tests. Interaction flows were exercised with keyboard and native select actions; automated pointer clicks in this in-app browser were unreliable and are not claimed as verified touch tests. The unchanged expensive numerical-cache suite was not rerun.
+
+## Unified controls and mobile modes — 27 September 2026
+
+Numbers and unit suffixes now share a single bordered field in the component inspector and Fine tuning. Mobile component controls use aligned value fields, 16px numeric text, compact previews and retained touch areas. The redundant Components toolbar is removed; beam elements and Settings → Edit components open the shared sheet. Closing the sheet or image-sharing dialog resolves a visible focus target even after the SVG is redrawn.
+
+Mobile tabs are Standard Mode and Expert Mode, with the same numerical quality and retained observation state. XZ/YZ sits immediately before Compute full path; small layouts put the title above that action row. Cancel remains below the compute button. Desktop action right edges remain aligned. With no selected observation, the position selector shows Select a position and z is empty/disabled instead of displaying contradictory old values. Reset scopes are described in Settings and accessible button labels.
+
+Validation:
+
+- 25/25 targeted automated tests passed: observation lifecycle/sharing, independent positions, reference restoration, extra position groups and compact beam geometry. JavaScript syntax and whitespace checks passed.
+- Chrome responsive viewport checks: 320×740, 390×844, 430×932, 638×836, 844×390, 995×766 and 1228×836. No page horizontal overflow was observed. Mask unit suffixes were contained in their borders at each compact size; the mobile number field outer height was 44px and its text 16px. All seven component panels remained accessible.
+- XZ/YZ and Compute were verified left-to-right, with equal top and height at 320, 390, 995 and 1228px. At 1228px the compute right edge exactly matched Compute all slices. Preview calculation start/cancel did not disrupt their alignment.
+- Settings → Components, beam → Components, close focus, fixed image → share → close, Standard/Expert switching, six/eight retained cards, and Compute all slices hiding mobile tuning were exercised. Real keyboard fine tuning changed 200mm to 199.999mm and 199.975mm. Deselecting cleared both position controls while keeping batch computation available.
+- Reset restored Fine slice quality, 512 wave detail and the saved Fine path. XZ/YZ switched the displayed cached cut without a calculation. No browser warning/error logs were recorded.
+
+These are desktop browser viewport simulations, not physical iOS/Android touch or software-keyboard tests. A browser zoom shortcut did not change the controlled viewport, so 200% browser zoom is not claimed as verified. The numerical engine and all preset cache assets are unchanged; the expensive numerical cache suite was not rerun for this interface revision.

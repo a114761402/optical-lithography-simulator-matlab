@@ -1,6 +1,13 @@
-import {brightness} from './wave.js?v=20260927-illumination2';
+import {brightness} from './wave.js?v=20260927-positions3';
 
 const mix=(a,b,t)=>a+(b-a)*t;
+// Monotone cubic interpolation: no new extrema, negative intensity or ringing.
+function slope(a,b,ha,hb){if(a*b<=0)return 0;const w1=2*hb+ha,w2=hb+2*ha;return (w1+w2)/(w1/a+w2/b);}
+function hermite(v0,v1,v2,v3,z0,z1,z2,z3,t){
+  const h=z2-z1,d=(v2-v1)/h,m1=slope((v1-v0)/(z1-z0),d,z1-z0,h),m2=slope(d,(v3-v2)/(z3-z2),h,z3-z2);
+  const t2=t*t,t3=t2*t,value=(2*t3-3*t2+1)*v1+(t3-2*t2+t)*h*m1+(-2*t3+3*t2)*v2+(t3-t2)*h*m2;
+  return Math.max(Math.min(v1,v2),Math.min(Math.max(v1,v2),value));
+}
 function atUnit(values,u){
   const f=Math.max(0,Math.min(1,u))*(values.length-1),i=Math.min(values.length-2,Math.floor(f));
   return mix(values[i],values[i+1],f-i);
@@ -14,7 +21,7 @@ export function createWaveSampler(result,section='xz',mode='local'){
     let peak=0;for(const value of values)peak=Math.max(peak,value);
     return {z:col.z,lo:axis[0],hi:axis.at(-1),values,peak};
   });
-  const boundaries=['condenser','mask','lens1','pupil','lens2','image'].map(key=>result.geometry?.[key]).filter(Number.isFinite);
+  const boundaries=['mask','pupil'].map(key=>result.geometry?.[key]).filter(Number.isFinite);
   return z=>{
     if(!columns.length||z<columns[0].z||z>columns.at(-1).z)return null;
     let lo=0,hi=columns.length-1;
@@ -24,7 +31,9 @@ export function createWaveSampler(result,section='xz',mode='local'){
     if(t===0||boundaries.some(at=>at>a.z&&at<=b.z)){b=a;t=0;}
     const lower=mix(a.lo,b.lo,t),upper=mix(a.hi,b.hi,t);
     const at=(col,y)=>y<col.lo||y>col.hi?0:atUnit(col.values,(y-col.lo)/(col.hi-col.lo));
-    const value=y=>mix(at(a,y),at(b,y),t);
+    const previous=columns[lo-1],next=columns[lo+2];
+    const cubic=t!==0&&previous&&next&&a.z>=result.geometry?.mask&&!boundaries.some(z=>z>previous.z&&z<=next.z);
+    const value=y=>cubic?hermite(at(previous,y),at(a,y),at(b,y),at(next,y),previous.z,a.z,b.z,next.z,t):mix(at(a,y),at(b,y),t);
     let reference=result.sharedPeak;
     if(mode==='local'){
       reference=a.peak;

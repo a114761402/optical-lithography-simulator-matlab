@@ -1,7 +1,7 @@
-import {defaults,sourceSamples} from './optics.js?v=20260927-illumination2';
-import {QUALITY} from './quality.js?v=20260927-illumination2';
-import {pathPlanes} from './wave.js?v=20260927-illumination2';
-export const CACHE_VERSION='scalar-wave-2026-09-27-v5';
+import {defaults,sourceSamples} from './optics.js?v=20260927-positions3';
+import {QUALITY} from './quality.js?v=20260927-positions3';
+import {pathPlanes} from './wave.js?v=20260927-positions3';
+export const CACHE_VERSION='scalar-wave-2026-09-27-v6';
 export const STARTUP_PARAMS={...defaults,lensType:'Circular',lensInner:.65};
 export const DEFAULT_WAVE_PARAMS={...STARTUP_PARAMS,...QUALITY.fine};
 export function waveCacheKey(params,scope='full') {

@@ -1,5 +1,5 @@
-import {geometry,axis,makeMask,sourceSamples,gaussianBeam,gaussianMode,pupilValue} from './optics.js?v=20260927-illumination2';
-import {lctCenterCuts} from './wave-cuts.js?v=20260927-illumination2';
+import {geometry,axis,makeMask,sourceSamples,gaussianBeam,gaussianMode,pupilValue} from './optics.js?v=20260927-positions3';
+import {lctCenterCuts} from './wave-cuts.js?v=20260927-positions3';
 export function densePupilCuts(p,size=257){
   const g=geometry(p),radius=g.f2*.001*p.projNA,half=radius*1.1;
   const output=Float64Array.from({length:size},(_,i)=>(i/(size-1)*2-1)*half),x=axis(p.gridSize,p.fieldSizeUm*1e-6/p.gridSize),mask=makeMask(p),beam=gaussianBeam(p,g.mask);

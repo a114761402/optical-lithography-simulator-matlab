@@ -21,13 +21,13 @@ export function setupSliceShare(){
   return {open(canvas,z,trigger=document.activeElement){
     returnFocus=trigger;
     clear();const current=ticket;dialog.showModal();$('send-status').textContent='Preparing image…';$('save-slice').disabled=true;$('share-slice').hidden=true;$('email-slice').hidden=true;
-    const name=`optical-bench-z-${Number(z.toFixed(6))}mm.png`;
+    const name=`optical-bench-z-${Number(z.toFixed(3))}mm.png`;
     canvas.toBlob(blob=>{
       if(current!==ticket||!dialog.open)return;
       if(!blob){$('send-status').textContent='Image could not be prepared. Close and try again.';return;}
       file=new File([blob],name,{type:'image/png'});url=URL.createObjectURL(blob);$('send-preview').src=url;$('save-slice').disabled=false;
       const native=fileShareAvailable(file);$('share-slice').hidden=!native;$('email-slice').hidden=native;
-      $('email-slice').href='mailto:?subject='+encodeURIComponent('Optical Bench observation')+'&body='+encodeURIComponent(`Observation at z = ${Number(z.toFixed(6))} mm.\n\nAttach the saved image: ${name}`);
+      $('email-slice').href='mailto:?subject='+encodeURIComponent('Optical Bench observation')+'&body='+encodeURIComponent(`Observation at z = ${Number(z.toFixed(3))} mm.\n\nAttach the saved image: ${name}`);
       $('send-status').textContent=native?'Save the image, or choose an app to share it.':'To email this image, save the PNG first and attach it to your message.';
     },'image/png');
   }};

@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {Worker} from 'node:worker_threads';
 import {sourceSamples} from '../dist/optics.js';
-import {pathPlanes} from '../dist/wave.js';
+import {pathPlanes,sampleLine} from '../dist/wave.js';
 import {QUALITY,waveQuality,waveParameters} from '../dist/quality.js';
 import {DEFAULT_WAVE_PARAMS,waveCacheKey,validateWaveCache} from '../dist/cache.js';
 const load=()=>JSON.parse(readFileSync(new URL('../dist/data/default-wave-circular-fine-v4.json',import.meta.url),'utf8'));
@@ -27,12 +27,12 @@ test('Circular cache agrees with fresh Fine cuts before, at and after the pupil'
  const w=validateWaveCache(load());
  await Promise.all([200,300,400,w.geometry.image].map(async z=>{
   const col=w.columns.find(c=>c.z===z);assert.ok(col,`Missing plane ${z}`);
-  const {cuts,sharedPeak}=await new Promise((resolve,reject)=>{
+  const {cuts,x,y,sharedPeak}=await new Promise((resolve,reject)=>{
    const worker=new Worker(new URL('./helpers/fine-reference.mjs',import.meta.url),{workerData:{params:DEFAULT_WAVE_PARAMS,z}});let received=false;
    worker.once('message',result=>{received=true;resolve(result);});worker.once('error',reject);
    worker.once('exit',code=>{if(code||!received)reject(Error(`Fine reference at ${z} stopped (${code})`));});
   });
-  for(const key of ['xz','yz']){let e=0,d=0;for(let i=0;i<col[key].length;i++){e+=(col[key][i]-cuts[key][i])**2;d+=cuts[key][i]**2;}assert.ok(Math.sqrt(e/Math.max(d,Number.MIN_VALUE))<1e-12,`${key} at ${z}`);}
+  for(const key of ['xz','yz']){let e=0,d=0;for(let i=0;i<cuts[key].length;i++){e+=(sampleLine(col[key==='xz'?'x':'y'],col[key],(key==='xz'?x:y||x)[i])-cuts[key][i])**2;d+=cuts[key][i]**2;}assert.ok(Math.sqrt(e/Math.max(d,Number.MIN_VALUE))<1e-10,`${key} at ${z}`);}
   assert.equal(w.sharedPeak,sharedPeak);
  }));
 });

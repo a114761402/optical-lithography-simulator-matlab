@@ -22,6 +22,6 @@ export function waveComponentSVG(result,width,height){
     else if(key==='source')shape='<path d="M0 -25V25M0 -25h7M0 25h7M0 -8l5 8-5 8"/>';
     else shape='<path d="M0 -33V33M-3 -33h6M-3 33h6"/>';
     const anchor=x<30?'start':x>width-65?'end':'middle',labelX=Math.max(7,Math.min(width-7,x));
-    return `<g class="wave-element ${key==='image'?'image-reference':''}" data-wave-component="${key}" transform="translate(${x},${y})"><title>${name} · z = ${Number(z.toFixed(6))} mm</title><g transform="scale(1,${verticalScale})">${shape}</g></g>${label?`<text class="wave-element-label" x="${labelX}" y="${labelY}" text-anchor="${anchor}">${name}</text>`:''}`;
+    return `<g class="wave-element ${key==='image'?'image-reference':''}" data-wave-component="${key}" transform="translate(${x},${y})"><title>${name} · z = ${Number(z.toFixed(3))} mm</title><g transform="scale(1,${verticalScale})">${shape}</g></g>${label?`<text class="wave-element-label" x="${labelX}" y="${labelY}" text-anchor="${anchor}">${name}</text>`:''}`;
   }).join('');
 }

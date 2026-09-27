@@ -29,9 +29,6 @@
 .phone-bench.editing-key-positions #focus-options{margin-top:0}
 .phone-bench.editing-key-positions #position-controls::before{content:'Tuning';font-size:.85rem;color:var(--muted)}
 .phone-bench .preset-label select{max-width:100%;font-size:.875rem}
-.phone-bench.editing-key-positions #focus-options[open] .focus-heading{height:auto;min-height:28px;position:static;pointer-events:auto;justify-content:space-between;align-items:center}
-.phone-bench.editing-key-positions #focus-options[open] .focus-heading>span{display:block}
-.phone-bench.editing-key-positions #focus-options[open] #return-focus{position:static;min-height:28px;padding:2px 0}
 .phone-bench #fixed-panel #calculate{width:100%;min-width:0}
 .phone-bench #mobile-key-grid-host .slice-panel:disabled[aria-pressed=true]{border-color:transparent;box-shadow:none;background:transparent}
 @media(max-width:350px){.phone-bench #fixed-panel .calculation-actions{gap:6px}.phone-bench #fixed-panel .calculation-actions button{font-size:.75rem;padding-inline:7px}}

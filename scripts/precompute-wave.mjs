@@ -6,7 +6,7 @@ import {computeWave,pathPlanes} from '../dist/wave.js';
 import {geometry} from '../dist/optics.js';
 import {CACHE_VERSION,DEFAULT_WAVE_PARAMS,waveCacheKey,validateWaveCache} from '../dist/cache.js';
 const encode=value=>JSON.stringify(value,(_,v)=>ArrayBuffer.isView(v)?Array.from(v):v);
-const engineHash=createHash('sha256').update(readFileSync(new URL('../dist/optics.js',import.meta.url))).update(readFileSync(new URL('../dist/wave.js',import.meta.url))).update(readFileSync(new URL('../dist/wave-cuts.js',import.meta.url))).digest('hex');
+const engineHash=createHash('sha256').update(readFileSync(new URL('../dist/optics.js',import.meta.url))).update(readFileSync(new URL('../dist/wave.js',import.meta.url))).update(readFileSync(new URL('../dist/wave-cuts.js',import.meta.url))).update(readFileSync(new URL('../dist/dense-pupil.js',import.meta.url))).update(readFileSync(new URL('../dist/radial-illumination.js',import.meta.url))).digest('hex');
 if(!isMainThread){
   let last=-1;
   const result=computeWave(DEFAULT_WAVE_PARAMS,'full',p=>{const step=Math.floor(p*20);if(step!==last){last=step;parentPort.postMessage({progress:p});}},workerData.planes);

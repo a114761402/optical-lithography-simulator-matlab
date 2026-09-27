@@ -1,3 +1,7 @@
+# Current scope — 27 September 2026
+
+The projection propagation remains subject to the original MATLAB tolerances. Circular/annular illumination now integrates the exact continuous source boundary instead of the old MATLAB rasterized source mask. The two old illumination screen fixtures therefore are no longer asserted to be numerically identical; their projection-pupil fields and axes still are. Separate analytic, independent polar quadrature, symmetry and integrated-power tests validate the new illumination routine. No MATLAB source was changed. The historical measurements below describe the earlier matching implementation.
+
 # Browser / MATLAB comparison — 26 September 2026
 
 Compared against the current local MATLAB source, including `lithography_specular_gui.m`, `lithography_open_xz.m`, `lithography_wave_yz_preview.m`, `lithography_preview_display.m`, `lithography_xy_display.m`, and `lithography_check_settings.m`.

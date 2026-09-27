@@ -1,6 +1,6 @@
-import {slicePlan,maximum} from './optics.js';
+import {slicePlan,maximum} from './optics.js?v=20260927-illumination2';
 const clamp=(v,lo,hi)=>Math.min(hi,Math.max(lo,v));
-export const PLANE_NAMES={source:'Source',condenser:'Condenser exit',mask:'Mask exit',near:'Mask + 1 µm',lens1:'Lens 1',pupil:'Aperture plane',lens2:'Lens 2',image:'Image plane',custom:'Custom position'};
+export const PLANE_NAMES={source:'Pupil plane',condenser:'Condenser exit',mask:'Mask exit',near:'Mask + 1 µm',lens1:'Lens 1',pupil:'Aperture plane',lens2:'Lens 2',image:'Image plane',custom:'Custom position'};
 let nextInstance=0;
 export function createPlane(id,plane='custom',base=0){return {id,instance:++nextInstance,plane,base,offset:0,generation:0,result:null,resultKey:null,pending:false,error:''};}
 export function createPlanes(){return ['source','mask','pupil','image'].map((plane,i)=>createPlane('ABCD'[i],plane));}
@@ -37,7 +37,7 @@ export function snapPosition(z,g,pixelWidth,{bypass=false,previous=null}={}){
 }
 // Keep only XY data needed by a screen; full relay fields belong to reference views.
 export function screenSnapshot(r){const {params,geometry,z,label,screenRaw,screenAxis,screenAxisY,screenHalf,sharedPeak,dark,samples}=r;return {params,geometry,z,label:displayPlaneLabel(label),screenRaw,screenAxis,screenAxisY,screenHalf,sharedPeak,dark,samples};}
-export function displayPlaneLabel(label){return ({'Pupil exit':'Aperture plane','Lens 1 to pupil':'Lens 1 to aperture','Pupil to lens 2':'Aperture to lens 2'})[label]||label;}
+export function displayPlaneLabel(label){return ({'Source plane':'Pupil plane','Pupil exit':'Aperture plane','Lens 1 to pupil':'Lens 1 to aperture','Pupil to lens 2':'Aperture to lens 2'})[label]||label;}
 export function referenceScreens(r){
   const g=r.geometry,base=screenSnapshot(r);
   const make=(z,raw,axis,axisY=axis,half=null)=>({...base,z,label:displayPlaneLabel(slicePlan(r.params,z).label),screenRaw:raw,screenAxis:axis,screenAxisY:axisY,screenHalf:half,dark:maximum(raw)===0});

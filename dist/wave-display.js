@@ -1,4 +1,4 @@
-import {brightness} from './wave.js';
+import {brightness} from './wave.js?v=20260927-illumination2';
 
 const mix=(a,b,t)=>a+(b-a)*t;
 function atUnit(values,u){
@@ -6,8 +6,8 @@ function atUnit(values,u){
   return mix(values[i],values[i+1],f-i);
 }
 
-// Interpolate the sampled mesh, including its changing transverse window.
-// This is a display interpolation: no new propagation results are generated.
+// Blend at a fixed physical transverse coordinate. Stretching the profile
+// with its changing calculation window incorrectly moves annular lobes.
 export function createWaveSampler(result,section='xz',mode='local'){
   const columns=result.columns.map(col=>{
     const axis=section==='xz'?col.x:col.y,values=col[section];
@@ -23,23 +23,25 @@ export function createWaveSampler(result,section='xz',mode='local'){
     // A thin component acts at its own plane; do not smear its change upstream.
     if(t===0||boundaries.some(at=>at>a.z&&at<=b.z)){b=a;t=0;}
     const lower=mix(a.lo,b.lo,t),upper=mix(a.hi,b.hi,t);
-    const value=u=>mix(atUnit(a.values,u),atUnit(b.values,u),t);
+    const at=(col,y)=>y<col.lo||y>col.hi?0:atUnit(col.values,(y-col.lo)/(col.hi-col.lo));
+    const value=y=>mix(at(a,y),at(b,y),t);
     let reference=result.sharedPeak;
     if(mode==='local'){
       reference=a.peak;
       if(t!==0){
         reference=0;
         // The maximum of a piecewise-linear blend occurs at one of its knots.
-        for(const data of [a.values,b.values])for(let i=0;i<data.length;i++)reference=Math.max(reference,value(i/(data.length-1)));
+        for(const col of [a,b])for(let i=0;i<col.values.length;i++){const y=col.lo+(col.hi-col.lo)*i/(col.values.length-1);if(y>=lower&&y<=upper)reference=Math.max(reference,value(y));}
+        reference=Math.max(reference,value(lower),value(upper));
       }
     }
-    return {lower,upper,reference,sample(y){return y<lower||y>upper?null:value((y-lower)/(upper-lower));}};
+    return {lower,upper,reference,sample(y){return y<lower||y>upper?null:value(y);}};
   };
 }
 
-export function renderWavePixels(result,{width,height,half,section='xz',mode='local',palette,illuminationPalette=null}){
+export function renderWavePixels(result,{width,height,half,section='xz',mode='local',palette,illuminationPalette=null,showWindow=false}){
   const pixels=new Uint8ClampedArray(width*height*4),sampleAt=createWaveSampler(result,section,mode);
-  const grey=[223,230,237],colours=Array.from({length:1024},(_,i)=>palette(i/1023));
+  const grey=showWindow?[223,230,237]:palette(0),colours=Array.from({length:1024},(_,i)=>palette(i/1023));
   const warm=illuminationPalette?Array.from({length:1024},(_,i)=>illuminationPalette(i/1023)):colours;
   const dy=2*half/height,dz=(result.zMax-result.zMin)/width;
   for(let x=0;x<width;x++){

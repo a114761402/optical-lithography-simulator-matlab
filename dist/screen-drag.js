@@ -1,5 +1,5 @@
-import {pathFrame} from './path-layout.js';
-import {snapPosition} from './observation-state.js';
+import {pathFrame} from './path-layout.js?v=20260927-illumination2';
+import {snapPosition} from './observation-state.js?v=20260927-illumination2';
 export function setupScreenDrag(svg,{geometry,currentZ,onMove,onSelect,onStart,compact}){
   let drag=null;
   const enabled=()=>!compact()&&!svg.classList.contains('compact-beam');

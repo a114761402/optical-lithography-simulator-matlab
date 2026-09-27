@@ -8,9 +8,9 @@ export async function shareSliceFile(file,navigatorLike=navigator){
   catch(error){if(error.name==='AbortError')return 'cancelled';throw error;}
 }
 export function setupSliceShare(){
-  const $=id=>document.getElementById(id),dialog=$('send-dialog');let file=null,url=null,ticket=0;
+  const $=id=>document.getElementById(id),dialog=$('send-dialog');let file=null,url=null,ticket=0,returnFocus=null;
   function clear(){ticket++;file=null;if(url)URL.revokeObjectURL(url);url=null;}
-  $('close-send').onclick=()=>dialog.close();dialog.addEventListener('close',()=>{clear();$('open-observation-zoom').focus({preventScroll:true});});
+  $('close-send').onclick=()=>dialog.close();dialog.addEventListener('close',()=>{clear();(returnFocus?.isConnected?returnFocus:$('open-observation-zoom')).focus({preventScroll:true});});
   $('save-slice').onclick=()=>{if(!file||!url)return;const a=document.createElement('a');a.href=url;a.download=file.name;document.body.append(a);a.click();a.remove();$('send-status').textContent='PNG ready to save. Check your browser downloads.';};
   $('share-slice').onclick=async()=>{
     if(!file)return;$('share-slice').disabled=true;
@@ -18,7 +18,8 @@ export function setupSliceShare(){
     catch{$('send-status').textContent='Sharing is unavailable here. Save the PNG instead.';}
     finally{$('share-slice').disabled=false;}
   };
-  return {open(canvas,z){
+  return {open(canvas,z,trigger=document.activeElement){
+    returnFocus=trigger;
     clear();const current=ticket;dialog.showModal();$('send-status').textContent='Preparing image…';$('save-slice').disabled=true;$('share-slice').hidden=true;$('email-slice').hidden=true;
     const name=`optical-bench-z-${Number(z.toFixed(6))}mm.png`;
     canvas.toBlob(blob=>{

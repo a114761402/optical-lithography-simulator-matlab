@@ -1,6 +1,6 @@
-import {PRESET_CACHE_VERSION,presetParams,presetCacheKey} from './presets.js';
-import {geometry,sourceSamples} from './optics.js';
-import {pathPlanes} from './wave.js';
+import {PRESET_CACHE_VERSION,presetParams,presetCacheKey} from './presets.js?v=20260927-illumination2';
+import {geometry,sourceSamples} from './optics.js?v=20260927-illumination2';
+import {pathPlanes} from './wave.js?v=20260927-illumination2';
 export function validatePresetCache(cache,id){
   const p=presetParams(id),g=geometry(p),key=presetCacheKey(p);
   if(cache.version!==PRESET_CACHE_VERSION||cache.id!==id||cache.key!==key||cache.slices?.length!==4||!cache.wave)throw Error('Saved preset does not match these settings.');
@@ -20,7 +20,7 @@ export function validatePresetCache(cache,id){
 let current=null;
 export async function loadPresetCache(id){
   if(current?.id===id)return current.promise;
-  const promise=fetch(new URL(`./data/presets/${id}.json.gz`,import.meta.url)).then(async r=>{
+  const promise=fetch(new URL(`./data/presets/${id}.json.gz?v=${PRESET_CACHE_VERSION}`,import.meta.url)).then(async r=>{
     if(!r.ok)throw Error('Saved preset unavailable');
     const raw=await r.arrayBuffer();
     const bytes=new Uint8Array(raw);

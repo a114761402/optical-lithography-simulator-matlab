@@ -1,5 +1,5 @@
-import {lctCenterCuts} from './wave-cuts.js';
-import {defaults,geometry,validate,makeMask,sourceSamples,gaussianBeam,coherent,propagateSame,lct,slicePlan,illuminationIntensity,intensity,maximum,compute} from './optics.js';
+import {lctCenterCuts} from './wave-cuts.js?v=20260927-illumination2';
+import {defaults,geometry,validate,makeMask,sourceSamples,gaussianBeam,coherent,propagateSame,lct,slicePlan,illuminationIntensity,intensity,maximum,compute} from './optics.js?v=20260927-illumination2';
 
 // Interpolate at the physical origin, which need not be the middle pixel.
 export function sampleLine(axis, values, at) {
@@ -21,6 +21,10 @@ export function pathPlanes(p,scope='full') {
   const g=geometry(p);
   if(scope==='near')return Array.from({length:61},(_,i)=>g.mask+i*.2/60);
   const a=Array.from({length:65},(_,i)=>i*g.max/64);
+  // Resolve rapid source-lobe spreading locally, without adding projection FFTs.
+  const end=Math.min(g.condenser*.4,40),step=p.gridSize>=512?.5:1;
+  for(let z=step;z<=end;z+=step)a.push(z);
+  for(const z of [.01,.025,.05,.1,.2,.3])if(z<end)a.push(z);
   for(const z of [g.condenser,g.mask,g.lens1,g.pupil,g.lens2,g.image,g.screen]) {
     a.push(z);for(const d of [.001,.02,.2,1])a.push(z-d,z+d);
   }

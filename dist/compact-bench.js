@@ -1,7 +1,7 @@
-import {RAY_BLUE,RAY_YELLOW} from './light-palette.js';
+import {RAY_BLUE,RAY_YELLOW} from './light-palette.js?v=20260927-illumination2';
 // A screen-sized schematic. z coordinates keep their physical scale; component
 // heights and ray heights are illustrative, just as in the large bench view.
-export function compactBench({width,geometry:g,params:p,components,selected,screen,pupilValue,mode='many'}){
+export function compactBench({width,geometry:g,params:p,components,selected,screen,pupilValue,mode='many',observations=[],activeId=null}){
   const height=164,left=18,right=width-18,X=z=>left+z/g.max*(right-left),cy=79;
   const positions=components.map(([key])=>X(g[key]));
   const number=n=>Number(n.toFixed(3));
@@ -11,12 +11,12 @@ export function compactBench({width,geometry:g,params:p,components,selected,scre
     const blocked=pupilValue(p,0,a/21)===0,tail=blocked?[]:[[g.lens2,a-h*g.f2/g.f1],[g.image,-h/p.reduction]];
     svg+=`<polyline points="${points([[g.mask,h],[g.lens1,h+a],[g.pupil,a],...tail])}" fill="none" stroke="${RAY_BLUE[h<0?0:h>0?1:2]}" stroke-width=".65" opacity=".36"/>`;
   }
-  const starts=p.sourceType==='Point'?[p.pointSourceV*26]:p.sourceType==='Dipole X'?[0]:[-10,0,10];
+  const starts=p.sourceType==='Point'?[p.pointSourceV*26]:p.sourceType==='Dipole X'?[0]:['Annular','Dipole Y'].includes(p.sourceType)?[-10,10]:[-10,0,10];
   if(mode!=='none')for(const h of starts)for(const a of mode==='many'?[-21,-11,0,11,21]:[-21,0,21])svg+=`<polyline points="${points([[0,h],[g.condenser,a],[g.mask,a-h]])}" fill="none" stroke="${RAY_YELLOW}" stroke-width=".65" opacity=".4"/>`;
   components.forEach(([key,name],i)=>{
     const x=positions[i],gap=Math.min(i?x-positions[i-1]:Infinity,i<6?positions[i+1]-x:Infinity),half=Math.max(.65,Math.min(6,gap*.24)),active=selected===key;
     let shape='';
-    if(key==='source')shape=`<rect x="${-half}" y="-17" width="${2*half}" height="34" rx="2" fill="#476579"/><ellipse rx="${Math.max(.5,half-2)}" ry="12" fill="#f9df9c"/>`;
+    if(key==='source')shape=`<rect x="${-half}" y="-17" width="${2*half}" height="34" rx="2" fill="#476579"/><ellipse rx="${Math.max(.5,half-2)}" ry="12" fill="#f9df9c"/>${p.sourceType==='Annular'?`<ellipse rx="${Math.max(.25,(half-2)*p.sourceInner/p.sourceOuter)}" ry="${12*p.sourceInner/p.sourceOuter}" fill="#163040"/>`:""}`;
     else if(['condenser','lens1','lens2'].includes(key)){const h=key==='lens2'?22:29;shape=`<path d="M0 ${-h}Q${-half*2} 0 0 ${h}Q${half*2} 0 0 ${-h}Z" fill="#dceefa" fill-opacity=".75" stroke="#527e9c" stroke-width="1"/>`;}
     else if(key==='mask')shape=`<rect x="${-half*.7}" y="-24" width="${half*1.4}" height="48" rx="1" fill="#52687a"/><path d="M${-half*.65} -13h${half*1.3}m${-half*1.3} 13h${half*1.3}m${-half*1.3} 13h${half*1.3}" stroke="#eff8ff" stroke-width="2.5"/>`;
     else if(key==='pupil'){const aperture=14;shape=`<path d="M0 -26V${-aperture}M0 ${aperture}V26" stroke="#283f53" stroke-width="${Math.max(1,half*1.5)}"/>${p.lensType==='Annular'?`<path d="M0 ${-aperture*p.lensInner}V${aperture*p.lensInner}" stroke="#283f53" stroke-width="${Math.max(1,half*1.5)}"/>`:''}`;}
@@ -28,6 +28,10 @@ export function compactBench({width,geometry:g,params:p,components,selected,scre
   });
   const at=Math.max(left,Math.min(right,X(screen)));
   if(screen!==null)svg+=`<g aria-label="Selected observation plane"><title>Observation screen · z = ${number(screen)} mm</title><path d="M${at} 39V117" stroke="#155fdf" stroke-width="1.1" stroke-dasharray="3 3"/><path d="M${at-3} 36h6l-3 5Z" fill="#155fdf"/></g>`;
+  const ordered=observations.map(o=>({...o,labelX:X(o.z)})).sort((a,b)=>a.z-b.z);
+  for(let i=1;i<ordered.length;i++)ordered[i].labelX=Math.max(ordered[i].labelX,ordered[i-1].labelX+23);
+  if(ordered.length){ordered.at(-1).labelX=Math.min(right-2,ordered.at(-1).labelX);for(let i=ordered.length-2;i>=0;i--)ordered[i].labelX=Math.min(ordered[i].labelX,ordered[i+1].labelX-23);}
+  for(const o of ordered){const active=o.id===activeId;svg+=`<g class="compact-position-marker" data-position-marker="${o.id}" aria-label="Position ${o.id} at ${number(o.z)} mm"><path d="M${X(o.z)} 113L${o.labelX} 119" fill="none" stroke="#9badbc"/><rect x="${o.labelX-9}" y="118" width="18" height="18" rx="3" fill="${active?'#155fdf':'#e6edf5'}"/><text x="${o.labelX}" y="131" text-anchor="middle" font-size="12" font-weight="600" fill="${active?'white':'#4e657b'}">${o.id}</text></g>`;}
   for(const z of [0,g.mask,g.image])svg+=`<path d="M${X(z)} 136v6" stroke="#8ca0b0"/><text x="${X(z)}" y="157" text-anchor="${z===0?'start':z===g.image?'end':'middle'}" fill="#667d8f" font-size="12">${number(z)}${z===g.image?' mm':''}</text>`;
   return {svg,height};
 }

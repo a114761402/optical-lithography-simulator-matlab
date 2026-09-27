@@ -1,4 +1,4 @@
-import {fft1} from './optics.js';
+import {fft1} from './optics.js?v=20260927-illumination2';
 const PI=Math.PI,TAU=2*PI;
 // The same Bluestein transform as the full Collins integral, for one vector.
 function transform(re,im,x,y,scale){

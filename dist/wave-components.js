@@ -1,6 +1,6 @@
 // The overlay uses the geometry of the displayed calculation, never live inputs.
 // Only z is to scale. Symbols describe ideal components, not their physical size.
-const names = [['source','Source'],['condenser','Condenser'],['mask','Mask'],['lens1','Lens 1'],['pupil','Aperture'],['lens2','Lens 2'],['image','Image']];
+const names = [['source','Source pupil'],['condenser','Condenser'],['mask','Mask'],['lens1','Lens 1'],['pupil','Aperture'],['lens2','Lens 2'],['image','Image']];
 export function waveComponentLayout(result,width,height){
   const span=result.zMax-result.zMin;
   if(!(span>0)||!(width>0)||!(height>0))return [];

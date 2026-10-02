@@ -20,7 +20,8 @@ export function setupControlLayout(){
   const mirrorWave=()=>{
     const s=waveStatus.textContent;
     let text=s;
-    if(/saved calculation$|^XZ and YZ ready/.test(s))text='';
+    // Calculation progress already lives in the plot and Compute button.
+    if(/saved calculation$|^XZ and YZ ready|^Wave path · \d+%$|^Calculating both XZ and YZ/.test(s))text='';
     else if(/loading/i.test(s))text='Loading saved wave…';
     else if(/cancelled/i.test(s))text='Calculation cancelled.';
     else if(/changed|new view|click Compute/i.test(s))text='Settings changed · '+$('calculate-yz').textContent;

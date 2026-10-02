@@ -97,12 +97,13 @@ test('Projection crop aligns to illustrated lens outlines at different display h
  near(projectionDisplayHalf(r,6,1,240),10e-6);
 });
 
-test('Full-path illustration clips both regions without changing raw fields',()=>{
+test('Projection illustration preserves calculated illumination and raw fields',()=>{
  const geometry={source:0,condenser:100,mask:200,lens1:300,pupil:400,lens2:425,image:450,f2:25};
  const r={...result([0,100,200,300,400,425,450].map(z=>column(z,.01,()=>100,101))),geometry,params:{fieldSizeUm:80,reduction:4,projNA:.15},scope:'full'};
  const before=structuredClone(r),opts={width:450,height:240,half:.01,palette:v=>[Math.round(v*255),0,0]};
  const full=renderWavePixels(r,opts),crop=renderWavePixels(r,{...opts,fullPathIllustration:true});
- for(const x of [50,150,250,350,410,440]){assert.ok(full[x*4]>0);assert.equal(crop[x*4],0);assert.ok(crop[(120*450+x)*4]>0);}
+ for(const x of [250,350,410,440]){assert.ok(full[x*4]>0);assert.equal(crop[x*4],0);assert.ok(crop[(120*450+x)*4]>0);}
+ for(const x of [50,100,150,199])for(let y=0;y<240;y++)for(let c=0;c<4;c++)assert.equal(crop[(y*450+x)*4+c],full[(y*450+x)*4+c]);
  assert.deepEqual(r,before);
  assert.deepEqual(renderWavePixels({...r,scope:'near'},opts),renderWavePixels({...r,scope:'near'},{...opts,fullPathIllustration:true}));
 });

@@ -11,8 +11,8 @@ import {renderWavePixels} from './wave-display.js?v=20261003-full-path';
 import {QUALITY,waveParameters} from './quality.js?v=20260927-positions3';
 import {waveCacheKey} from './cache.js?v=20261002-transmitted2';
 import {setupViewSwitch} from './view-switch.js?v=20260928-tuning';
-import {setupControlLayout} from './control-layout.js?v=20261003-full-path';
-import {waveComponentSVG} from './wave-components.js?v=20261003-full-path';
+import {setupControlLayout} from './control-layout.js?v=20261003-illumination-correction';
+import {waveComponentSVG} from './wave-components.js?v=20261003-illumination-correction';
 import {compactBench} from './compact-bench.js?v=20260928-tuning';
 import {regionMarkup,waveView} from './path-layout.js?v=20260927-position-fit';
 import {desktopBench} from './desktop-bench.js?v=20260927-overview';
@@ -499,7 +499,7 @@ function drawYZ(){
   $('yz-labels').classList.toggle('full-path',!near);const labels=near?[[r.zMin,'0'],[(r.zMin+r.zMax)/2,'100 µm'],[r.zMax,'200 µm after mask']]:[0,100,200,300,400,r.zMax].filter((v,i,a)=>a.indexOf(v)===i&&v<=r.zMax).map(v=>[v,`${fmt(v)}${v===r.zMax?' mm':''}`]);$('yz-labels').innerHTML=labels.map(([at,name])=>`<span style="left:${(at-r.zMin)/(r.zMax-r.zMin)*100}%">${name}</span>`).join('');
   $('yz-note').textContent=`${r.params.gridSize} × ${r.params.gridSize} mask grid · ${r.samples} emitter${r.samples===1?'':'s'} · ${cols.length} z planes. Display interpolated between calculated planes; Dark outside the calculation window is background; enable Show calculation window in Settings to see its bounds. ${mode==='local'?'Each column is normalized; brightness cannot be compared along z.':'Fixed XYZ reference; intensities above it are clipped.'}`;
   $('wave-scale').textContent=mode.includes('log')?'−120 → 0 dB · XYZ reference':mode==='local'?'0 → 1 · normalized per z':'0 → 1 · XYZ reference';
-  syncWaveCursor();c.setAttribute('aria-label',`${section.toUpperCase()} wave intensity, ${near?'0 to 200 micrometres after mask':'full optical path'}${r.transmittedOnly?', transmitted full-path illustration':''}`);
+  syncWaveCursor();c.setAttribute('aria-label',`${section.toUpperCase()} wave intensity, ${near?'0 to 200 micrometres after mask':'full optical path'}${r.transmittedOnly?', calculated illumination, aperture-transmitted projection illustration':''}`);
 }
 function drawWaveMarkers(r,width,height){
   const overlay=$('wave-components');overlay.setAttribute('viewBox',`0 0 ${width} ${height}`);overlay.style.height=`${height}px`;

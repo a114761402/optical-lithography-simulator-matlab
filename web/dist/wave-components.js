@@ -15,12 +15,12 @@ export function projectionDisplayHalf(result,z,half,height){
   }
   return Infinity;
 }
-// Explicit full-path illustration: component outlines form a visual envelope.
+// Projection illustration only. Illumination must remain the computed field.
 // This never selects incident rays or modifies the computed intensities.
 export function fullPathDisplayHalf(result,z,half,height){
-  if(result.scope==='near')return Infinity;
+  if(result.scope==='near'||z<result.geometry.mask)return Infinity;
   const g=result.geometry,p=result.params,u=2*half/height*Math.min(1,height/240);
-  const anchors=[[g.source,25*u],[g.condenser,36*u],[g.mask,p.fieldSizeUm*.5e-6],
+  const anchors=[[g.mask,p.fieldSizeUm*.5e-6],
     [g.lens1,36*u],[g.pupil,Math.min(14*u,g.f2*.001*p.projNA)],
     [g.lens2,29*u],[g.image,p.fieldSizeUm*.5e-6/p.reduction]];
   if(z<g.source||z>g.image)return Infinity;

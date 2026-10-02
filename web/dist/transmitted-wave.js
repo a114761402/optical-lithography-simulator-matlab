@@ -9,14 +9,14 @@ export function transmittedMaskField(f,reduction){
   for(let i=0;i<=last;i++){out.re[i]=f.image.re[last-i]/reduction;out.im[i]=f.image.im[last-i]/reduction;}
   return out;
 }
-export function computeTransmittedWave(params,scope='full',progress=()=>{},planes=null) {
+export function computeTransmittedWave(params,scope='full',progress=()=>{},planes=null,options={}) {
   if(scope==='near')return computeWave(params,scope,progress,planes);
   const transmittedOnly=true;
   const p={...defaults,...params};validate(p);const g=geometry(p),zs=planes||pathPlanes(p,scope);
   if(!zs.length||zs.some(z=>!Number.isFinite(z)||z<0||z>g.max))throw Error('Wave positions must lie within the bench.');
   const n=p.gridSize,dx=p.fieldSizeUm*1e-6/n,lambda=p.wavelengthNm*1e-9,mask=makeMask(p),beam=gaussianBeam(p,g.mask),samples=sourceSamples(p),columns=zs.map(z=>({z,plan:wavePlan(p,z)}));
   // Use the same fixed source/mask-incident/pupil/image reference as XY results.
-  const reference=compute(p,g.screen),sharedPeak=reference.sharedPeak,propagationCache={operators:new Map(),spectra:new WeakMap()};
+  const reference=compute(p,g.screen),sharedPeak=reference.sharedPeak,propagationCache={operators:new Map(),spectra:new WeakMap(),maxBytes:options.operatorCacheBytes??128*1024*1024};
   for(const col of columns){if(col.plan.type==='illumination'){col.x=col.plan.axis;col.y=col.plan.axisY||col.x;Object.assign(col,centerCuts(illuminationIntensity(p,col.plan.beam,col.x,col.y),col.x,col.y));}}
   for(let k=0;k<samples.length;k++) {
     const s=samples[k],f=coherent(p,mask,s,beam),passed=transmittedOnly&&scope==='full'?transmittedMaskField(f,p.reduction):null,passedAxis=passed?axis(passed.n,dx):null;propagationCache.spectra=new WeakMap();

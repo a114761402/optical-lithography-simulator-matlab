@@ -37,7 +37,7 @@ body:not(.phone-bench) #observation-grid[data-count='0']{display:none}
 body:not(.phone-bench) .slice-item{width:100%;min-width:0}
 body:not(.phone-bench) .slice-panel{padding:8px;gap:10px;grid-template-rows:30px auto}
 body:not(.phone-bench) .slice-panel canvas{width:100%;height:auto;aspect-ratio:1}
-body:not(.phone-bench) .zoom-position{display:grid;place-items:center;position:absolute;bottom:14px;right:14px;width:32px;height:32px;min-height:32px;padding:0;border:1px solid #94b4d1;background:#17344ddd;color:white;border-radius:5px;font-size:1.1rem}
+body:not(.phone-bench) .zoom-position{display:grid;place-items:center;position:relative;grid-area:1/1;align-self:end;justify-self:end;margin:14px;width:32px;height:32px;min-height:32px;padding:0;border:1px solid #94b4d1;background:#17344ddd;color:white;border-radius:5px;font-size:1.1rem}
 body:not(.phone-bench) .zoom-position:hover{background:#155fdf}
 body:not(.phone-bench) .zoom-position:disabled{opacity:.4}
 body:not(.phone-bench) .wave-section{margin-top:36px;padding-top:24px;border-top-width:1px;align-items:start}
@@ -133,7 +133,7 @@ body:not(.phone-bench) #reference-preset-row .z-input input{width:100%;min-width
 body:not(.phone-bench) #reference-preset-row .z-unit{margin-left:auto}
 body:not(.phone-bench) #position-controls>.slice-bar{display:none}
 body:not(.phone-bench) #focus-options{padding-bottom:0}
-.compact-beam :is(.compact-screen-handle,.compact-position-marker){cursor:ew-resize;touch-action:pan-y pinch-zoom;outline:none}
+.compact-beam :is(.compact-screen-handle,.compact-position-marker){cursor:ew-resize;touch-action:none;outline:none}
 .compact-beam :is(.compact-screen-handle,.compact-position-marker):focus-visible{outline:2px solid #5b9dff;outline-offset:2px}
 .compact-beam .drag-position-value{display:none}
 .compact-beam.dragging-screen .drag-position-value{display:block}

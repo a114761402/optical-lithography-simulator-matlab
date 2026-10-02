@@ -1,5 +1,5 @@
 import {pathFrame} from './path-layout.js?v=20260927-position-fit';
-import {snapPosition} from './observation-state.js?v=20260927-position-fit';
+import {snapPosition} from './observation-state.js?v=20260930-interpolate';
 // Capture on the stable SVG root: its children are replaced while dragging.
 export function setupScreenDrag(svg,{geometry,currentZ,onMove,onSelect,onStart,compact,onDragStart=()=>{},onDragEnd=()=>{}}){
   let drag=null,ignoreClickUntil=0;
@@ -16,7 +16,8 @@ export function setupScreenDrag(svg,{geometry,currentZ,onMove,onSelect,onStart,c
     if(ended.moving)onDragEnd();
   }
   svg.addEventListener('pointerdown',e=>{
-    if(drag||e.button!==0||!e.isPrimary)return;
+    if(drag){finish({pointerId:drag.pointerId},true);return;}
+    if(e.button!==0||!e.isPrimary)return;
     const handle=target(e);if(!handle)return;
     const mobile=compact(),id=handle.dataset.positionMarker||null;
     if(!mobile&&id)return;
@@ -29,8 +30,7 @@ export function setupScreenDrag(svg,{geometry,currentZ,onMove,onSelect,onStart,c
     if(!drag||e.pointerId!==drag.pointerId)return;
     const dx=e.clientX-drag.x,dy=e.clientY-drag.y;
     if(!drag.moving){
-      if(Math.abs(dy)>6&&Math.abs(dy)>Math.abs(dx)){finish(e,true);return;}
-      if(Math.abs(dx)<6||Math.abs(dx)<Math.abs(dy)*1.2)return;
+      if(Math.abs(dx)<6)return;
       drag.moving=true;
       onDragStart(drag.id,drag.z);
       if(drag.id)onSelect(drag.id);
@@ -38,10 +38,13 @@ export function setupScreenDrag(svg,{geometry,currentZ,onMove,onSelect,onStart,c
     }
     e.preventDefault();
     const z=Math.max(0,Math.min(drag.max,drag.z+dx*drag.max/drag.pixels));
-    // Touch is continuous; exact reference planes remain available in Edit.
+    // Touch is continuous; exact planes remain available in the position select.
     const snap=drag.mobile?{z,plane:'custom'}:snapPosition(z,geometry(),drag.pixels,{bypass:e.altKey,previous:drag.snapped,displayMax:drag.max});
     drag.snapped=snap.plane;onMove(snap.z,snap.plane);
   });
+  const abort=()=>{if(drag)finish({pointerId:drag.pointerId},true);};
+  if(typeof window!=='undefined')window.addEventListener('blur',abort);
+  if(typeof document!=='undefined'){document.addEventListener('visibilitychange',()=>{if(document.hidden)abort();});document.addEventListener('pointerdown',e=>{if(drag&&e.pointerId!==drag.pointerId)abort();},true);}
   svg.addEventListener('pointerup',e=>finish(e));
   svg.addEventListener('pointercancel',e=>finish(e,true));
   svg.addEventListener('lostpointercapture',e=>finish(e,true));

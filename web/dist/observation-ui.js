@@ -1,4 +1,4 @@
-export function setupObservationUI(getPlanes,{onSelect,onRemove,onAdd,onUndo,onReference,onZoom}){
+export function setupObservationUI(getPlanes,{onSelect,onRemove,onDuplicate,onAdd,onUndo,onReference,onZoom}){
   const $=id=>document.getElementById(id),grid=document.createElement('div');
   grid.id='observation-grid';grid.setAttribute('role','group');grid.setAttribute('aria-label','Observation positions');
   $('observation-layout').before(grid);
@@ -10,16 +10,17 @@ export function setupObservationUI(getPlanes,{onSelect,onRemove,onAdd,onUndo,onR
   $('observation-title').closest('.observation-heading').append(toolbar);$('add-position').onclick=onAdd;$('undo-position').onclick=onUndo;
   const empty=document.createElement('p');empty.id='observation-empty';empty.textContent='Add a position to explore the light.';grid.after(empty);
   const active=document.createElement('p');active.id='active-observation';active.setAttribute('aria-live','polite');$('reference-preset-row').append(active);
-  const badge=document.createElement('span');badge.id='observation-state';badge.className='slice-state';$('observation-label').after(badge);
-  $('observation-title').innerHTML='<span class="wide-label">Key positions</span><span class="phone-label">Observation screen</span>';
+  const badge=document.createElement('span');badge.id='observation-state';badge.className='slice-state';document.querySelector('.observation-field').append(badge);
+  $('observation-title').innerHTML='<span class="wide-label">Key positions</span><span class="phone-label">Position</span>';
   return {
     render(){
       const planes=getPlanes();
       for(const node of [...grid.children])if(!planes.some(p=>String(p.instance)===node.dataset.instance))node.remove();
       for(const panel of planes){
         let item=grid.querySelector(`[data-instance="${panel.instance}"]`);
+        if(item&&item.dataset.positionId!==panel.id){item.remove();item=null;}
         if(!item){
-          item=document.createElement('div');item.className='slice-item';item.dataset.instance=panel.instance;
+          item=document.createElement('div');item.className='slice-item';item.dataset.instance=panel.instance;item.dataset.positionId=panel.id;
           const button=document.createElement('button');button.type='button';button.className='slice-panel';button.id=`slice-panel-${panel.id}`;
           button.innerHTML=`<span class="slice-heading"><b>${panel.id}</b><span id="slice-label-${panel.id}"></span><span class="slice-state" id="slice-state-${panel.id}"></span></span><canvas id="slice-canvas-${panel.id}" width="320" height="320" aria-label="Observation ${panel.id} intensity"></canvas><span class="slice-caption"><span id="slice-position-${panel.id}"></span><span id="slice-target-${panel.id}" class="slice-target"></span><span id="slice-axis-${panel.id}"></span></span>`;
           button.onclick=()=>onSelect(panel.id);
@@ -29,16 +30,20 @@ export function setupObservationUI(getPlanes,{onSelect,onRemove,onAdd,onUndo,onR
             e.preventDefault();const list=getPlanes(),index=list.findIndex(p=>p.id===panel.id),next=list[(index+(e.key==='ArrowRight'?1:list.length-1))%list.length];
             onSelect(next.id);$(`slice-panel-${next.id}`).focus();
           };
+          const cardActions=document.createElement('div');cardActions.className='position-card-actions';
           const remove=document.createElement('button');remove.type='button';remove.className='remove-position';remove.textContent='−';remove.title=`Remove position ${panel.id}`;remove.setAttribute('aria-label',remove.title);remove.onclick=()=>onRemove(panel.id);
+          const duplicate=document.createElement('button');duplicate.type='button';duplicate.className='duplicate-position';duplicate.textContent='+';duplicate.title=`Duplicate position ${panel.id} after this one`;duplicate.setAttribute('aria-label',duplicate.title);duplicate.onclick=()=>onDuplicate(panel.id);
+          cardActions.append(remove,duplicate);
           const zoom=document.createElement('button');zoom.type='button';zoom.id=`zoom-position-${panel.id}`;zoom.className='zoom-position';zoom.textContent='↗';zoom.title=`View larger ${panel.id}`;zoom.setAttribute('aria-label',zoom.title);zoom.setAttribute('aria-haspopup','dialog');zoom.onclick=()=>onZoom(panel.id);
-          item.append(button,remove,zoom);
+          const caption=button.querySelector('.slice-caption');button.setAttribute('aria-describedby',`slice-position-${panel.id} slice-target-${panel.id} slice-axis-${panel.id}`);
+          item.append(button,cardActions,zoom,caption);
         }
         grid.append(item);
       }
       grid.dataset.count=planes.length;$('observation-panel').dataset.count=planes.length;empty.hidden=planes.length>0;
       $('observation-layout').hidden=planes.length===0;document.dispatchEvent(new Event('position-grid-updated'));
     },
-    removed(id){this.notice(id?`Removed ${id}`:'');},
-    notice(text){$('removed-position').textContent=text;$('undo-position').hidden=!text;const mobile=document.getElementById('undo-mobile-position');if(mobile)mobile.hidden=!text;}
+    removed(id){this.notice(id?'Position removed':'');},
+    notice(text){$('removed-position').textContent=text;$('undo-position').hidden=!text;const mobile=document.getElementById('undo-mobile-position');if(mobile){mobile.hidden=!text;mobile.textContent='Undo · '+text;}}
   };
 }

@@ -4,6 +4,7 @@ import {readFileSync} from 'node:fs';
 import {createWaveSampler,renderWavePixels} from '../dist/wave-display.js';
 import {waveView} from '../dist/path-layout.js';
 import {brightness} from '../dist/wave.js';
+import {projectionDisplayHalf,waveComponentLayout} from '../dist/wave-components.js';
 
 const column=(z,half,fn,n=5)=>{const x=Array.from({length:n},(_,i)=>-half+2*half*i/(n-1));return {z,x,y:x,xz:x.map(v=>fn(v,z)),yz:x.map(v=>fn(v,z)*2)};};
 const result=columns=>({columns,geometry:{},zMin:columns[0].z,zMax:columns.at(-1).z,sharedPeak:100});
@@ -65,4 +66,33 @@ test('Cropping at Image uses the same physical samples and does not paint downst
  const before=structuredClone(r),full=renderWavePixels(r,options),cropped=renderWavePixels(waveView(r),{...options,width:20});
  for(let y=0;y<8;y++)assert.deepEqual(cropped.slice(y*80,(y+1)*80),full.slice(y*160,y*160+80));
  assert.deepEqual(r,before);
+});
+
+test('Projection display crop preserves illumination, retained intensities and raw fields in both sections',()=>{
+ const r=result([0,1,2,3,4].map(z=>column(z,1,()=>25)));
+ r.geometry={source:0,mask:1,lens1:2,pupil:2.5,lens2:3,image:4};
+ r.params={fieldSizeUm:200000,reduction:4};r.scope='full';
+ const before=structuredClone(r),options={width:80,height:240,half:1,mode:'shared',palette:t=>[255*t,0,0],illuminationPalette:t=>[0,255*t,0]};
+ for(const section of ['xz','yz']){
+  const full=renderWavePixels(r,{...options,section}),cropped=renderWavePixels(r,{...options,section,projectionCrop:true});
+  for(let y=0;y<240;y++)for(let x=0;x<20;x++){
+   const k=(y*80+x)*4;assert.deepEqual(cropped.slice(k,k+4),full.slice(k,k+4));
+  }
+  const inside=(120*80+40)*4,outside=(20*80+40)*4;
+  assert.deepEqual(cropped.slice(inside,inside+4),full.slice(inside,inside+4));
+  assert.ok(full[outside]>0);assert.deepEqual(Array.from(cropped.slice(outside,outside+4)),[0,0,0,255]);
+ }
+ assert.deepEqual(r,before);
+ r.scope='near';assert.deepEqual(renderWavePixels(r,{...options,projectionCrop:true}),renderWavePixels(r,options));
+});
+
+test('Projection crop aligns to illustrated lens outlines at different display heights',()=>{
+ const r={geometry:{source:0,condenser:1,mask:2,lens1:3,pupil:4,lens2:5,image:6},params:{fieldSizeUm:80,reduction:4},scope:'full',zMin:0,zMax:6};
+ for(const height of [104,128,240,300])for(const key of ['lens1','lens2']){
+  const item=waveComponentLayout(r,800,height).find(item=>item.key===key);
+  near(projectionDisplayHalf(r,r.geometry[key],1,height),item.halfHeight*Math.min(1,height/240)*2/height);
+ }
+ assert.equal(projectionDisplayHalf(r,1,1,240),Infinity);
+ near(projectionDisplayHalf(r,2,1,240),40e-6);
+ near(projectionDisplayHalf(r,6,1,240),10e-6);
 });

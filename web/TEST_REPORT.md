@@ -492,3 +492,13 @@ Based on `0d452896359e58d60939683c50052d6e08bf4113`; source changes in this rele
 - Browser interaction checks: Standard keyboard fine adjustment 200 → 200.001 mm matched the marker; Expert Add E–F and menu Undo returned to four cards. New Standard Fast calculation completed at exactly 34.219 mm. Batch start/cancel kept document-coordinate heading y=416.094 and card y=564.860 stable (focus scrolling accounted for).
 - Native pointer-drag automation on this in-app viewport did not reliably hit the strip, so actual flick feel is not claimed as browser-verified. Pointer capture, release, cancel, regrip, momentum interruption and stale frames were checked with deterministic event tests. Physical iPhone Photos-like feel still requires device feedback.
 - This is a web deployment. Offline iOS asset preparation is verified; installed native applications were not rebuilt, signed or reinstalled in this turn.
+
+## 2 October 2026 — Standard Intensity removal and Projection display crop
+
+Artifact: authored `dist/` changes based on `befafa0`, entry `app.js?v=20261002-projection-display` and `interaction-layout.css?v=20261002-standard-intensity`; final source revision is the commit containing this record. macOS, Node v25.8.0, Codex in-app browser.
+
+- 35 relevant tests pass: wave display/components/path layout, compact bench, relative tuning and position history. Two new display checks verify preserved illumination and retained intensity values in XZ/YZ, unchanged raw arrays, near-mask bypass, and crop-to-symbol alignment at 104/128/240/300 CSS px plot heights.
+- Browser review used a same-origin iframe harness because the current browser zoom limited its top-level narrow viewport. Actual frame CSS widths 320, 337, 393 and 507: Standard hides the entire wave section, Expert restores it, and body scrollWidth equals clientWidth. Desktop frame width 1280 (1250 content width with scrollbar) retains Intensity. Screenshots inspected at 393 and 1280; no physical-phone certification.
+- Exercised General settings, both Projection display choices, Standard/Expert switching and resized desktop/mobile layouts. Full-field versus cropped screenshots preserve illumination and show projection bounded by Lens 1/Lens 2 outlines; changing the choice needs no Compute.
+- Numerical operators, caches and MATLAB source were not edited. This is display cropping, not a lens-transmission calculation. Native assets/install and App Store distribution were not part of this task.
+- Local screenshots: parent project `output/playwright/standard-no-intensity.jpg` and `output/playwright/projection-within-lenses.jpg`. Hosting result is verified separately after source preparation.

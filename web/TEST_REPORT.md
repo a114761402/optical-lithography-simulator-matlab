@@ -517,3 +517,17 @@ Artifact: `app.js?v=20261002-wave-reveal2`, based on `a0cef60`; final source rev
 Artifact: `app.js?v=20261002-progress-notice`, based on `02dede2`; macOS, Codex in-app browser, 393 CSS px responsive frame. The brief notice above the plot suppresses running `Wave path · N%` and the initial calculating message, since the plot overlay and Cancel/Compute button already show progress. Loading, cancellation, changed-setting and failure notices remain available. No optical/calculation changes.
 
 Verified a real fresh Preview full-path calculation: at 1% and 61%, `wave-notice` was not visible, the plot progress overlay was visible and updated, and Compute changed to Cancel. Screenshot inspected at 62% and stored in parent project `output/playwright/wave-progress-no-top-label.jpg`. JavaScript syntax and diff checks passed.
+
+## 2026-10-02 — transmitted-aperture projection display
+
+Artifact: authored Sites checkout based on 696a3b47; original `wave.js`, optical engine, fixtures and frozen caches unchanged. macOS Node 25.8, in-app browser local responsive harness at 393 and 1280 CSS px.
+
+Default-on Settings checkbox `Only light through projection aperture` uses actual pupil transmission (NA and shape), not lens outlines. A fresh reload checks it and disables schematic cropping. Saved experiments retain the selection; old experiments default on. Selection changes cancel/invalidate wave results and require Compute. Full-field Fine caches cannot satisfy the transmitted selection.
+
+The new module undoes image inversion/reduction to reconstruct the pupil-filtered inverse FFT on its full padded grid, then propagates that complex field through the existing relay before the stop. This is the transmitted contribution, not total incident intensity or an independent-ray intensity decomposition. Illumination and downstream calculations stay unchanged; near-mask scope retains ordinary diffraction. No finite Lens 1 diameter was added.
+
+Independent full inverse Fourier/Collins integration checks mask-plane orientation and units, and full 2-D propagation agrees with both centre cuts for circular, annular and slit pupils. A closed pupil zeros selected fields upstream/downstream, leaving illumination unchanged. Downstream and near-mode arrays match the original, with distinct cache selection identities.
+
+135 tests passed: `node --test --test-skip-pattern='Circular cache agrees with fresh Fine' tests/*.test.mjs`, including MATLAB parity and original engine-hash validation. The expensive fresh 445-emitter Fine cache check was excluded; earlier full-suite attempts were stopped. No cache or fixture values were modified.
+
+Real Preview compute completed in 41.5 s; both XZ/YZ accessibility labels confirmed transmitted selection. Disabling restored the existing Fine full-field cache, without the transmitted label. Desktop setting reachable with no overflow; cancellation stops the new job. One MutationObserver error predating the final reload remained in captured browser logs; no new error accompanied the final compute. Proof: root ignored `output/playwright/transmitted-light-settings.jpg`. This is browser emulation, not physical-phone verification. Fine transmitted views calculate locally and can take longer than cached full-field startup.

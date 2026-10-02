@@ -1,4 +1,4 @@
-import {STARTUP_PARAMS} from './cache.js?v=20260927-positions3';
+import {STARTUP_PARAMS} from './cache.js?v=20261002-transmitted2';
 import {QUALITY} from './quality.js?v=20260927-positions3';
 export const PRESETS=[
   {id:'default',name:'Default · Three-line imaging',description:'The original circular-source, circular-aperture, 4× reduction bench.',selected:'mask',changes:{}},

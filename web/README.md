@@ -79,3 +79,11 @@ Scale bars and image details have independent switches. Details are hidden by de
 ## Intensity display (2 October 2026)
 
 Mobile Standard hides the complete Intensity section, including its divider. Expert and desktop retain it. Settings → General → Wave settings → Projection display defaults to **Within lens outlines**, with **Full computed field** available immediately without Compute. This crops the display envelope between the physical mask/image windows and the illustrated Lens 1/Lens 2 outlines. It is not a calculation of which individual rays or field contributions will pass a physical lens. Illumination, near-mask views, raw computed fields, normalizations, XY images and numerical/cache settings remain unchanged. Saved experiments retain this display choice.
+
+## Transmitted projection display (October 2, 2026)
+
+Settings → General → Wave settings includes **Only light through projection aperture**, enabled by default. Press the Intensity Compute button after changing this setting. The option applies to the full path; near-mask diffraction remains unchanged.
+
+The existing complex Fourier spectrum is multiplied by the actual projection pupil transmission (NA and shape). Its inverse FFT, before image inversion/reduction, defines the transmitted mask-plane field on the full padded grid. That field is propagated with the existing relay operators for the path before the stop. Thus the upstream display is a reconstruction of the transmitted contribution, not the total physical incident intensity or an independent-ray intensity decomposition. Downstream fields, source illumination, XY results, precision and sampling parameters stay unchanged. Lens-symbol cropping is disabled for this selection; Lens 1 still has no finite diameter in the model.
+
+The separate `transmitted-wave.js` module preserves the original full-field engine and frozen caches. Transmitted selections reject those caches and calculate locally; Fine may take longer. Saved experiments store the selection; older experiments default to enabled.

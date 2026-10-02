@@ -52,7 +52,11 @@ export function setupControlLayout(){
   projectionDisplay.innerHTML='Projection display<select id="projection-display"><option value="lenses" selected>Within lens outlines</option><option value="full">Full computed field</option></select>';
   const projectionHelp=document.createElement('p');projectionHelp.className='wave-setting-help';projectionHelp.id='projection-display-help';projectionHelp.textContent='Display crop only. Hidden light is not zero; calculations stay unchanged.';
   projectionDisplay.querySelector('select').setAttribute('aria-describedby',projectionHelp.id);
-  waveSettings.append(projectionDisplay,projectionHelp);
+  const transmitted=document.createElement('label');transmitted.className='projection-transmitted-toggle';
+  transmitted.innerHTML='<input type="checkbox" id="projection-transmitted-only" checked> Only light through projection aperture';
+  const transmittedHelp=document.createElement('p');transmittedHelp.className='wave-setting-help';transmittedHelp.textContent='Uses the aperture opening and NA. Before the aperture: reconstructed transmitted field. Full path only; Compute to update.';
+  projectionDisplay.querySelector('select').disabled=true;
+  waveSettings.append(transmitted,transmittedHelp,projectionDisplay,projectionHelp);
   const aboutSettings=document.createElement('section');aboutSettings.id='about-settings';aboutSettings.innerHTML='<h3>About</h3>';
   const modelButton=$('model-button'),modelHome=document.createComment('mobile about');modelButton.after(modelHome);
   // Relocate the actual controls, so desktop and phone always share values.

@@ -511,3 +511,9 @@ Artifact: `app.js?v=20261002-wave-reveal2`, based on `a0cef60`; final source rev
 - `drawYZ` now returns while the canvas has zero layout width/height, preserving the last valid drawing. Mode changes schedule redraw after layout; ResizeObserver tracks actual canvas size, including visibility and scrollbar changes. No changes to calculated fields, optical geometry or display-crop semantics.
 - 18 wave display/components/path-layout tests passed. Browser regression: fresh Standard startup → Expert; 3 Standard/Expert cycles at each of 320/337/393/507 CSS px; changing widths while hidden; XZ/YZ, both Projection display options, annular preset while hidden, reset, settings open/close, and desktop width 1280. Overlay viewBox matched canvas CSS size on reveal, all buffer widths exceeded 1, and no browser errors were recorded in the final review. Example 393px frame: canvas/overlay 317 × 118 CSS px (backing width 349 at the observed display density).
 - Corrected screenshot inspected and stored in parent project `output/playwright/intensity-reveal-fixed.jpg`. Browser emulation only; physical phone and native installation not tested.
+
+## 2 October 2026 — Remove duplicate wave progress notice
+
+Artifact: `app.js?v=20261002-progress-notice`, based on `02dede2`; macOS, Codex in-app browser, 393 CSS px responsive frame. The brief notice above the plot suppresses running `Wave path · N%` and the initial calculating message, since the plot overlay and Cancel/Compute button already show progress. Loading, cancellation, changed-setting and failure notices remain available. No optical/calculation changes.
+
+Verified a real fresh Preview full-path calculation: at 1% and 61%, `wave-notice` was not visible, the plot progress overlay was visible and updated, and Compute changed to Cancel. Screenshot inspected at 62% and stored in parent project `output/playwright/wave-progress-no-top-label.jpg`. JavaScript syntax and diff checks passed.

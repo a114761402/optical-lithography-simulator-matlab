@@ -7,12 +7,12 @@ import {presetDefinition,presetParams,matchingPreset} from './presets.js?v=20260
 import {loadPresetCache} from './preset-cache.js?v=20261002-transmitted2';
 import {validate,geometry,sourceValue,sourceExtent,pupilValue,makeMask,maximum} from './optics.js?v=20260927-positions3';
 import {centerCuts,brightness} from './wave.js?v=20260927-positions3';
-import {renderWavePixels} from './wave-display.js?v=20261002-projection-display';
+import {renderWavePixels} from './wave-display.js?v=20261003-full-path';
 import {QUALITY,waveParameters} from './quality.js?v=20260927-positions3';
 import {waveCacheKey} from './cache.js?v=20261002-transmitted2';
 import {setupViewSwitch} from './view-switch.js?v=20260928-tuning';
-import {setupControlLayout} from './control-layout.js?v=20261002-transmitted2';
-import {waveComponentSVG} from './wave-components.js?v=20260927-overview';
+import {setupControlLayout} from './control-layout.js?v=20261003-full-path';
+import {waveComponentSVG} from './wave-components.js?v=20261003-full-path';
 import {compactBench} from './compact-bench.js?v=20260928-tuning';
 import {regionMarkup,waveView} from './path-layout.js?v=20260927-position-fit';
 import {desktopBench} from './desktop-bench.js?v=20260927-overview';
@@ -493,13 +493,13 @@ function drawYZ(){
   const ratio=Math.min(devicePixelRatio||1,2);c.width=Math.round(width*ratio);c.height=Math.round(height*ratio);const ctx=c.getContext('2d');ctx.setTransform(ratio,0,0,ratio,0,0);ctx.fillStyle='#071624';ctx.fillRect(0,0,width,height);$('yz-labels').replaceChildren();$('wave-components').replaceChildren();$('wave-regions').replaceChildren();$('wave-regions').hidden=!yzResult||yzResult.scope==='near';syncWaveCursor();
   if(!yzResult){c.setAttribute('aria-label','Wave intensity — not calculated for these settings');$('wave-scale').textContent=$('wave-brightness').value.includes('log')?'−120 → 0 dB · XYZ reference':$('wave-brightness').value==='local'?'0 → 1 · normalized per z':'0 → 1 · XYZ reference';if(activeJob!=='yz')$('wave-status').textContent=waveLoading?'Loading the saved Fine calculation…':`Optics changed or new view selected · click ${$('calculate-yz').textContent}`;if(activeJob!=='yz'){ctx.fillStyle='#687f94';ctx.font='15px system-ui';ctx.textAlign='center';ctx.fillText(waveLoading?'Loading saved Fine wave…':`Click ${$('calculate-yz').textContent} for this view.`,width/2,height/2);}$('yz-note').textContent='XZ: horizontal cut at y = 0. YZ: vertical cut at x = 0. Dark outside the calculation window is canvas background; enable Show calculation window in Settings to see the bounds.';return;}
   const r=waveView(yzResult),section=$('wave-section').value,mode=$('wave-brightness').value,near=r.scope==='near',half=near?r.params.fieldSizeUm*.5e-6:Math.max(r.params.condenserFocalMm*.001*r.params.sourceEmissionNA*1.4,r.geometry.f1*.001*r.params.projNA/r.params.reduction*1.4),w=width,h=height,img=ctx.createImageData(c.width,c.height),cols=r.columns;
-  img.data.set(renderWavePixels(r,{width:c.width,height:c.height,half,section,mode,palette:t=>palette(t,'blue'),illuminationPalette:t=>palette(t,'warm'),showWindow:$('wave-window-toggle').checked,projectionCrop:!r.transmittedOnly&&$('projection-display').value==='lenses',displayHeight:height}));
+  img.data.set(renderWavePixels(r,{width:c.width,height:c.height,half,section,mode,palette:t=>palette(t,'blue'),illuminationPalette:t=>palette(t,'warm'),showWindow:$('wave-window-toggle').checked,fullPathIllustration:!!r.transmittedOnly,projectionCrop:!r.transmittedOnly&&$('projection-display').value==='lenses',displayHeight:height}));
   ctx.putImageData(img,0,0);drawWaveMarkers(r,width,height);
   $('wave-regions').hidden=near;if(!near)$('wave-regions').innerHTML=regionMarkup(r.geometry);
   $('yz-labels').classList.toggle('full-path',!near);const labels=near?[[r.zMin,'0'],[(r.zMin+r.zMax)/2,'100 µm'],[r.zMax,'200 µm after mask']]:[0,100,200,300,400,r.zMax].filter((v,i,a)=>a.indexOf(v)===i&&v<=r.zMax).map(v=>[v,`${fmt(v)}${v===r.zMax?' mm':''}`]);$('yz-labels').innerHTML=labels.map(([at,name])=>`<span style="left:${(at-r.zMin)/(r.zMax-r.zMin)*100}%">${name}</span>`).join('');
   $('yz-note').textContent=`${r.params.gridSize} × ${r.params.gridSize} mask grid · ${r.samples} emitter${r.samples===1?'':'s'} · ${cols.length} z planes. Display interpolated between calculated planes; Dark outside the calculation window is background; enable Show calculation window in Settings to see its bounds. ${mode==='local'?'Each column is normalized; brightness cannot be compared along z.':'Fixed XYZ reference; intensities above it are clipped.'}`;
   $('wave-scale').textContent=mode.includes('log')?'−120 → 0 dB · XYZ reference':mode==='local'?'0 → 1 · normalized per z':'0 → 1 · XYZ reference';
-  syncWaveCursor();c.setAttribute('aria-label',`${section.toUpperCase()} wave intensity, ${near?'0 to 200 micrometres after mask':'full optical path'}${r.transmittedOnly?', only light through projection aperture':''}`);
+  syncWaveCursor();c.setAttribute('aria-label',`${section.toUpperCase()} wave intensity, ${near?'0 to 200 micrometres after mask':'full optical path'}${r.transmittedOnly?', transmitted full-path illustration':''}`);
 }
 function drawWaveMarkers(r,width,height){
   const overlay=$('wave-components');overlay.setAttribute('viewBox',`0 0 ${width} ${height}`);overlay.style.height=`${height}px`;

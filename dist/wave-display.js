@@ -1,5 +1,5 @@
 import {brightness} from './wave.js?v=20260927-positions3';
-import {projectionDisplayHalf,fullPathDisplayHalf} from './wave-components.js?v=20261003-full-path';
+import {projectionDisplayHalf,fullPathDisplayHalf} from './wave-components.js?v=20261003-illumination-correction';
 
 const mix=(a,b,t)=>a+(b-a)*t;
 // Monotone cubic interpolation: no new extrema, negative intensity or ringing.

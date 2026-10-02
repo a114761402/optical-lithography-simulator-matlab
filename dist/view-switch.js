@@ -13,7 +13,7 @@ export function setupViewSwitch(){
   let selected=0,phoneSelected=0,editing=false,start=null,ignoreClickUntil=0;
   function select(index,{focus=false}={}){
     if(media.matches)phoneSelected=index;else index=0;
-    selected=index;workspace.dataset.view=index?'fixed':'explore';byId('bench-navigation').dataset.view=workspace.dataset.view;byId('position-controls').hidden=index!==0&&!editing;
+    selected=index;workspace.dataset.view=index?'fixed':'explore';byId('bench-navigation').dataset.view=workspace.dataset.view;byId('position-controls').hidden=false;
     document.body.classList.toggle('editing-key-positions',media.matches&&index===1&&editing);
     const grid=byId('observation-grid');if(grid){if(media.matches&&index===1)byId('mobile-key-grid-host').append(grid);else byId('observation-layout').before(grid);}
     document.dispatchEvent(new CustomEvent('position-view-change',{detail:{key:media.matches&&index===1,editing}}));

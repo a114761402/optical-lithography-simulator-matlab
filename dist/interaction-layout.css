@@ -1,0 +1,226 @@
+/* Mobile layout ownership: 4px within a group, 8px between rows, 12px between sections. */
+.phone-bench{--mobile-gap:4px;--mobile-row-gap:8px;--mobile-section-gap:12px}
+body:not(.show-image-details) .slice-caption,body:not(.show-image-details) .observation-meta{display:none!important}
+#mobile-preset-row:empty,#mobile-tuning-row[hidden],.position-menu{display:none}
+#illumination-comparison label:has(select),#illumination-comparison label:has(input[type=number]){display:grid;grid-template-columns:minmax(0,1fr) minmax(90px,1fr)}
+#illumination-comparison input[type=number]{min-width:0;width:100%}
+#fixed-width-label[hidden]{display:none!important}
+#calculate,#show-slice,#calculate-yz{position:relative;overflow:hidden;white-space:nowrap;font-variant-numeric:tabular-nums}
+.is-computing::after{content:'';position:absolute;left:0;bottom:0;height:3px;width:var(--compute-progress);background:#a8d8ff;pointer-events:none}
+#wave-progress-overlay{position:absolute;left:50%;top:55%;transform:translate(-50%,-50%);z-index:4;padding:8px 12px;border-radius:6px;background:#071624de;color:#fff;font-size:.875rem;font-weight:600;white-space:nowrap;pointer-events:none;box-shadow:0 2px 12px #07162455}
+#wave-progress-overlay[hidden]{display:none}
+#wave-cursor{width:40px;margin-left:-20px;border:0;pointer-events:auto;touch-action:none;cursor:ew-resize}
+#wave-cursor[hidden]{display:none}
+#wave-cursor::before{content:'';position:absolute;left:19px;top:0;bottom:0;border-left:2px dashed #ffcf70}
+#wave-cursor::after{content:none}
+#wave-cursor:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.phone-bench #mobile-preset-row{display:flex;align-items:center;gap:8px;width:100%;min-width:0}
+.phone-bench .workspace-heading{display:block;padding-block:4px;margin-bottom:4px}
+.phone-bench #mobile-preset-row .preset-label{display:block;flex:1;min-width:0;width:auto;margin:0;font-size:0}
+.phone-bench #mobile-preset-row #preset{width:100%;min-width:0;max-width:none;height:44px;margin:0;padding:6px 24px 6px 8px;font-size:1rem;text-overflow:ellipsis}
+.phone-bench #mobile-preset-row #view-switch{display:flex;flex:0 0 190px;width:190px;min-height:44px;height:44px;margin:0;padding:3px;border:0}
+.phone-bench #mobile-preset-row #view-switch button{flex:1;min-width:0;min-height:38px;height:38px;padding:0 6px;font-size:.875rem;white-space:nowrap}
+.phone-bench #position-controls{display:block!important;padding:0;margin:0}
+.phone-bench #position-controls>.screen-track,.phone-bench #position-controls>.slice-bar,.phone-bench #focus-options,.phone-bench #fine-tuning-toggle,.phone-bench #standard-position-toggle,.phone-bench #standard-position-options{display:none!important}
+.phone-bench #bench-navigation{padding:6px 8px 4px;min-height:0}
+.phone-bench #mobile-tuning-row{display:block;width:100%;min-width:0}
+.phone-bench #bench-navigation[data-view=fixed] #mobile-tuning-row{display:grid;grid-template-columns:minmax(0,1fr) clamp(106px,27%,150px);align-items:center;gap:6px}
+.phone-bench .mobile-plane{display:flex;align-items:center;min-width:0;position:relative}
+#mobile-position-id:empty{display:none}
+#mobile-position-id{position:absolute;left:7px;z-index:1;color:var(--blue);font-size:.75rem;pointer-events:none}
+.phone-bench .mobile-plane #plane{width:100%;max-width:100%;min-width:0;height:44px;min-height:44px;font-size:.875rem;padding:5px 20px 5px 7px}
+.phone-bench .mobile-plane:has(#mobile-position-id:not(:empty)) #plane{padding-left:24px}
+.phone-bench .mobile-position-fields .z-input{width:100%;height:44px;min-height:44px;margin:0;min-width:0;box-sizing:border-box;gap:3px}
+.phone-bench .mobile-position-fields .z-input input{min-width:0;width:0;min-height:42px;height:42px;font-size:1rem;appearance:textfield}
+#relative-tuning{position:relative;min-width:0;height:44px;border:1px solid #cbd8e8;border-radius:6px;background:#f8fbff;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;cursor:ew-resize}
+#relative-tuning[aria-disabled=true]{opacity:.4;pointer-events:none}
+#relative-tuning:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.tuning-ticks{position:absolute;inset:12px -24px;background:repeating-linear-gradient(90deg,transparent 0 11px,#a8bbd2 11px 12px);transform:translateX(var(--tick-offset,0px))}
+.tuning-center{position:absolute;left:calc(50% - 2px);top:7px;bottom:7px;width:4px;border-radius:4px;background:var(--blue);box-shadow:0 0 0 4px #f8fbff}
+#relative-tuning.scrubbing{background:#eaf2ff;border-color:var(--blue)}
+.phone-bench #edit-key-positions{display:none!important}
+.phone-bench #fixed-panel .calculation-actions #expert-high-detail{width:28px;height:16px;min-height:16px}
+.phone-bench #fixed-panel .calculation-actions #expert-high-detail:before{left:1px;top:1px;width:12px;height:12px}
+.phone-bench #fixed-panel .calculation-actions #expert-high-detail:checked:before{transform:translateX(12px)}
+.phone-bench #fixed-panel .calculation-actions .detail-toggle{min-width:0;white-space:nowrap;font-size:.8125rem;gap:5px}
+.phone-bench #fixed-panel #calculate,.phone-bench #profile-menu #show-slice{height:44px;min-height:44px;padding:6px 8px}
+.position-card-actions{position:absolute;top:5px;right:4px;z-index:3;display:flex;align-items:center;gap:0}
+.position-card-actions :is(.remove-position,.duplicate-position){position:static;display:grid;place-items:center;width:34px;height:44px;min-height:44px;padding:0;border-radius:6px;background:transparent;color:var(--muted);font-size:1.25rem;font-weight:400;line-height:1}
+.position-card-actions :is(.remove-position,.duplicate-position):hover{background:#e8f0fb;color:var(--blue)}
+body:not(.phone-bench) #observation-grid .slice-heading{padding-right:70px}
+.phone-bench #mobile-key-grid-host .position-card-actions{top:-3px;right:2px}
+.phone-bench #mobile-key-grid-host .position-card-actions :is(.remove-position,.duplicate-position){display:grid!important;width:30px}
+.phone-bench #observation-grid .slice-heading{padding-right:64px}
+@media(max-width:350px){
+ .phone-bench #mobile-preset-row{gap:5px}
+ .phone-bench #mobile-preset-row #view-switch{flex-basis:168px;width:168px}
+}
+
+.phone-bench #mobile-preset-row .view-switch-thumb{display:none}
+.phone-bench #mobile-preset-row #view-switch button[aria-selected=true]{background:#fff;color:var(--blue);box-shadow:0 1px 4px #1b365b20;border-radius:5px}
+.phone-bench #mobile-preset-row #view-switch button[aria-selected=false]{background:transparent;box-shadow:none;color:var(--muted)}
+.phone-bench #profile-menu .slice-compute-action,.phone-bench #profile-menu #show-slice{max-width:100%;width:100%;min-width:0}
+/* The inline z field carries the off-diagram position without adding a row. */
+.phone-bench #path-range-notice{display:none}
+.observation-field{position:relative}
+.observation-field #observation-state{position:absolute;left:8px;top:8px;margin:0;z-index:1}
+.show-image-details.phone-bench .observation-meta{display:block}
+.show-image-details.phone-bench .observation-meta :is(#observation-z,#observation-axis){display:block}
+
+/* Position fields share the existing title row; the tuning strip owns its row. */
+.mobile-position-fields[hidden]{display:none!important}
+.phone-bench .observation-heading,.phone-bench #fixed-panel .results-heading>div:first-child{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:8px;width:100%;min-width:0}
+.phone-bench .observation-heading h2,.phone-bench #reference-title{font-size:1rem;line-height:1.1;min-height:44px;display:flex;align-items:center;margin:0;padding:0;white-space:nowrap}
+.phone-bench .mobile-position-fields{display:grid;grid-template-columns:minmax(75px,1fr) minmax(117px,1fr);gap:6px;min-width:0}
+.phone-bench .mobile-position-fields .z-input{display:flex;align-items:center;padding:0 5px;border:1px solid var(--line);border-radius:5px;background:white;font-size:.75rem}
+.phone-bench .mobile-position-fields .z-input input{flex:1;padding:0;border:0;background:transparent;font-variant-numeric:tabular-nums}
+.phone-bench .mobile-position-fields .z-unit{display:inline;font-size:.6875rem;flex:none}
+.phone-bench .mobile-position-fields input::-webkit-inner-spin-button{appearance:none}
+.phone-bench .mobile-position-fields .z-input:focus-within{outline:2px solid var(--blue);outline-offset:1px}
+.phone-bench #fixed-panel .results-heading{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--mobile-row-gap);margin:0 0 var(--mobile-row-gap);padding:0}
+.phone-bench #fixed-panel .results-heading>div:first-child{grid-template-columns:max-content max-content minmax(72px,1fr);gap:4px}
+.phone-bench #fixed-panel .results-heading .mobile-position-fields{grid-column:3;grid-row:1;grid-template-columns:minmax(0,1fr);gap:0;width:min(100%,120px);justify-self:end}
+.phone-bench #fixed-panel .results-heading #position-edit-actions{grid-column:2;grid-row:1}
+.phone-bench #mobile-position-actions{position:static;display:flex;flex-direction:row;grid-column:1;grid-row:1;gap:var(--mobile-gap);align-items:center;min-width:0;height:44px}
+.phone-bench #fixed-panel .calculation-actions{display:grid;grid-template-columns:66px minmax(0,1fr) 68px 76px;align-items:center;gap:var(--mobile-gap);margin:0;width:100%}
+.phone-bench #fixed-panel .calculation-actions>.detail-toggle{grid-column:3;grid-row:1;min-height:44px;height:44px;justify-self:start;width:56px;flex-direction:column-reverse;justify-content:center;gap:1px;font-size:.6875rem;line-height:1;align-items:center}
+.phone-bench #fixed-panel #calculate{grid-column:4;grid-row:1;width:76px;min-width:76px;height:44px;white-space:nowrap}
+@media(max-width:350px){
+ .phone-bench .observation-heading,.phone-bench #fixed-panel .results-heading>div:first-child{gap:4px}
+ .phone-bench .observation-heading h2,.phone-bench #reference-title{font-size:.875rem}
+ .phone-bench .mobile-position-fields{grid-template-columns:minmax(64px,1fr) 119px;gap:4px}
+ .phone-bench .mobile-plane #plane{font-size:.8125rem;padding-right:15px}
+}
+.phone-bench #bench-workspace{margin-bottom:var(--mobile-gap)}
+.phone-bench #view-workspace{padding:0;margin:0}
+.phone-bench #fixed-panel{padding:0;margin:0}
+.phone-bench .observation-heading{margin-bottom:4px}
+
+.phone-bench #mobile-position-actions #add-mobile-position{width:66px;min-width:66px;padding:0 3px;font-size:.75rem;white-space:nowrap}
+#position-edit-actions{display:flex;align-items:center;gap:4px}
+body:not(.phone-bench) #position-edit-actions .position-history-action{display:none}
+.phone-bench #position-edit-actions #reset-key-positions{width:48px;min-width:48px;height:44px;min-height:44px;padding:0 2px;font-size:.75rem}
+.phone-bench #position-edit-actions .position-history-action{width:44px;min-width:44px;flex:none;height:44px;min-height:44px;padding:0;display:grid;place-items:center;border-radius:8px;color:var(--blue)}
+.phone-bench #position-edit-actions .position-history-action svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.phone-bench #position-edit-actions #redo-position-edit svg{transform:scaleX(-1)}
+.phone-bench #position-edit-actions .position-history-action:disabled{opacity:.42;color:var(--muted)}
+@media(max-width:350px){
+ .phone-bench #fixed-panel #reference-title{font-size:.8125rem}
+ .phone-bench #position-edit-actions #reset-key-positions{width:44px;min-width:44px}
+ .phone-bench #position-edit-actions .position-history-action{width:44px;min-width:44px;margin-left:-2px}
+ .phone-bench #fixed-panel .mobile-position-fields .z-input input{font-size:.8125rem}
+}
+#tuning-settings details>summary{display:flex;align-items:center;min-height:44px;cursor:pointer;font-weight:600;list-style:none}
+#tuning-settings details>summary::-webkit-details-marker{display:none}
+#tuning-settings details>summary:after{content:'⌄';margin-left:auto;color:var(--muted)}
+#tuning-settings details[open]>summary:after{transform:rotate(180deg)}
+#tuning-settings .tuning-setting-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:8px 0 4px}
+#tuning-settings .tuning-setting-fields label{min-width:0;font-size:.8125rem}
+#tuning-settings .tuning-setting-fields select{width:100%;min-width:0;padding-inline:5px;font-size:.8125rem}
+@media(max-width:380px){#tuning-settings .tuning-setting-fields{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.phone-bench #mobile-key-grid-host #observation-grid{margin:0;row-gap:var(--mobile-row-gap);column-gap:var(--mobile-row-gap)}
+.phone-bench #mobile-key-grid-host .slice-panel{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:30px auto;align-content:start;gap:var(--mobile-gap);padding:4px}
+.phone-bench #mobile-key-grid-host .slice-heading{height:30px;min-height:30px;align-items:center;flex-wrap:nowrap;margin:0;padding:0 64px 0 0}
+.phone-bench #mobile-key-grid-host .slice-heading>span:first-of-type{max-width:none;min-width:0;padding:0;line-height:1.1;white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-overflow:clip}
+.phone-bench #mobile-key-grid-host .slice-heading .slice-state{top:40px}
+.phone-bench .wave-section{margin-top:var(--mobile-section-gap);padding-top:var(--mobile-row-gap);padding-bottom:0}
+.phone-bench .settings-privacy{display:none}
+.phone-bench #app-menu>nav{min-width:160px;width:160px;padding:4px}
+.phone-bench #app-menu>nav>button{width:100%;text-align:left;min-height:44px;padding:10px 14px}
+.phone-bench #model-dialog .site-contact{display:flex;flex-wrap:wrap;gap:4px 8px;margin:12px 0;padding:0 0 12px;border-top:0;border-bottom:1px solid var(--line);font-size:.875rem}
+.phone-bench #model-dialog .site-contact a{margin:0;color:var(--blue)}
+.phone-bench #model-dialog .site-contact a[href="privacy.html"]{flex-basis:100%;min-height:44px;display:flex;align-items:center}
+.compact-beam.tuning-screen .drag-position-value{display:block}
+
+/* Shared desktop action edge and a single horizontal rhythm. */
+.mobile-key-title{display:none}
+body:not(.phone-bench) #fixed-panel .results-heading{width:100%;padding:0 20px 0 var(--diagram-inset);display:flex;align-items:center;gap:16px}
+body:not(.phone-bench) #fixed-panel .results-heading>div:first-child{display:flex;align-items:center;gap:12px;min-width:0}
+body:not(.phone-bench) #observation-panel .observation-heading{width:100%;margin-inline:0;padding:0 20px 0 var(--diagram-inset);display:flex;align-items:center;gap:16px;flex-wrap:nowrap}
+body:not(.phone-bench) #observation-panel .observation-heading>div:first-child{display:flex;align-items:center;gap:12px;min-width:0}
+body:not(.phone-bench) #observation-panel .observation-toolbar{margin-left:auto;justify-content:flex-end;flex:none}
+body:not(.phone-bench) #observation-panel #reference-positions{display:none}
+body:not(.phone-bench) #observation-panel .observation-toolbar>.slice-compute-action{margin-left:0;align-items:center}
+body:not(.phone-bench) #fixed-panel .calculation-actions{display:flex;flex-direction:row;align-items:center;justify-content:flex-end;gap:8px;width:auto;margin-left:auto}
+body:not(.phone-bench) #position-edit-actions .position-history-action{display:grid;width:44px;height:44px;min-height:44px;padding:0;place-items:center}
+body:not(.phone-bench) #position-edit-actions .position-history-action svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+body:not(.phone-bench) #position-edit-actions #redo-position-edit svg{transform:scaleX(-1)}
+body:not(.phone-bench) #position-edit-actions .position-history-action:disabled{opacity:.42}
+body:not(.phone-bench) #position-edit-actions #reset-key-positions{display:block;height:44px;min-height:44px;padding:6px 12px}
+body:not(.phone-bench) #mobile-position-actions{display:flex;align-items:center}
+body:not(.phone-bench) #position-edit-actions #add-position{width:44px;height:44px;min-height:44px;padding:0;font-size:1.25rem}
+body:not(.phone-bench) .wave-section>.wave-heading{grid-column:1/-1;min-width:0;margin:0 0 14px;padding:0 20px 0 var(--diagram-inset)}
+body:not(.phone-bench) .wave-section>.wave-heading .wave-action-group{margin-left:auto}
+body:not(.phone-bench) .wave-section>.wave-main{grid-column:1;grid-row:2}
+body:not(.phone-bench) .wave-section>.wave-sidebar{grid-column:2;grid-row:2}
+body:not(.phone-bench) .wave-section>.wave-sidebar #wave-region-setting{margin-top:14px}
+
+/* The two Expert fields share a width and right edge on iPhone. */
+.phone-bench{--expert-field-width:120px}
+.phone-bench #bench-navigation[data-view=fixed] #mobile-tuning-row{grid-template-columns:minmax(0,1fr) var(--expert-field-width)}
+.phone-bench #fixed-panel .results-heading .mobile-position-fields{width:var(--expert-field-width);margin-right:0}
+.phone-bench #fixed-panel .results-heading>div:first-child{grid-template-columns:max-content max-content minmax(0,1fr);gap:6px}
+.phone-bench #fixed-panel #reference-title{font-size:.875rem}
+.phone-bench #position-edit-actions{gap:3px}
+.phone-bench #position-edit-actions #reset-key-positions{width:44px;min-width:44px}
+.phone-bench #position-edit-actions .position-history-action{width:42px;min-width:42px}
+.phone-bench #position-edit-actions #add-mobile-position{width:42px;min-width:42px;height:44px;min-height:44px;padding:0;font-size:1.25rem;line-height:1}
+.phone-bench #mobile-position-actions{grid-column:1;grid-row:1;width:auto}
+.phone-bench #mobile-position-actions .mobile-key-title{display:block;font-size:1.25rem;font-weight:650;line-height:1.15;white-space:nowrap;color:var(--ink)}
+.phone-bench .wave-heading #wave-title{font-size:1.25rem;line-height:1.15}
+.phone-bench #fixed-panel .calculation-actions{grid-template-columns:minmax(0,1fr) 68px 76px}
+.phone-bench #fixed-panel .calculation-actions>.detail-toggle{grid-column:2}
+.phone-bench #fixed-panel #calculate{grid-column:3}
+.phone-bench #bench-workspace{margin-bottom:0;border-bottom:0;border-radius:8px 8px 0 0}
+.phone-bench #fixed-panel .results-heading{gap:0}
+.phone-bench #fixed-panel .results-heading>div:first-child{box-sizing:border-box;background:#fff;border:1px solid #dce3ec;border-top:0;border-radius:0 0 8px 8px;padding:4px 8px 8px}
+.phone-bench #fixed-panel .calculation-actions{border-top:3px solid #9aadc3;margin-top:8px;padding-top:8px}
+@media(max-width:379px){
+ .phone-bench{--expert-field-width:108px}
+ .phone-bench #fixed-panel .results-heading>div:first-child{grid-template-columns:max-content minmax(0,1fr)}
+ .phone-bench #fixed-panel .results-heading #position-edit-actions{grid-column:2;justify-self:end}
+ .phone-bench #fixed-panel .results-heading .mobile-position-fields{grid-column:2;grid-row:2;justify-self:end}
+ .phone-bench #fixed-panel .results-heading>div:first-child{row-gap:4px}
+}
+
+/* Keep header content aligned with the main container at every desktop width. */
+body:not(.phone-bench) .app-header{padding-inline:0}
+.app-header-inner{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:1720px;margin-inline:auto;padding-inline:4%}
+.phone-bench .app-header-inner{flex-wrap:wrap;gap:6px;padding-inline:0}
+body:not(.phone-bench) .wave-sidebar .site-contact a[href="privacy.html"]{display:none}
+
+/* Standard phone view places region labels in the unused strip above the axis. */
+.phone-bench #bench-wrap:has(#beam-regions){position:relative}
+.phone-bench #bench-wrap>#beam-regions{position:absolute;top:116px;left:var(--diagram-inset);right:var(--diagram-inset);height:20px;margin:0;pointer-events:none;z-index:1}
+@media(max-width:350px){.phone-bench #mobile-key-grid-host .slice-heading>span:first-of-type{font-size:.7rem}}
+
+/* Divide the desktop bench from Key positions without adding vertical space. */
+body:not(.phone-bench) #view-workspace{margin-top:12px;padding-top:5px;border-top:3px solid #9aadc3}
+
+/* Interpolation uses the existing divider as its one-line instruction area. */
+#interpolate-positions{position:relative;isolation:isolate;width:88px;height:44px;min-height:44px;padding:0 3px;white-space:nowrap;font-size:.75rem;font-weight:700;border-color:transparent;background:transparent;color:#102740;box-shadow:none}
+#interpolate-positions::before{content:"";position:absolute;z-index:-1;inset:3px 0;border:1px solid #dd671f;border-radius:7px;background:#f37021;transition:background .15s,border-color .15s}
+#interpolate-positions:hover{color:#102740}
+#interpolate-positions:hover::before{border-color:#b94f12;background:#e66519}
+#interpolate-positions:focus-visible{outline:3px solid #b94f12;outline-offset:2px}
+#interpolate-positions.active,#interpolate-positions.active:hover{color:#fff}
+#interpolate-positions.active::before,#interpolate-positions.active:hover::before{border-color:#a6410b;background:#ad430c;box-shadow:inset 0 0 0 1px #fff4}
+#interpolate-positions.ready::before,#interpolate-positions.ready:hover::before{background:#903609;border-color:#903609}
+#interpolate-guide[hidden]{display:none!important}
+#interpolate-guide{position:absolute;z-index:5;margin:0;color:#345777;font-size:.6875rem;line-height:14px;font-weight:550;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
+#interpolate-guide.error{color:#a34d1e}
+#observation-grid .slice-item[data-interpolate-endpoint] .slice-panel{outline:3px solid #d99b29;outline-offset:2px}
+#observation-grid .slice-item[data-interpolate-endpoint]::after{content:attr(data-interpolate-endpoint);position:absolute;z-index:5;left:12px;top:53px;display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:#e9a93d;color:#08223c;font-size:.75rem;font-weight:700;pointer-events:none}
+.phone-bench #fixed-panel .calculation-actions{position:relative;grid-template-columns:minmax(0,1fr) 88px 56px 76px}
+.phone-bench #fixed-panel .calculation-actions #interpolate-positions{grid-column:2;grid-row:1;width:88px;min-width:0;padding:0 3px;font-size:.75rem}
+@media(min-width:380px){.phone-bench #fixed-panel .calculation-actions{grid-template-columns:minmax(0,1fr) 100px 56px 76px}}
+.phone-bench #fixed-panel .calculation-actions>.detail-toggle{grid-column:3;width:56px}
+.phone-bench #fixed-panel #calculate{grid-column:4}
+.phone-bench.interpolating-positions #fixed-panel .calculation-actions{border-top-color:transparent}
+.phone-bench #interpolate-guide{left:0;right:0;top:-7px}
+body:not(.phone-bench) #view-workspace{position:relative}
+body:not(.phone-bench).interpolating-positions #view-workspace{border-top-color:transparent}
+body:not(.phone-bench) #interpolate-guide{left:var(--diagram-inset);right:20px;top:-8px}
+body:not(.phone-bench) #position-edit-actions #interpolate-positions{height:44px;min-height:44px;padding-block:0}
+@media(min-width:781px) and (max-width:850px){body:not(.phone-bench) #observation-panel #show-slice{width:132px;min-width:132px}}
+@media(max-width:350px){.phone-bench #mobile-position-actions .mobile-key-title{white-space:normal;font-size:.875rem;line-height:1.05}}

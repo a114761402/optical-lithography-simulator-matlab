@@ -5,9 +5,23 @@ let nextInstance=0;
 export function createPlane(id,plane='custom',base=0){return {id,instance:++nextInstance,plane,base,offset:0,generation:0,result:null,resultKey:null,pending:false,error:''};}
 export function createPlanes(){return ['source','mask','pupil','image'].map((plane,i)=>createPlane('ABCD'[i],plane));}
 export function restorePlane(panel){return {...panel,instance:++nextInstance,generation:panel.generation+1,pending:false,progress:null,error:''};}
+export function positionIdAt(index){
+  let n=index+1,id='';while(n){n--;id=String.fromCharCode(65+n%26)+id;n=Math.floor(n/26);}return id;
+}
 export function availablePlaneId(planes){
   const used=new Set(planes.map(p=>p.id));
-  for(let i=0;;i++){let n=i+1,id='';while(n){n--;id=String.fromCharCode(65+n%26)+id;n=Math.floor(n/26);}if(!used.has(id))return id;}
+  for(let i=0;;i++){const id=positionIdAt(i);if(!used.has(id))return id;}
+}
+export function relabelPositions(planes){
+  for(const [index,panel] of planes.entries()){
+    const id=positionIdAt(index);
+    if(panel.id!==id){panel.id=id;panel.generation++;}
+  }
+  return planes;
+}
+export function duplicatePositionAfter(planes,id){
+  const index=planes.findIndex(panel=>panel.id===id);if(index<0)return null;
+  const copy=restorePlane(planes[index]);planes.splice(index+1,0,copy);relabelPositions(planes);return copy;
 }
 // Clone state, sharing immutable calculated arrays but never identity or edits.
 export function appendPositionGroup(planes,count){
@@ -41,9 +55,22 @@ export function setObservation(panel,g,value,plane='custom'){
   if(!Number.isFinite(value))return false;
   panel.plane=plane;panel.base=clamp(value,0,g.max);panel.offset=0;panel.generation++;panel.error='';return true;
 }
+// Card order defines the steps. Keep both endpoints and every position outside
+// the interval untouched; only the intermediate screen coordinates change.
+export function interpolatePositions(planes,firstId,secondId,g){
+  const first=planes.findIndex(panel=>panel.id===firstId),second=planes.findIndex(panel=>panel.id===secondId);
+  if(first<0||second<0||Math.abs(first-second)<2)return [];
+  const start=Math.min(first,second),end=Math.max(first,second);
+  const startZ=observationZ(planes[start],g),endZ=observationZ(planes[end],g),updated=[];
+  for(let index=start+1;index<end;index++){
+    const panel=planes[index],z=startZ+(endZ-startZ)*(index-start)/(end-start);
+    setObservation(panel,g,z,'custom');updated.push(panel);
+  }
+  return updated;
+}
 export function tuneObservation(panel,g,offset){
   if(!Number.isFinite(offset))return false;
-  const base=tuningBase(panel,g);panel.offset=clamp(offset,Math.max(-100,-base*1000),Math.min(100,(g.max-base)*1000));panel.generation++;panel.error='';return true;
+  const base=tuningBase(panel,g);panel.offset=clamp(offset,-base*1000,(g.max-base)*1000);panel.generation++;panel.error='';return true;
 }
 export function sliceKey(params,z){const p={...params,defocusUm:0};return 'slice-v1:'+JSON.stringify(Object.keys(p).sort().map(key=>[key,p[key]]))+':'+Number(z.toFixed(9));}
 export function sliceRequest(panel,g,params){return {panelId:panel.id,instance:panel.instance,generation:panel.generation,z:observationZ(panel,g),key:sliceKey(params,observationZ(panel,g))};}

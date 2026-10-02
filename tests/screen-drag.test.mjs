@@ -16,9 +16,11 @@ test('Mobile label dragging uses finger displacement, preserves identity and nev
   assert.ok(!h.calls.includes('start'));assert.equal(h.calls.at(-1),'end');assert.equal(h.capture.size,0);
   assert.ok(h.event('click',2000,130).stopped);
 });
-test('Vertical gestures and pointer cancellation leave positions untouched and do not select',()=>{
-  const h=harness();h.event('pointerdown',280,130);h.event('pointermove',282,150);h.event('pointerup',282,150);assert.deepEqual(h.calls,[]);assert.equal(h.z,200);
-  h.event('pointerdown',280,130);h.event('pointercancel',280,130);assert.deepEqual(h.calls,[]);assert.equal(h.capture.size,0);
+test('A diagonal start retains capture and continues far outside the marker until cancellation',()=>{
+  const h=harness();h.event('pointerdown',280,130);h.event('pointermove',282,150);assert.equal(h.capture.size,1);assert.equal(h.z,200);
+  h.event('pointermove',300,600);assert.equal(h.z,220);h.event('pointermove',400,-100);assert.equal(h.z,320);
+  h.event('pointercancel',400,-100);assert.equal(h.capture.size,0);const count=h.calls.length;
+  h.event('pointermove',450,100);assert.equal(h.calls.length,count);
 });
 test('A tap selects without moving; unrelated fingers cannot move or end the gesture',()=>{
   const h=harness();h.event('pointerdown',280,130);h.event('pointermove',350,130,{id:2});h.event('pointerup',350,130,{id:2});assert.equal(h.z,200);

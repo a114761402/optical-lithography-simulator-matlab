@@ -14,7 +14,7 @@
 .phone-bench #mobile-key-grid-host .slice-panel[aria-pressed=true]{border-color:var(--blue);background:#eaf2ff}
 .phone-bench #mobile-key-grid-host .slice-heading{height:auto;min-height:30px;font-size:.78rem;gap:6px;padding:0}
 .phone-bench #mobile-key-grid-host canvas{width:100%;height:auto;aspect-ratio:1;max-width:none;margin:0}
-.phone-bench #mobile-key-grid-host .slice-caption,.phone-bench #mobile-key-grid-host .remove-position{display:none}
+.phone-bench #mobile-key-grid-host .remove-position{display:none}
 .phone-bench #mobile-key-grid-host .slice-state{font-size:.66rem}
 .phone-bench #fixed-panel .results-heading{display:block}
 .phone-bench #fixed-panel .calculation-actions{display:grid;grid-template-columns:auto auto minmax(0,1fr);gap:8px;width:100%;margin:12px 0 0}

@@ -1,3 +1,78 @@
+# Expert Add without automatic page scroll — 30 September 2026
+
+Both the Key Positions + and each card's + keep the current page scroll position while selecting the new position. Removed the explicit smooth scroll and restored the viewport after card rendering, since DOM reordering could otherwise trigger browser scroll anchoring.
+
+Browser checks at 320, 393, 507 and 1280 CSS px kept the same scroll offset after both + actions, with the new position selected, correct card count and no page errors. A scrolled 393 px page remained at 571 px after duplicating E; before this fix, the same action moved it to 118 px. Browser emulation does not establish physical-device behavior.
+
+# Interpolate button height — 30 September 2026
+
+The visible orange Interpolate/Apply box is 38 px high, centered inside its unchanged 44 px button target. Desktop and mobile keep the same action row and card positions. Browser screenshots and geometry at 320, 393, 417, 507 and 1280 CSS px verified the 3 px top/bottom inset, orange and active colours, unchanged card y coordinates, no horizontal overflow and no page errors. This is a visual and browser interaction check, not physical-device testing.
+
+# Interpolation Undo while selecting — 30 September 2026
+
+Undo now remains enabled while an Interpolate selection is in progress, even with no earlier position edit. Before Apply it cancels the selection, clears endpoint markers and the guide, and leaves positions unchanged. After Apply it reverts the recorded interpolation as before. The control keeps its row and changes its accessible label to "Cancel interpolation selection" while selecting.
+
+Focused position/history tests passed 9/9; syntax, whitespace and offline iPhone asset preparation passed. Browser clicks at 320, 393, 417, 507 and 1280 CSS px verified that Undo cancels an A–D selection without changing card positions or causing horizontal overflow. At 417 px, Apply then Undo restored B = 200 mm and C = 400 mm. No page errors were observed. Browser emulation does not certify physical-device behavior.
+
+# Interpolate action placement and state — 30 September 2026
+
+Desktop Key positions actions now read Reset, Undo, Redo, +, Interpolate. The orange Interpolate action sits slightly farther left on mobile Expert while High detail and Compute retain their positions. Starting endpoint selection darkens the button; selecting two endpoints changes its label to Apply and darkens it further. Its 44 px height and fixed width prevent the row from jumping. The one-line guide and card markers remain visible during selection.
+
+Focused position/history tests passed 9/9; JavaScript syntax, whitespace and offline iPhone asset preparation passed. Browser checks at 320, 337, 393, 427, 507, 781, 820, 860 and 1280 CSS px found no horizontal overflow. At 393, 781, 820, 860 and 1280 px, button and first-card document positions were unchanged while entering selection and choosing A/D. Applying A/D returned to the normal button state and began computing the intervening slices. Mobile → desktop → mobile resizing preserved action order and button location. No page errors were observed. This is browser emulation, not physical-device testing.
+
+# Two-endpoint Key Positions interpolation — 30 September 2026
+
+Base: `b5c547a40e7c1ebfcca2e9ae3972f2d5c52c69bd`. Current intent: on mobile Expert and desktop Key positions, Interpolate replaces only the intervening cards' z settings with equal steps between two selected endpoint cards, keeps endpoints and the physical Image plane fixed, computes the affected optical slices, and records one reversible position edit. The prior divider becomes a one-line selection/error message without moving the action row or cards. At 320 px, the title wraps within its existing 44 px row.
+
+Focused state/history tests passed 9/9; the full source suite passed 131/131. Offline iPhone asset preparation succeeded. Browser checks at 320, 337, 393, 427, 507, 781, 820, 860, 1280 and 1920 CSS px found the Interpolate, High detail and Compute actions aligned at the same row height, no horizontal overflow, and no card displacement when the selection message replaces the divider. Selecting A and D changed B/C to 150/300 mm; an adjacent-card error left settings unchanged. At 393 px, both affected slices finished a real Preview calculation and showed their new z values, then Undo restored Mask/Aperture and Redo restored the interpolated positions. At desktop 1280 px, a six-card A–F sequence preserved E/F when interpolating A–D in reverse selection order. Emulated touch taps also completed the A–D flow at 393 px. No page errors. Browser emulation does not establish physical-device touch behavior.
+
+# Per-card Key Positions actions — 29 September 2026
+
+Base: `6551bee2b167b82a0028b3ecff653e96ef0319a4`. Each card now has an aligned minus and plus action on desktop and mobile. Minus removes that card and renumbers the remaining cards in display order. Plus inserts an independent copy immediately after the chosen card, retains its plane, z and cached picture, and selects the copy. Both edits remain undoable and redoable; renamed cards get matching controls and canvas IDs.
+
+Focused state/history tests passed 8/8. Browser interactions passed at 320, 337, 393, 428, 507, 1280 and 1920 CSS px: middle insertion/removal, sequential labels, custom z copying, undo/redo, clearing all cards and adding again, equal action alignment, and no horizontal overflow. A cached Mask image painted identically on the copied card at 393 and 1280 px. These are browser checks, not physical-device testing.
+
+# Desktop and mobile control grouping — 29 September 2026
+
+Base: `6c47dc2ec0771410c0b335a629d2acdc32bda6bc`. Desktop Key positions now orders Reset, Undo, Add, Redo on the left, with equal 44 px action heights and the Compute controls aligned at the right edge. Mobile Expert connects the tuning strip and Option row in one white section, then separates the Key Positions heading with a compact line. Key Positions and Intensity titles are both 20 px. The wave cursor keeps its draggable hit area and dashed line without the large top cap.
+
+Browser checks at 320, 337, 393, 416, 507 and 1280 CSS px found no horizontal overflow. Desktop Add created four views and Undo restored four; mobile Add created two and Undo restored four, including after a desktop-to-mobile resize. No page errors. The complete source suite passed 129/129; offline iPhone asset preparation passed. Browser emulation does not certify physical touch hardware.
+
+# Mobile Expert tuning layout and settings — 28 September 2026
+
+Base: `f7d2d81253b9fcbcc2db12c9bdc126351eca56e4`. The five latest phone annotations are implemented in the authored `dist/` source.
+
+- Expert places the named-plane selector beside a shorter tuning strip. At 507 CSS px the strip is 328 px within a 458 px row; at 320 px it is 159 px within a 271 px row. Standard still uses its entire 458 px tuning row at 507 px.
+- Positions, Reset, Undo, Redo and the numeric z readout occupy one 44 px row. + Panels, High detail and Compute occupy the next. The history buttons use mirrored semicircular SVG arrows with 44 px-high click targets. At 320 CSS px, the full `450.123 mm` readout remains visible. No horizontal document overflow was observed at 507, 432, 393, 350, 337 or 320 CSS px.
+- General Settings includes a collapsed Position tuning section for slow drag (0.5×/1×/2×), fast drag (0.5×/1×/1.5×) and glide (off/short/default). The same values apply to Standard and Expert; they are included in native experiment snapshots. Model tests verify both speed adjustments and disabling glide.
+- In the browser, a tuned strip drag changed D from 200 to 427.507 mm; one Undo restored 200 mm. Compute kept the action row and card grid at document y=441 and y=493 px. Desktop at 1280 px kept its original position controls. No browser warnings or errors appeared. These are browser viewport checks, not physical-phone touch certification.
+- Full source suite: **128/128 passed**. Offline iPhone asset preparation and whitespace checks passed. Local proof: `.sites-runtime/mobile-tuning-expert-507.png` (not deployed).
+
+# Mobile Expert Undo/Redo verification — 28 September 2026
+
+Base: `0b31616bead417a1c8326f7694eb9b6d8ecddb23`. This update adds Undo and Redo to the Expert position action area and slightly reduces the High detail switch.
+
+- At 432 and 393 CSS px, + Panels, Reset, Undo, Redo, High detail and Compute share one 44 px-high aligned row. At 367, 350, 337 and 320 CSS px, the controls use two 44 px rows to preserve full-size Undo/Redo touch targets. No tested width overflowed horizontally. High detail retains a 44 px label target while the visual switch is 28 × 16 px.
+- Browser actions: numeric edit 450 → 449.123 mm, Undo → 450, Redo → 449.123; add A–F, Undo A–D, Redo A–F; Reset A–D, Undo A–F; remove A, Undo restores A. A new position edit cleared the Redo branch. All panel canvas IDs remained correct.
+- Actual beam-marker drag moved D from 450 to 354.878 mm; a single Undo restored 450 and disabled further Undo, then Redo restored 354.878. Actual relative-strip drag with short coasting moved D from 250.001 to 355.493 mm; a single Undo restored 250.001, and Redo restored 355.493. Drag and coast share one history entry. Calculations themselves are not history steps.
+- Compute → Cancel → Compute kept the action area 44 px high and the card grid at document y=493 px. Desktop at 1280 CSS px retained Key positions and hid the mobile actions. The final interaction sequence showed no browser errors or warnings.
+- The complete source suite passed 127/127 after the main implementation. Following the drag/coast grouping fix, all 17 focused gesture/history/drag tests passed; offline iPhone asset preparation and whitespace checks passed. Physical iPhone gestures and installation were not tested.
+- Local visual captures: `.sites-runtime/mobile-history-432.png` and `.sites-runtime/mobile-history-320.png` (excluded from deployment).
+
+# Mobile compact layout verification — 28 September 2026
+
+Base: `4bb74f9e7eaa6aaf5dcabc4be884da6145d82e87`. Covers the previous 11 mobile annotations plus removal of the Contact / Privacy page footer.
+
+- Both modes: removed accumulated navigation/workspace padding. The tuning strip to Position / Positions row gap is now 8.7 CSS px (previously 36.7 px). Expert action rows are separated by 8 px; card title-to-image gap is 4 px; cards-to-wave section gap is 12 px. Spacing is owned in one mobile stylesheet with 4 / 8 / 12 px tokens.
+- Labels and actions: Preset, Position, + Panels and direct Reset. Expert High detail stays beside Compute. Undo is available in General, so changing its visibility cannot insert another toolbar row.
+- Settings menu has only General and About. Components is inside General. Contact and Privacy policy are in About; the mobile page footer is gone. Both dialogs and component access were checked.
+- Browser geometry checked at 320, 337, 367 and 393 CSS px in Standard and Expert, including a 450.123 mm entry: no document horizontal overflow, stable 44 px action rows and no button wrapping. Desktop at 1280 px retains Key positions, sidebar contact, original controls and no horizontal overflow.
+- Verified add -> reset -> undo restores A–F with correct canvas identities, then Reset returns A–D. An old cached dependency could allocate duplicate panel identities; updated the dependency URLs together. Clearing selection now updates the plane badge after the selection label is cleared, avoiding a stale letter.
+- A changed-position Expert calculation changed Compute to Cancel and back without displacement: heading 95.99 px high, grid document y=492.08 px and first canvas y=531.85 px throughout.
+- Marker value visibility follows tuning drag, coast and keyboard activity. Interaction tests cover start, release, coast completion, interruption, key release and blur. This does not certify physical iPhone touch feel; numerical tuning gains are unchanged.
+- Full existing suite: 124/124 passed in 129.8 s. After dependency/selection cleanup, all 20 focused position, reference, quality and tuning tests passed, including the new production module-graph identity regression. Offline iPhone asset preparation and whitespace checks passed. Native device installation was not changed.
+- Inspected final Standard and Expert browser screenshots. Local proof images: `.sites-runtime/mobile-compact-standard.png` and `.sites-runtime/mobile-compact-expert.png` (not deployed). Earlier console errors from the stale module identity case predate the fix; the verified add/reset/undo/compute/cancel sequence produced no new errors.
+
 # Current verification — 27 September 2026, expandable positions and projection sampling
 
 **100/100 automated checks passed** (`node --test tests/*.test.mjs`, 167.0 s on this Mac), with no skips or cancellations. Syntax and whitespace checks passed. MATLAB source and the underlying XY optical operators were not changed.
@@ -384,3 +459,36 @@ These are desktop browser viewport simulations, not physical iOS/Android touch o
 - Mobile wave legend hidden; bottom Contact shows Chuang Lu and the existing mailto address. Desktop legend retained.
 - Verified 320, 413, 611 and 1228px layouts with no horizontal overflow; position disclosure and quality preference checked. Six existing path/quality tests passed; no browser errors/warnings. No physics changes.
 - Screenshots: .sites-runtime/mobile-actions-final.png and .sites-runtime/mobile-standard-final.png.
+
+## 2026-09-28 — Physical comparison of illumination slices
+
+- Source baseline: c5c7eb7d9eccd09589e77b6b092fb0bdc0a5a333, with this section's display changes; Node on macOS and local in-app browser preview.
+- Complete suite: 113/113 passed, including four new comparison tests; final targeted comparison/quality checks: 6/6 passed. Regression covers reported distances, widening/weakening, unchanged raw arrays, independent x/y axes for displaced sources, scale-bar units, and disabled/non-peer framing.
+- Desktop reproduced A=0.049, B=40.355, C=61.593, D=87.073 mm in Fast mode. All four display a 28.552 mm common window; visible B/C/D widths increase. Turning common size off restores 2.450/14.537/20.908/28.552 mm windows. Shared brightness makes later images dimmer without recomputation. Calculated z and stale target remain distinct.
+- Standard Mode keeps an independent single-image view; Expert retains calibrated cards. Browser validation uses CSS viewport sizes, not a physical iPhone run. No propagation engine, raw cache assets or installed native app changed.
+- Web entry and native preparation entry checked for matching versioned URL. Publishing is tracked by the Sites version/deployment result, separately from these local checks.
+- Final responsive checks: 1280px desktop, 393×852 Standard/Expert, and 320×720 Expert. Captions/scale bars readable, no horizontal overflow; comparison note follows the Expert grid. Browser console: no warnings/errors. Desktop evidence: /tmp/optical-bench-comparison-desktop.png.
+
+## 2026-09-28 — Compact relative tuning and reliable marker capture
+
+- Baseline: a2e023a8c8bd6742f96ce47179703c75f1a17f26. Authored web UI, no propagation engine or numerical cache asset changes.
+- Local in-app browser: CSS widths 320, 393, 648 and 1280, using DOM measurements (the browser's capture/zoom dimensions differ). Standard/Expert controls fit without page-level horizontal overflow. Preset and mode switch share a row; position select, relative strip and z share a row; Edit and duplicate fine/position disclosures are hidden on phones.
+- Expert B: keyboard moved 200 → 200.001 mm; direct input set 34.219 mm. A Remove/Undo round trip retained four positions. Switching between desktop/mobile keeps the same control instances and values.
+- Compute/Cancel check: the Expert grid document top stayed 512.0759 px before/during calculation; button stayed 95.9989 × 43.9955 px. Cancel restored Compute. Stale Standard results have a badge inside the image, not a new row.
+- Pointer-based browser drags: Expert B from 200 to 303.514 mm while dragging diagonally beyond the SVG; Standard from 200 to 96.486 mm with a similarly off-diagram endpoint. Identity/mode retained and capture ended on release. Relative-strip drag continued beyond its bounds and stopped at the valid endpoint. These are browser pointer tests, not physical iPhone finger/VoiceOver verification.
+- Display checks: Fixed width 40 mm produced 40 mm window captions on all four intensity views; details could be shown/hidden, scale bars independently disabled. Default details are hidden and the old illumination note is removed.
+- Desktop: offset +2500 µm at Mask produced z = 202.5 mm. Reducing the configured span to ±1 mm kept z = 202.5 mm and offset +2500 µm; Reset offset returned to 200 mm and range ±1000 µm.
+- New deterministic tests cover slow/fast gain, sub-micrometre accumulation, comparable 60/120 Hz travel, stationary contact, reversal, endpoints, new-contact continuity, frame coalescing, release/cancel/blur/second touch, selection identity and fixed physical frames. Browser console has no warnings/errors in these checks.
+- Release checks: complete suite 121/121 passed in 133.5 s; final targeted interaction/comparison tests 17/17 passed. Native offline asset preparation succeeded; this does not establish native sync, signing, installation or a device run. A fresh Standard computation at 34.219 mm completed and displayed its calculated position with the Fast badge. Cached Image-plane result was then reused.
+
+## 2026-09-28 — full-width tuning and compact position headings
+
+Based on `0d452896359e58d60939683c50052d6e08bf4113`; source changes in this release:
+
+- Mobile tuning occupies the entire beam footer. Plane and z share the Observation / Positions heading. Expert Add and group actions share the Compute row; Restore default positions and contextual Undo are in the group menu. Existing two-column cards are retained.
+- Bounded gradual drag gain preserves 1 µm accumulation. Only sustained fast releases coast, for at most 240 ms; touch/regrip, external edits, mode/target changes, backgrounding and Compute stop it synchronously. Stale animation callbacks cannot change the new target. Tick phase persists across release/regrip.
+- `npm test`: 124/124 passed (133.4 seconds). After the final visual tick-phase adjustment, relative-tuning and screen-drag tests were rerun: 15/15 passed. `npm run ios:prepare` succeeded after final source changes.
+- Local in-app browser: CSS widths 320, 393 and 430 checked; no horizontal overflow. At 393 the strip grew from about 108 to 349 px; title fields stayed in one row. At 320 Add, menu, detail and Compute all fit with 44 px action heights. Desktop 1280 retained coarse/fine fields and ±2500 µm range; mobile strip was hidden.
+- Browser interaction checks: Standard keyboard fine adjustment 200 → 200.001 mm matched the marker; Expert Add E–F and menu Undo returned to four cards. New Standard Fast calculation completed at exactly 34.219 mm. Batch start/cancel kept document-coordinate heading y=416.094 and card y=564.860 stable (focus scrolling accounted for).
+- Native pointer-drag automation on this in-app viewport did not reliably hit the strip, so actual flick feel is not claimed as browser-verified. Pointer capture, release, cancel, regrip, momentum interruption and stale frames were checked with deterministic event tests. Physical iPhone Photos-like feel still requires device feedback.
+- This is a web deployment. Offline iOS asset preparation is verified; installed native applications were not rebuilt, signed or reinstalled in this turn.

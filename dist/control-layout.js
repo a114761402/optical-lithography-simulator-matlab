@@ -24,7 +24,7 @@ export function setupControlLayout(){
     if(/saved calculation$|^XZ and YZ ready|^Wave path · \d+%$|^Calculating both XZ and YZ/.test(s))text='';
     else if(/loading/i.test(s))text='Loading saved wave…';
     else if(/cancelled/i.test(s))text='Calculation cancelled.';
-    else if(/changed|new view|click Compute/i.test(s))text='Settings changed · '+$('calculate-yz').textContent;
+    else if(/changed|new view|No calculation|click Compute/i.test(s))text='Compute to update this view.';
     brief.textContent=text;brief.hidden=!text;
   };
   new MutationObserver(mirrorWave).observe(waveStatus,{childList:true,subtree:true,characterData:true});mirrorWave();
@@ -54,7 +54,7 @@ export function setupControlLayout(){
   projectionDisplay.querySelector('select').setAttribute('aria-describedby',projectionHelp.id);
   const transmitted=document.createElement('label');transmitted.className='projection-transmitted-toggle';
   transmitted.innerHTML='<input type="checkbox" id="projection-transmitted-only" checked> Aperture-transmitted projection';
-  const transmittedHelp=document.createElement('p');transmittedHelp.className='wave-setting-help';transmittedHelp.textContent='Illumination shows the actual incident field. Projection shows the aperture-selected reconstruction inside illustrated outlines. Hidden light is not a calculated zero. Compute to update.';
+  const transmittedHelp=document.createElement('p');transmittedHelp.className='wave-setting-help';transmittedHelp.textContent='Illumination shows the actual incident field. Projection shows the aperture-selected reconstruction inside illustrated outlines. Hidden light is not a calculated zero. Fine presets update automatically; edited settings need Compute.';
   projectionDisplay.querySelector('select').disabled=true;
   waveSettings.append(transmitted,transmittedHelp,projectionDisplay,projectionHelp);
   const aboutSettings=document.createElement('section');aboutSettings.id='about-settings';aboutSettings.innerHTML='<h3>About</h3>';
@@ -106,12 +106,12 @@ export function setupControlLayout(){
   detail.closest('label').firstChild.textContent='Calculation detail';
   scale.closest('label').firstChild.textContent='Intensity scale';
   scale.options[2].textContent='Logarithmic';
-  const detailHelp=document.createElement('p');detailHelp.className='wave-setting-help';detailHelp.textContent='Region or detail changes need Compute. Separate from slice High detail.';detail.closest('label').after(detailHelp);
+  const detailHelp=document.createElement('p');detailHelp.className='wave-setting-help';detailHelp.textContent='Saved Fine presets load automatically. Other views need Compute. Separate from slice High detail.';detail.closest('label').after(detailHelp);
   const scaleHelp=document.createElement('p');scaleHelp.id='wave-scale-help';scaleHelp.className='wave-setting-help';scale.closest('label').after(scaleHelp);scale.setAttribute('aria-describedby',scaleHelp.id);
   const updateScaleHelp=()=>{scaleHelp.textContent={local:'Each position has its own scale. Compare shape, not brightness.',shared:'One reference scale across the path. Compare relative intensity.','shared-log':'One logarithmic scale reveals weaker light.'}[scale.value]+' Display only; no recalculation.';};
   scale.addEventListener('change',updateScaleHelp);updateScaleHelp();
   const contact=document.querySelector('.site-contact'),waveLegend=main.querySelector('.wave-footer');
-  waveSettings.append(waveOptionsBody);waveSettings.querySelector('p').textContent='High detail uses Fine sampling; off uses Preview. Changes take effect when you Compute.';
+  waveSettings.append(waveOptionsBody);waveSettings.querySelector('p').textContent='Presets load saved High detail results. Other detail levels need Compute.';
   const waveDetail=document.createElement('label');waveDetail.className='detail-toggle wave-detail-toggle';waveDetail.title='Wave only. Off: Preview sampling. On: Fine sampling.';
   waveDetail.innerHTML='<input id="wave-high-detail" type="checkbox" role="switch" aria-label="Wave high detail"><span>High detail</span>';
   const waveHigh=waveDetail.querySelector('input');

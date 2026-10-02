@@ -34,3 +34,10 @@ test('Downstream fields and near-mask diffraction remain unchanged; caches disti
  const near=[g.mask,g.mask+.01];assert.deepEqual(computeWave(p,'near',()=>{},near).columns,computeTransmittedWave(p,'near',()=>{},near).columns);
  assert.notEqual(waveCacheKey(p,'full'),waveCacheKey(p,'full',true));
 });
+test('Offline operator retention changes reuse without changing any field',()=>{
+ const q={...p,sourceType:'Dipole X',sourceBins:3,sourceOuter:.08},g=geometry(q),zs=[g.mask+.001,g.mask+.005,g.mask+.02,g.lens1,g.pupil,g.image];
+ assert.ok(sourceSamples(q).length>1);
+ const uncached=computeTransmittedWave(q,'full',()=>{},zs,{operatorCacheBytes:0});
+ const retained=computeTransmittedWave(q,'full',()=>{},zs,{operatorCacheBytes:1024*1024*1024});
+ assert.deepEqual(retained,uncached);
+});

@@ -1,0 +1,31 @@
+{
+  "version": "fine-aperture-transmitted-v1",
+  "engineHash": "e9107550be510b7e409f078c4075b183dc737d05e0b54a1df8ed51df56eda2c0",
+  "presets": [
+    {
+      "id": "default",
+      "key": "[\"scalar-wave-2026-09-27-v6\",\"full\",[[\"condenserAperture\",1],[\"condenserFocalMm\",100],[\"defocusUm\",0],[\"f1Mm\",100],[\"fieldSizeUm\",80],[\"gratingDuty\",0.5],[\"gratingPitchUm\",20],[\"gridSize\",512],[\"lensInner\",0.65],[\"lensType\",\"Circular\"],[\"maskInnerRatio\",0.45],[\"maskSizeUm\",60],[\"maskType\",\"1D Grating\"],[\"pointSourceU\",0],[\"pointSourceV\",0],[\"projNA\",0.15],[\"propagationPadding\",2],[\"quadSeparation\",0.3],[\"reduction\",4],[\"sourceBins\",25],[\"sourceEmissionNA\",0.05],[\"sourceGridSize\",201],[\"sourceInner\",0.2],[\"sourceOuter\",0.3],[\"sourceType\",\"Circular\"],[\"wavelengthNm\",365]],null,null]|transmitted-v1",
+      "file": "default-transmitted.json.gz"
+    },
+    {
+      "id": "filtering",
+      "key": "[\"scalar-wave-2026-09-27-v6\",\"full\",[[\"condenserAperture\",1],[\"condenserFocalMm\",100],[\"defocusUm\",0],[\"f1Mm\",100],[\"fieldSizeUm\",80],[\"gratingDuty\",0.5],[\"gratingPitchUm\",10],[\"gridSize\",512],[\"lensInner\",0.65],[\"lensType\",\"Circular\"],[\"maskInnerRatio\",0.45],[\"maskSizeUm\",60],[\"maskType\",\"1D Grating\"],[\"pointSourceU\",0],[\"pointSourceV\",0],[\"projNA\",0.06],[\"propagationPadding\",2],[\"quadSeparation\",0.3],[\"reduction\",4],[\"sourceBins\",25],[\"sourceEmissionNA\",0.05],[\"sourceGridSize\",201],[\"sourceInner\",0.2],[\"sourceOuter\",0.3],[\"sourceType\",\"Point\"],[\"wavelengthNm\",365]],null,null]|transmitted-v1",
+      "file": "filtering-transmitted.json.gz"
+    },
+    {
+      "id": "diffraction",
+      "key": "[\"scalar-wave-2026-09-27-v6\",\"full\",[[\"condenserAperture\",1],[\"condenserFocalMm\",100],[\"defocusUm\",0],[\"f1Mm\",100],[\"fieldSizeUm\",80],[\"gratingDuty\",0.5],[\"gratingPitchUm\",20],[\"gridSize\",512],[\"lensInner\",0.65],[\"lensType\",\"Circular\"],[\"maskInnerRatio\",0.45],[\"maskSizeUm\",20],[\"maskType\",\"Circular Aperture\"],[\"pointSourceU\",0],[\"pointSourceV\",0],[\"projNA\",0.15],[\"propagationPadding\",2],[\"quadSeparation\",0.3],[\"reduction\",4],[\"sourceBins\",25],[\"sourceEmissionNA\",0.05],[\"sourceGridSize\",201],[\"sourceInner\",0.2],[\"sourceOuter\",0.3],[\"sourceType\",\"Point\"],[\"wavelengthNm\",365]],null,null]|transmitted-v1",
+      "file": "diffraction-transmitted.json.gz"
+    },
+    {
+      "id": "annular",
+      "key": "[\"scalar-wave-2026-09-27-v6\",\"full\",[[\"condenserAperture\",1],[\"condenserFocalMm\",100],[\"defocusUm\",0],[\"f1Mm\",100],[\"fieldSizeUm\",80],[\"gratingDuty\",0.5],[\"gratingPitchUm\",20],[\"gridSize\",512],[\"lensInner\",0.65],[\"lensType\",\"Circular\"],[\"maskInnerRatio\",0.45],[\"maskSizeUm\",60],[\"maskType\",\"1D Grating\"],[\"pointSourceU\",0],[\"pointSourceV\",0],[\"projNA\",0.15],[\"propagationPadding\",2],[\"quadSeparation\",0.3],[\"reduction\",4],[\"sourceBins\",25],[\"sourceEmissionNA\",0.05],[\"sourceGridSize\",201],[\"sourceInner\",0.2],[\"sourceOuter\",0.3],[\"sourceType\",\"Annular\"],[\"wavelengthNm\",365]],null,null]|transmitted-v1",
+      "file": "annular-transmitted.json.gz"
+    },
+    {
+      "id": "dipole",
+      "key": "[\"scalar-wave-2026-09-27-v6\",\"full\",[[\"condenserAperture\",1],[\"condenserFocalMm\",100],[\"defocusUm\",0],[\"f1Mm\",100],[\"fieldSizeUm\",80],[\"gratingDuty\",0.5],[\"gratingPitchUm\",20],[\"gridSize\",512],[\"lensInner\",0.65],[\"lensType\",\"Circular\"],[\"maskInnerRatio\",0.45],[\"maskSizeUm\",60],[\"maskType\",\"1D Grating\"],[\"pointSourceU\",0],[\"pointSourceV\",0],[\"projNA\",0.15],[\"propagationPadding\",2],[\"quadSeparation\",0.5],[\"reduction\",4],[\"sourceBins\",25],[\"sourceEmissionNA\",0.05],[\"sourceGridSize\",201],[\"sourceInner\",0.2],[\"sourceOuter\",0.08],[\"sourceType\",\"Dipole X\"],[\"wavelengthNm\",365]],null,null]|transmitted-v1",
+      "file": "dipole-transmitted.json.gz"
+    }
+  ]
+}

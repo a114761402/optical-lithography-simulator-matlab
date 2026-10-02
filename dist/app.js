@@ -4,15 +4,15 @@ import {comparisonScale,scaleBar} from './slice-comparison.js?v=20260928-tuning'
 import {DetailPreferences,sameSlice,bestSlice} from './quality-policy.js?v=20260930-interpolate';
 import {sampleIntensity} from './image-sampling.js?v=20260927-positions3';
 import {presetDefinition,presetParams,matchingPreset} from './presets.js?v=20260927-positions3';
-import {loadPresetCache} from './preset-cache.js?v=20261002-transmitted2';
+import {loadPresetCache,loadPresetWave} from './preset-cache.js?v=20261003-transmitted-cache';
 import {validate,geometry,sourceValue,sourceExtent,pupilValue,makeMask,maximum} from './optics.js?v=20260927-positions3';
 import {centerCuts,brightness} from './wave.js?v=20260927-positions3';
 import {renderWavePixels} from './wave-display.js?v=20261003-full-path';
 import {QUALITY,waveParameters} from './quality.js?v=20260927-positions3';
 import {waveCacheKey} from './cache.js?v=20261002-transmitted2';
 import {setupViewSwitch} from './view-switch.js?v=20260928-tuning';
-import {setupControlLayout} from './control-layout.js?v=20261003-illumination-correction';
-import {waveComponentSVG} from './wave-components.js?v=20261003-illumination-correction';
+import {setupControlLayout} from './control-layout.js?v=20261003-transmitted-cache';
+import {waveComponentSVG} from './wave-components.js?v=20261003-transmitted-cache';
 import {compactBench} from './compact-bench.js?v=20260928-tuning';
 import {regionMarkup,waveView} from './path-layout.js?v=20260927-position-fit';
 import {desktopBench} from './desktop-bench.js?v=20260927-overview';
@@ -94,9 +94,9 @@ function updatePresetInfo(){const choice=matchingPreset(p);presetInfo.innerHTML=
 function requestedWaveKey(){return waveCacheKey(waveParameters(p,$('wave-detail').value),$('wave-scope').value,$('projection-transmitted-only').checked);}
 async function restoreDefaultWave(){
   const choice=matchingPreset(p),ticket=++waveRequest,key=requestedWaveKey();
-  if($('projection-transmitted-only').checked||!choice||$('wave-scope').value!=='full'||Number($('wave-detail').value)!==512){waveLoading=false;return;}
-  waveLoading=true;$('wave-status').textContent='Loading saved Fine wave…';
-  try{const saved=await loadPresetCache(choice.id);if(ticket!==waveRequest||key!==requestedWaveKey())return;waveLoading=false;yzResult=saved.wave;drawYZ();$('wave-status').textContent='Fine · saved calculation';}
+  if(!choice||$('wave-scope').value!=='full'||Number($('wave-detail').value)!==512){waveLoading=false;return;}
+  waveLoading=true;drawYZ();$('wave-status').textContent='Loading saved Fine wave…';
+  try{const saved=await loadPresetWave(choice.id,$('projection-transmitted-only').checked);if(ticket!==waveRequest||key!==requestedWaveKey())return;waveLoading=false;yzResult=saved;drawYZ();$('wave-status').textContent='Fine · saved calculation';}
   catch(error){console.warn('Saved wave:',error.message);if(ticket!==waveRequest)return;waveLoading=false;drawYZ();$('wave-status').textContent='Saved wave unavailable · Compute full path to calculate locally.';}
 }
 async function restorePresetSlices(id){
@@ -440,7 +440,7 @@ function useReferencePositions(){
 }
 function calculate(kind='image',override=null,target=activePlane(),batchTicket=null){
   if(kind==='screen'&&!target)return;
-  if(kind==='yz'&&!$('projection-transmitted-only').checked&&matchingPreset(p)&&$('wave-scope').value==='full'&&Number($('wave-detail').value)===512&&(yzResult?.cached||waveLoading)){restoreDefaultWave();return;}
+  if(kind==='yz'&&matchingPreset(p)&&$('wave-scope').value==='full'&&Number($('wave-detail').value)===512&&(yzResult?.cached||waveLoading)){restoreDefaultWave();return;}
   const params={...p,...(kind==='yz'?waveParameters(p,$('wave-detail').value):(override||quality())),defocusUm:0},panel=target||createPlane('_','image'),request=sliceRequest(panel,geometry(p),params),version=revision,scope=$('wave-scope').value,transmittedOnly=$('projection-transmitted-only').checked;
   const key=kind==='yz'?'wave':kind==='image'?'references':'screen-'+panel.id;
   const retained=()=>planes.includes(panel),settle=state=>{batchTicket?.settle(panel.instance,state);};
@@ -491,7 +491,7 @@ function drawYZ(){
   // replacing it with a one-pixel buffer and collapsed SVG coordinates.
   if(!(width>0&&height>0))return;
   const ratio=Math.min(devicePixelRatio||1,2);c.width=Math.round(width*ratio);c.height=Math.round(height*ratio);const ctx=c.getContext('2d');ctx.setTransform(ratio,0,0,ratio,0,0);ctx.fillStyle='#071624';ctx.fillRect(0,0,width,height);$('yz-labels').replaceChildren();$('wave-components').replaceChildren();$('wave-regions').replaceChildren();$('wave-regions').hidden=!yzResult||yzResult.scope==='near';syncWaveCursor();
-  if(!yzResult){c.setAttribute('aria-label','Wave intensity — not calculated for these settings');$('wave-scale').textContent=$('wave-brightness').value.includes('log')?'−120 → 0 dB · XYZ reference':$('wave-brightness').value==='local'?'0 → 1 · normalized per z':'0 → 1 · XYZ reference';if(activeJob!=='yz')$('wave-status').textContent=waveLoading?'Loading the saved Fine calculation…':`Optics changed or new view selected · click ${$('calculate-yz').textContent}`;if(activeJob!=='yz'){ctx.fillStyle='#687f94';ctx.font='15px system-ui';ctx.textAlign='center';ctx.fillText(waveLoading?'Loading saved Fine wave…':`Click ${$('calculate-yz').textContent} for this view.`,width/2,height/2);}$('yz-note').textContent='XZ: horizontal cut at y = 0. YZ: vertical cut at x = 0. Dark outside the calculation window is canvas background; enable Show calculation window in Settings to see the bounds.';return;}
+  if(!yzResult){c.setAttribute('aria-label',waveLoading?'Wave intensity — loading saved calculation':'Wave intensity — not calculated for these settings');$('wave-scale').textContent=$('wave-brightness').value.includes('log')?'−120 → 0 dB · XYZ reference':$('wave-brightness').value==='local'?'0 → 1 · normalized per z':'0 → 1 · XYZ reference';if(activeJob!=='yz')$('wave-status').textContent=waveLoading?'Loading the saved Fine calculation…':`No calculation for this view · press ${$('calculate-yz').textContent}`;if(activeJob!=='yz'){ctx.fillStyle='#687f94';ctx.font='15px system-ui';ctx.textAlign='center';ctx.fillText(waveLoading?'Loading saved Fine wave…':`Click ${$('calculate-yz').textContent} for this view.`,width/2,height/2);}$('yz-note').textContent='XZ: horizontal cut at y = 0. YZ: vertical cut at x = 0. Dark outside the calculation window is canvas background; enable Show calculation window in Settings to see the bounds.';return;}
   const r=waveView(yzResult),section=$('wave-section').value,mode=$('wave-brightness').value,near=r.scope==='near',half=near?r.params.fieldSizeUm*.5e-6:Math.max(r.params.condenserFocalMm*.001*r.params.sourceEmissionNA*1.4,r.geometry.f1*.001*r.params.projNA/r.params.reduction*1.4),w=width,h=height,img=ctx.createImageData(c.width,c.height),cols=r.columns;
   img.data.set(renderWavePixels(r,{width:c.width,height:c.height,half,section,mode,palette:t=>palette(t,'blue'),illuminationPalette:t=>palette(t,'warm'),showWindow:$('wave-window-toggle').checked,fullPathIllustration:!!r.transmittedOnly,projectionCrop:!r.transmittedOnly&&$('projection-display').value==='lenses',displayHeight:height}));
   ctx.putImageData(img,0,0);drawWaveMarkers(r,width,height);

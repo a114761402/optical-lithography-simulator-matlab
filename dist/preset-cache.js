@@ -1,6 +1,10 @@
 import {PRESET_CACHE_VERSION,presetParams,presetCacheKey} from './presets.js?v=20260927-positions3';
 import {geometry,sourceSamples} from './optics.js?v=20260927-positions3';
 import {pathPlanes} from './wave.js?v=20260927-positions3';
+import {loadTransmittedPresetCache} from './transmitted-cache.js?v=20261003-transmitted-cache';
+export async function loadPresetWave(id,transmittedOnly=false){
+  return transmittedOnly?loadTransmittedPresetCache(id):(await loadPresetCache(id)).wave;
+}
 export function validatePresetCache(cache,id){
   const p=presetParams(id),g=geometry(p),key=presetCacheKey(p);
   if(cache.version!==PRESET_CACHE_VERSION||cache.id!==id||cache.key!==key||cache.slices?.length!==4||!cache.wave)throw Error('Saved preset does not match these settings.');

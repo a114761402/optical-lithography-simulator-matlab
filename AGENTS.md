@@ -19,6 +19,8 @@ The owner is a scientist, not a software engineer: explain outcomes briefly in f
 
 ## Mobile layout acceptance
 
+- Mobile Standard hides the complete Intensity section and its divider. Mobile Expert and desktop retain Intensity. Projection display cropping is only a visual envelope aligned with illustrated lenses; do not describe it as physically selecting transmitted rays or change raw fields to implement it.
+
 - Own compact spacing in `dist/interaction-layout.css`: 4px within groups, 8px between rows, 12px between sections. Inspect parent padding/margins and actual display mode before changing gaps. Do not add a new contradictory override for each annotation.
 - Settings menu contains only General and About. Components belong in General; contact and privacy belong in About, with no mobile page footer. Default preset reads Preset; Standard result heading reads Position.
 - Tuning shows the live marker value during drag/coast, just as dragging the beam marker does. Numerical kernels and cache identity are unaffected.

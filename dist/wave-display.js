@@ -1,4 +1,5 @@
 import {brightness} from './wave.js?v=20260927-positions3';
+import {projectionDisplayHalf} from './wave-components.js?v=20261002-projection-display';
 
 const mix=(a,b,t)=>a+(b-a)*t;
 // Monotone cubic interpolation: no new extrema, negative intensity or ringing.
@@ -48,18 +49,18 @@ export function createWaveSampler(result,section='xz',mode='local'){
   };
 }
 
-export function renderWavePixels(result,{width,height,half,section='xz',mode='local',palette,illuminationPalette=null,showWindow=false}){
+export function renderWavePixels(result,{width,height,half,section='xz',mode='local',palette,illuminationPalette=null,showWindow=false,projectionCrop=false,displayHeight=height}){
   const pixels=new Uint8ClampedArray(width*height*4),sampleAt=createWaveSampler(result,section,mode);
   const grey=showWindow?[223,230,237]:palette(0),colours=Array.from({length:1024},(_,i)=>palette(i/1023));
   const warm=illuminationPalette?Array.from({length:1024},(_,i)=>illuminationPalette(i/1023)):colours;
   const dy=2*half/height,dz=(result.zMax-result.zMin)/width;
   for(let x=0;x<width;x++){
     // Two horizontal subpixels plus exact vertical coverage antialias the window edge.
-    const frames=[.25,.75].map(offset=>{const z=result.zMin+(x+offset)*dz;return {frame:sampleAt(z),ramp:z<result.geometry.mask?warm:colours};});
+    const frames=[.25,.75].map(offset=>{const z=result.zMin+(x+offset)*dz;return {frame:sampleAt(z),ramp:z<result.geometry.mask?warm:colours,limit:projectionCrop?projectionDisplayHalf(result,z,half,displayHeight):Infinity};});
     for(let y=0;y<height;y++){
       const top=half-y*dy,bottom=top-dy,rgb=[0,0,0];
-      for(const {frame,ramp} of frames){
-        const low=frame?Math.max(bottom,frame.lower):0,high=frame?Math.min(top,frame.upper):0;
+      for(const {frame,ramp,limit} of frames){
+        const low=frame?Math.max(bottom,frame.lower,-limit):0,high=frame?Math.min(top,frame.upper,limit):0;
         const coverage=Math.max(0,Math.min(1,(high-low)/dy));
         const colour=coverage>0?ramp[Math.round(brightness(frame.sample((low+high)/2),frame.reference,mode)*1023)]:grey;
         for(let channel=0;channel<3;channel++)rgb[channel]+=.5*mix(grey[channel],colour[channel],coverage);

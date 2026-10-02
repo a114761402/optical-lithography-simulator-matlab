@@ -47,6 +47,11 @@ export function setupControlLayout(){
   const profileToggle=profileOption.querySelector('input');profileToggle.checked=false;
   profileToggle.addEventListener('change',()=>document.body.classList.toggle('profile-enabled',profileToggle.checked));
   const waveSettings=document.createElement('section');waveSettings.id='global-wave-settings';waveSettings.innerHTML='<h3>Wave settings</h3><p class="muted">Wave detail controls the full-path view. High detail beside Compute controls observation slices separately.</p>';
+  const projectionDisplay=document.createElement('label');
+  projectionDisplay.innerHTML='Projection display<select id="projection-display"><option value="lenses" selected>Within lens outlines</option><option value="full">Full computed field</option></select>';
+  const projectionHelp=document.createElement('p');projectionHelp.className='wave-setting-help';projectionHelp.id='projection-display-help';projectionHelp.textContent='Display crop only. Hidden light is not zero; calculations stay unchanged.';
+  projectionDisplay.querySelector('select').setAttribute('aria-describedby',projectionHelp.id);
+  waveSettings.append(projectionDisplay,projectionHelp);
   const aboutSettings=document.createElement('section');aboutSettings.id='about-settings';aboutSettings.innerHTML='<h3>About</h3>';
   const modelButton=$('model-button'),modelHome=document.createComment('mobile about');modelButton.after(modelHome);
   // Relocate the actual controls, so desktop and phone always share values.

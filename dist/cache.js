@@ -4,9 +4,10 @@ import {pathPlanes} from './wave.js?v=20260927-positions3';
 export const CACHE_VERSION='scalar-wave-2026-09-27-v6';
 export const STARTUP_PARAMS={...defaults,lensType:'Circular',lensInner:.65};
 export const DEFAULT_WAVE_PARAMS={...STARTUP_PARAMS,...QUALITY.fine};
-export function waveCacheKey(params,scope='full') {
+export function waveCacheKey(params,scope='full',transmittedOnly=false) {
   const p={...defaults,...params};
-  return JSON.stringify([CACHE_VERSION,scope,Object.keys(defaults).sort().map(k=>[k,p[k]]),p.customSource??null,p.customPupil??null]);
+  const key=JSON.stringify([CACHE_VERSION,scope,Object.keys(defaults).sort().map(k=>[k,p[k]]),p.customSource??null,p.customPupil??null]);
+  return transmittedOnly?key+'|transmitted-v1':key;
 }
 export function validateWaveCache(cache,params=DEFAULT_WAVE_PARAMS,scope='full') {
   if(cache.version!==CACHE_VERSION||cache.key!==waveCacheKey(params,scope)||waveCacheKey(cache.result.params,cache.result.scope)!==cache.key)throw Error('The saved wave calculation does not match these settings.');

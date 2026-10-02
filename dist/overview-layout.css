@@ -160,3 +160,6 @@ body:not(.phone-bench) #active-observation.no-active-position{display:none}
  .phone-bench .wave-heading>.wave-title-group{flex-basis:100%!important}
  .phone-bench .wave-heading .wave-action-group{flex-basis:100%}
 }
+
+#global-wave-settings .projection-transmitted-toggle{display:flex;align-items:center;gap:8px;min-height:44px;font-size:.875rem}
+#global-wave-settings .projection-transmitted-toggle input{width:18px;height:18px;flex:0 0 18px;margin:0}

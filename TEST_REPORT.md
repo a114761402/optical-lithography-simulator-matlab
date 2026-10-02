@@ -502,3 +502,12 @@ Artifact: authored `dist/` changes based on `befafa0`, entry `app.js?v=20261002-
 - Exercised General settings, both Projection display choices, Standard/Expert switching and resized desktop/mobile layouts. Full-field versus cropped screenshots preserve illumination and show projection bounded by Lens 1/Lens 2 outlines; changing the choice needs no Compute.
 - Numerical operators, caches and MATLAB source were not edited. This is display cropping, not a lens-transmission calculation. Native assets/install and App Store distribution were not part of this task.
 - Local screenshots: parent project `output/playwright/standard-no-intensity.jpg` and `output/playwright/projection-within-lenses.jpg`. Hosting result is verified separately after source preparation.
+
+## 2 October 2026 — Hidden Intensity reveal regression
+
+Artifact: `app.js?v=20261002-wave-reveal2`, based on `a0cef60`; final source revision is the commit containing this entry. macOS, Node v25.8.0, Codex in-app browser, same-origin responsive iframe review.
+
+- Reproduced the user screenshot on fresh Standard startup after Fine cache load, then selecting Expert without resizing: canvas backing width was 1 while rendered width was 317 CSS px; overlay viewBox was `0 0 1 240`. This stretched one column across the path and collapsed all component coordinates. The previous width-cycling review had forced a redraw and missed this startup sequence.
+- `drawYZ` now returns while the canvas has zero layout width/height, preserving the last valid drawing. Mode changes schedule redraw after layout; ResizeObserver tracks actual canvas size, including visibility and scrollbar changes. No changes to calculated fields, optical geometry or display-crop semantics.
+- 18 wave display/components/path-layout tests passed. Browser regression: fresh Standard startup → Expert; 3 Standard/Expert cycles at each of 320/337/393/507 CSS px; changing widths while hidden; XZ/YZ, both Projection display options, annular preset while hidden, reset, settings open/close, and desktop width 1280. Overlay viewBox matched canvas CSS size on reveal, all buffer widths exceeded 1, and no browser errors were recorded in the final review. Example 393px frame: canvas/overlay 317 × 118 CSS px (backing width 349 at the observed display density).
+- Corrected screenshot inspected and stored in parent project `output/playwright/intensity-reveal-fixed.jpg`. Browser emulation only; physical phone and native installation not tested.

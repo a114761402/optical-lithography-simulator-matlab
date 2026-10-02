@@ -486,7 +486,11 @@ function calculate(kind='image',override=null,target=activePlane(),batchTicket=n
 }
 
 function drawYZ(){
-  const c=$('yz-canvas'),width=Math.max(1,c.clientWidth),height=c.clientHeight||240,ratio=Math.min(devicePixelRatio||1,2);c.width=Math.round(width*ratio);c.height=Math.round(height*ratio);const ctx=c.getContext('2d');ctx.setTransform(ratio,0,0,ratio,0,0);ctx.fillStyle='#071624';ctx.fillRect(0,0,width,height);$('yz-labels').replaceChildren();$('wave-components').replaceChildren();$('wave-regions').replaceChildren();$('wave-regions').hidden=!yzResult||yzResult.scope==='near';syncWaveCursor();
+  const c=$('yz-canvas'),width=c.clientWidth,height=c.clientHeight;
+  // Standard hides the entire section. Keep the last valid drawing rather than
+  // replacing it with a one-pixel buffer and collapsed SVG coordinates.
+  if(!(width>0&&height>0))return;
+  const ratio=Math.min(devicePixelRatio||1,2);c.width=Math.round(width*ratio);c.height=Math.round(height*ratio);const ctx=c.getContext('2d');ctx.setTransform(ratio,0,0,ratio,0,0);ctx.fillStyle='#071624';ctx.fillRect(0,0,width,height);$('yz-labels').replaceChildren();$('wave-components').replaceChildren();$('wave-regions').replaceChildren();$('wave-regions').hidden=!yzResult||yzResult.scope==='near';syncWaveCursor();
   if(!yzResult){c.setAttribute('aria-label','Wave intensity — not calculated for these settings');$('wave-scale').textContent=$('wave-brightness').value.includes('log')?'−120 → 0 dB · XYZ reference':$('wave-brightness').value==='local'?'0 → 1 · normalized per z':'0 → 1 · XYZ reference';if(activeJob!=='yz')$('wave-status').textContent=waveLoading?'Loading the saved Fine calculation…':`Optics changed or new view selected · click ${$('calculate-yz').textContent}`;if(activeJob!=='yz'){ctx.fillStyle='#687f94';ctx.font='15px system-ui';ctx.textAlign='center';ctx.fillText(waveLoading?'Loading saved Fine wave…':`Click ${$('calculate-yz').textContent} for this view.`,width/2,height/2);}$('yz-note').textContent='XZ: horizontal cut at y = 0. YZ: vertical cut at x = 0. Dark outside the calculation window is canvas background; enable Show calculation window in Settings to see the bounds.';return;}
   const r=waveView(yzResult),section=$('wave-section').value,mode=$('wave-brightness').value,near=r.scope==='near',half=near?r.params.fieldSizeUm*.5e-6:Math.max(r.params.condenserFocalMm*.001*r.params.sourceEmissionNA*1.4,r.geometry.f1*.001*r.params.projNA/r.params.reduction*1.4),w=width,h=height,img=ctx.createImageData(c.width,c.height),cols=r.columns;
   img.data.set(renderWavePixels(r,{width:c.width,height:c.height,half,section,mode,palette:t=>palette(t,'blue'),illuminationPalette:t=>palette(t,'warm'),showWindow:$('wave-window-toggle').checked,projectionCrop:$('projection-display').value==='lenses',displayHeight:height}));
@@ -536,6 +540,10 @@ $('reset').onclick=async()=>{
 };
 $('yz-canvas').onclick=e=>{if(!yzResult)return;const r=e.target.getBoundingClientRect(),view=waveView(yzResult);selectWavePosition(view.zMin+(e.clientX-r.left)/r.width*(view.zMax-view.zMin));};
 window.addEventListener('resize',()=>requestAnimationFrame(()=>{drawBench();drawYZ();drawScreen();if($('profile-dialog').open)drawProfile();}));
+// Revealing the section and opening/closing settings can change its available
+// size without a window resize (for example when a scrollbar appears).
+const waveResizeObserver=new ResizeObserver(()=>requestAnimationFrame(drawYZ));
+waveResizeObserver.observe($('yz-canvas'));
 $('component-picker').onchange=()=>{selected=$('component-picker').value;renderInspector();drawBench();};
 const waveKeys=e=>{if(!yzResult)return;if(['ArrowLeft','ArrowRight','Home','End'].includes(e.key)){e.preventDefault();const view=waveView(yzResult),step=(view.zMax-view.zMin)/(e.shiftKey?1000:100);selectWavePosition(e.key==='Home'?view.zMin:e.key==='End'?view.zMax:Math.min(view.zMax,Math.max(view.zMin,currentZ()+(e.key==='ArrowRight'?step:-step))));}};
 $('yz-canvas').onkeydown=waveKeys;$('wave-cursor').onkeydown=waveKeys;
@@ -561,6 +569,9 @@ document.addEventListener('position-view-change',()=>{
   if(!viewTabs.keyView&&benchEditor.compact&&!activePlane())activeId=planes.find(p=>p.id==='D')?.id||planes[0]?.id||null;
 
   syncScreen();drawScreen();drawBench();setBusy();
+  // The view event precedes completion of the tab/layout update. Draw after
+  // Expert becomes visible so canvas and component overlay share its size.
+  requestAnimationFrame(drawYZ);
 });
 function deselectObservation(){if(benchEditor.compact)return;cancelInterpolation();activeId=null;refreshObservations();}
 $('observation-panel').addEventListener('click',e=>{if(!e.target.closest('button,input,select,a,summary,dialog'))deselectObservation();});

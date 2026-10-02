@@ -28,6 +28,8 @@ The owner is a scientist, not a software engineer: explain outcomes briefly in f
 
 ## Verification and delivery
 
+- Never redraw a hidden intensity canvas using a fallback width of one pixel. Preserve the previous buffer while hidden; redraw after reveal using its real layout size and keep the SVG overlay aligned. Check fresh Standard startup then Expert without resizing, as well as repeated switching.
+
 - For layout changes, use the reported CSS viewport and mode, then inspect a representative shared-code layout. Verify requested edges/rows plus the overall screenshot; shorter labels alone do not prove alignment. Keep physical beam and wave coordinates aligned, not just their outer boxes.
 - Run relevant existing tests; `npm test` is the complete suite and includes expensive fresh numerical calculations. UI-only changes need affected interaction/layout checks, while numerical changes and release checks justify the complete suite and independent references.
 - Browser emulation, native simulator, signed physical-device behavior and distribution are different evidence. For native changes, check bundled/offline loading, a changed-parameter calculation, save/reopen/relaunch and system export as relevant. See `IOS_INSTALL.md` and the current App Store release draft for delivery work.

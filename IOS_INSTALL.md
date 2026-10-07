@@ -2,6 +2,12 @@
 
 The iPhone app uses the same simulator and mobile interface as the website. Calculations and bundled example data work offline. Experiment settings are saved on the phone; individual images can be saved or shared with the iOS share sheet.
 
+## Keep the iPhone app synchronized
+
+The website source is `dist/`. After web changes, run `npm run ios:sync` in this checkout, then build and run the app in Xcode. This regenerates both `ios-web/` and `ios/App/App/public/` from the same source, including all preset caches, and clears obsolete files from the generated native copy. These generated folders are intentionally not stored in Git; a fresh checkout must run the same command before building. Publishing the website does not update an installed iPhone app.
+
+For an in-place phone update, keep the same bundle identifier and signing team so saved experiments remain available. If Xcode has no Apple Account or the previous provisioning profile has expired, sign in under **Xcode → Settings → Apple Accounts** and rebuild using Automatic signing. A prepared bundle or a simulator build is not an installed phone update.
+
 ## Install on your iPhone 14 Pro
 
 1. Connect and unlock your iPhone. Tap **Trust** if the phone asks. On the phone, turn on **Settings → Privacy & Security → Developer Mode**, then restart and confirm.

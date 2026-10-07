@@ -15,4 +15,7 @@ const html=await readFile(htmlPath,'utf8');
 const entry=html.match(/<script type="module" src="app\.js(?:\?[^\"]*)?"><\/script>/)?.[0];
 if(!entry)throw Error('Cannot locate the web application entry point.');
 await writeFile(htmlPath,html.replace(entry,'<script type="module" src="native-bridge.js"></script>\n  '+entry));
+// Full sync also clears the generated native copy so obsolete bundled files
+// and filesystem conflict copies cannot survive later packaging.
+if(process.argv.includes('--sync'))await rm(resolve(root,'ios/App/App/public'),{recursive:true,force:true});
 console.log('Prepared offline iPhone assets in ios-web/.');
